@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import Userlayout from '@/Layouts/UserLayout';
+import { useState, useEffect } from 'react';
 import './Home.scss';
 export default function Home({user}) {
   const genres = [
@@ -8,6 +9,30 @@ export default function Home({user}) {
     'Viễn tưởng', 'Tâm lý', 'Gia đình', 'Võ thuật',
     'Học đường', 'Thể thao', 'Âm nhạc', 'Chính kịch','Buồn'
   ];
+
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    window.addEventListener('resize', () => setScreenWidth(window.innerWidth));
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const containerWidth = screenWidth * 0.9;
+  const remInPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const maxPerRow = Math.floor(containerWidth / (150 + remInPx));
+
+  let genres1 = [];
+  let genres2 = [];
+
+  if (genres.length <= maxPerRow * 2) {
+    genres1 = genres.slice(0, maxPerRow);
+    genres2 = genres.slice(maxPerRow);
+  } else {
+    const half = Math.ceil(genres.length / 2);
+    genres1 = genres.slice(0, half);
+    genres2 = genres.slice(half);
+  }
+
   return (
     <Userlayout >
       <Head title="Trang chủ test" />
@@ -18,14 +43,24 @@ export default function Home({user}) {
         <div>
              <button className='TheLoai'>
                <img src="/img/theloai.svg" alt="" />Thể loại nổi bật</button>
-              
+              <div className='d-flex justify-content-center'>
                <div className="TheLoai-container">
-                  {genres.map((item, index) => (
-                    <button className="TheLoai-box" key={index}>
-                      {item}
-                    </button>
-                  ))}
+                  <div>
+                    {genres1.map((item, index) => (
+                      <button className="TheLoai-box" key={index}>
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    {genres2.map((item, index) => (
+                      <button className="TheLoai-box" key={index}>
+                        {item}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              </div>
                
         </div>
 

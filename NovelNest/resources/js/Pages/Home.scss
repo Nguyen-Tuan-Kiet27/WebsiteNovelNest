@@ -37,23 +37,24 @@
 }
 
 .TheLoai-container {
-  background-color: #F3F2EC;
-  padding: 20px;
   border-radius: 16px;
-  display: flex;
-  flex-wrap: wrap; /* Cho phép xuống dòng */
-  gap: 15px;
-  overflow-x: auto; /* Cuộn ngang nếu vượt quá chiều ngang */
-  overflow-y: hidden;
-  margin: 0 auto;
+  background-color: #F3F2EC;
   width: 90%;
   border: 1px solid #C5A992;
 
-  max-height: 100px; /* Giới hạn chiều cao nếu muốn 2–3 dòng */
-  align-content: flex-start;
-  scroll-snap-type: x mandatory;
+  overflow: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  > div{
+    gap: 1rem;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+  }
+  > div:nth-of-type(2){
+    padding-top: 0;
+  }
 
-  
 }
 
 .TheLoai-box {
@@ -71,7 +72,6 @@
   justify-content: center;
   white-space: nowrap;
   transition: background-color 0.3s ease, transform 0.2s;
-
   &:hover {
     background-color: #E9CF73;
     transform: scale(1.03);
