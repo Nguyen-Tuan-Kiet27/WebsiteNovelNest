@@ -44,6 +44,29 @@ export default function Userlayout({children}){
             <main>
             {children}
             </main>
+            <footer>
+                <div>
+                        <img src="img/logo_v3.png" alt="" />
+
+                        <div>
+                            <h5>Truy cập:</h5>
+                            <ul>
+                                <li><a href="#">Trang Chủ</a></li>
+                                <li><a href="#">Chính sách</a></li>
+                                <li><a href="#">Về chúng tôi</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5>Liên hệ:</h5>
+                            <ul>
+                                <li><a href="#"> FaceBook</a></li>
+                                <li><a href="#"> Youtube</a></li>
+                                <li><a href="#"> Email</a></li>
+                            </ul>
+                        </div>
+                        
+                </div>
+            </footer>
         </>
 
     );

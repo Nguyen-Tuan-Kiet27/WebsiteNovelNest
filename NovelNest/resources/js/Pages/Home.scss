@@ -28,7 +28,7 @@
     margin: 30px 0 17px 22px;
     background-color: #F3F2EC;
     display: flex;
-   
+   color: #AC7446;
     align-items: center;
     >img{
         width: 15%;
@@ -58,7 +58,7 @@
 }
 
 .TheLoai-box {
-  flex: 0 0 calc(50% - 10px); /* Chia 3 cột (hoặc dùng 50% cho 2 cột) */
+  flex: 0 0 calc(50% - 10px); 
   max-width: 150px;
   background-color: white;
   border: 1px solid #444;
