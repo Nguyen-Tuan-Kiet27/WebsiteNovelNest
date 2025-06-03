@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import Userlayout from '@/Layouts/UserLayout';
 import { useState, useEffect } from 'react';
 import './Home.scss';
@@ -14,7 +13,7 @@ export default function Home({user}) {
 
   useEffect(() => {
     window.addEventListener('resize', () => setScreenWidth(window.innerWidth));
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', () => setScreenWidth(window.innerWidth));
   }, []);
 
   const containerWidth = screenWidth * 0.9;
@@ -34,8 +33,7 @@ export default function Home({user}) {
   }
 
   return (
-    <Userlayout >
-      <Head title="Trang chủ test" />
+    <Userlayout title="Home">
       <div>
         <div className='banner'>
           <img src="img/banner.jpg" alt="" />

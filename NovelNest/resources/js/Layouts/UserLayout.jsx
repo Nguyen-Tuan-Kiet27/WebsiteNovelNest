@@ -1,16 +1,21 @@
+import { router } from '@inertiajs/react';
 import './Userlayout.scss';
-export default function Userlayout({children}){
+import { Head } from '@inertiajs/react';
+export default function Userlayout({children,title}){
     return(
         <>
+            <Head title={`NovelNest - ${title}`} />
             <header>
                 <div className="header">
                     <div className='subHeader'>
                         <div>
-                            <img src="/img/logo_v3.png" alt="" />
+                            <img src="/img/logo_v4.png" alt="" />
                         </div>
                         
 
-                            <button className='buttonHeader'>
+                            <button className='buttonHeader'
+                                onClick={()=>router.visit('/')}
+                            >
                                 <img src="/img/khampha.svg" alt="" />
                                 Khám Phá
                             </button>
@@ -45,8 +50,10 @@ export default function Userlayout({children}){
             {children}
             </main>
             <footer>
-                <div>
-                        <img src="img/logo_v3.png" alt="" />
+                <div>   
+                        <div>
+                            <img src="img/logo_v3.png" alt="" />
+                        </div>
 
                         <div>
                             <h5>Truy cập:</h5>
