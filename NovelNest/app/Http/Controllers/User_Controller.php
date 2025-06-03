@@ -8,8 +8,6 @@ class User_Controller extends Controller
 {
     public function index()
     {
-        return Inertia::render('Home', [
-            'user' => ['name' => 'Kiệt Nguyễn','old' => 21]
-        ]);
+        return Inertia::render('User/Home');
     }
 }
