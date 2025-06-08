@@ -1,9 +1,28 @@
 import { router } from '@inertiajs/react';
 import './Userlayout.scss';
-import { Head } from '@inertiajs/react';
-export default function Userlayout({children,title}){
+import { Head, usePage } from '@inertiajs/react';
+import UserLogin from '@/Components/UserLogin';
+import { useState, useEffect } from 'react';
+
+export default function Userlayout({children,title,login}){
+    /////test
+    /////////
+    const {flash} = usePage().props;
+    const [userLoginIsVisible, setUserLoginIsVisible] = useState(false);
+    useEffect(() => {
+        if (window.location.hash === '#_=_') {
+            window.history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
+    }, []);
+    const handleClickLogin = ()=>{
+        if(login || flash.loginf)
+            router.visit('/taikhoan');
+        else
+            setUserLoginIsVisible(true);
+    }
     return(
         <>
+            <UserLogin userLoginIsVisible={userLoginIsVisible} setUserLoginIsVisible={setUserLoginIsVisible} ></UserLogin>
             <Head title={`NovelNest - ${title}`} />
             <header>
                 <div className="header">
@@ -11,8 +30,6 @@ export default function Userlayout({children,title}){
                         <div>
                             <img src="/img/logo_v4.png" alt="" />
                         </div>
-                        
-
                             <button className='buttonHeader'
                                 onClick={()=>router.visit('/')}
                             >
@@ -31,9 +48,11 @@ export default function Userlayout({children,title}){
                                 <img src="/img/dangtruyen.svg" alt="" />
                                 Đăng Truyện
                             </button>
-                            <button className='buttonHeader'>
+                            <button className='buttonHeader'
+                                onClick={handleClickLogin}
+                            >
                                 <img src="/img/dangnhap.svg" alt="" />
-                                Đăng Nhập
+                                {login||flash.loginf?"Tài Khoản":"Đăng Nhập"}
                             </button>
                             
                             <div className='searchHeader'>
@@ -47,12 +66,12 @@ export default function Userlayout({children,title}){
               
             </header>
             <main>
-            {children}
+                {children}
             </main>
             <footer>
                 <div>   
                         <div>
-                            <img src="img/logo_v3.png" alt="" />
+                            <img src="/img/logo_v3.png" alt="" />
                         </div>
 
                         <div>
