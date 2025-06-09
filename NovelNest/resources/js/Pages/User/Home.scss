@@ -77,3 +77,24 @@
     transform: scale(1.03);
   }
 }
+.hot-stories-wrapper {
+  background-color: #e5e5e5;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  
+}
+
+.hot-title {
+  color: #A45A27;
+  font-family: 'Prata', serif;
+}
+
+.hot-stories-container {
+  // display: grid;
+  // grid-template-columns: repeat(auto-fill, minmax(13%, 13%));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+}

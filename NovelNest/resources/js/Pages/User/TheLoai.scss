@@ -1,0 +1,50 @@
+
+*{
+     font-family: 'Prata', serif;
+     font-size: 14px;
+}
+.category-page {
+  padding: 20px;
+  text-align: center;
+
+
+  h2 {
+    color: green;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 10px;
+  justify-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 60%;
+}
+
+.category-card {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 50%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.03);
+  }
+
+  img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+   .info {
+    text-align: left;}
+
+}
