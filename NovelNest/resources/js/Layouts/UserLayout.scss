@@ -3,6 +3,9 @@ body{
     font-family: 'Prata', serif;
    
 }
+*{
+   
+}
 .header{
     border: 1.5px solid #C5A992 ;
     border-radius: 40px;
@@ -11,6 +14,11 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
+    >div{
+        >button{
+        font-size: 13px;
+    }
+    }
     
     
 }

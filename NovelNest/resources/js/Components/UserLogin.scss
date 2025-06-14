@@ -1,0 +1,46 @@
+.UserLogin{
+    position: fixed;
+    top: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(241, 217, 189, 0.274);
+    > div {
+        height: 50%;
+        width: 50%;
+        max-width: 564px;
+        max-height: 332px;
+        background-color: #F4E8BC;
+        border: 2 solid rgb(95, 255, 47);
+        padding: 20px 80px 40px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        box-shadow: 4px 4px 10px 0px rgba(105, 104, 104, 0.555);
+        > div{
+            display: flex;
+            justify-content: center;
+            > div{
+                width: 90%;
+                display: flex;
+                flex-direction: column;
+                >button{
+                    width: 100%;
+                    height: 57px;
+                    margin-top: 24px;
+                    border-radius: 18px;
+                    text-align: left;
+                    padding-left: 20px;
+                }
+                >button:first-of-type{
+                    margin: 0;
+                }
+            }
+        }
+    }
+
+}

@@ -4,7 +4,7 @@ import './Home.scss';
 import CardStories from '../../Components/CardStories';
 import ListStories from '../../Components/ListStories';
 
-export default function Home({user}) {
+export default function Home({login}) {
   const genres = [
     'Hành động', 'Lãng mạn', 'Kinh dị', 'Phiêu lưu',
     'Trinh thám', 'Lịch sử', 'Kỳ ảo', 'Hài hước',
@@ -65,10 +65,10 @@ export default function Home({user}) {
   }
 
   return (
-    <Userlayout title="Home">
+    <Userlayout title="Home" login={login}>
       <div>
         <div className='banner'>
-          <img src="img/banner.jpg" alt="" />
+          <img src="/img/banner.jpg" alt="" />
         </div>
         <div>
           <button className='TheLoai'>

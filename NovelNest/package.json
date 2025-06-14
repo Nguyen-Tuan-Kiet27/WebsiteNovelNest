@@ -9,7 +9,7 @@
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
         "@vitejs/plugin-react": "^4.5.0",
-        "axios": "^1.8.2",
+        "axios": "^1.9.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.2.0",
         "sass-embedded": "^1.89.1",
@@ -17,6 +17,9 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.7.2",
+        "@fortawesome/free-solid-svg-icons": "^6.7.2",
+        "@fortawesome/react-fontawesome": "^0.2.2",
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/react": "^2.0.11",
         "bootstrap": "^5.3.6",

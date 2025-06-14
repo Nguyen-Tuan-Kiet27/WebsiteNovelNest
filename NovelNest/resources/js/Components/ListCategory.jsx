@@ -12,7 +12,7 @@ export default function ListCategory({ items, onClickItem }) {
         <div
           key={item.id}
           className="category-card"
-          onClick={() => onClickItem?.(item.id)}
+          onClick={() => router.visit(`/theloai/${item.id}`)}
         >
           <img src={`/img/theLoai/${item.img}`} alt={item.title} />
           <div className="info">

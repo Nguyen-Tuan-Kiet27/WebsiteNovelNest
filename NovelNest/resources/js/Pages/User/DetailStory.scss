@@ -1,0 +1,68 @@
+.doc-truyen {
+  background: #faf9f6;
+  padding: 20px;
+
+  .doc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    >.back-btn{
+        border: none;
+        background-color: #faf9f6;
+    } 
+  }
+
+  .doc-main {
+    display: flex;
+    margin-top: 20px;
+  }
+
+  .doc-content-wrapper {
+    flex: 1;
+
+    .doc-nav {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+
+      button {
+        background: #f5e8c7;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+    }
+
+    .doc-content {
+      background: #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      
+      >p{
+          margin: 10px 10px 10px 10px;
+      }
+    }
+  }
+
+  .doc-report {
+    margin-left: 20px;
+    width: 200px;
+
+    .report-btn {
+      background: #e74c3c;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+  
+  }
+}

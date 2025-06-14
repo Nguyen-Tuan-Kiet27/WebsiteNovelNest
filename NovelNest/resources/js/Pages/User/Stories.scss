@@ -1,0 +1,148 @@
+*{
+    color:black;
+    font-size: 14px;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+//Ảnh nền
+.storyInformation{
+    background-color: #F3F2EC;
+    width: 90%;
+    // height: 339px;
+    aspect-ratio: 16/9;
+    border: 1px solid;
+    position: relative;
+ 
+    >img{
+        width: 100%;
+        height: 100%;
+        opacity: 0.4;
+        position: absolute;
+        z-index: 0;
+        
+    }
+}
+//ảnh bìa
+.subStoryInformation{
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    position: absolute;
+    padding: 20px;
+    height: 100%;
+  
+    >img{
+        width: 30%;
+        aspect-ratio: 2/3;
+    }
+    >.information{
+       padding: 10px;
+       display: flex;
+       flex-direction: column;
+       justify-content: space-around;
+       min-height: 50%;
+       > h4{
+        font-weight:600;
+        color: #333333;
+       }
+    }
+    
+}
+.storyChapter{
+    background-color: #F3F2EC;
+    width: 90%;
+    border: 1px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    >h4{
+        text-align: left;
+        width: 90%;
+        padding-top: 20px;
+    }
+  
+    >div:first-of-type{
+        width: 90%;
+        border: 1px solid;
+        border-radius: 7px;
+        >p{
+            padding: 20px;
+            font-size: 16px;
+            
+        }
+    }
+    >button{
+        width: 30%;
+        margin: 15px;
+        border-radius: 18px;
+        background-color: #EFE3B9;
+        height: 40px;
+        &:hover{
+            background-color: #97e69d;
+        }
+    }
+    >.chuongMoi{
+        height: 233px;
+        border: 1px solid;
+        width: 90%;
+        >h5{
+            margin: 20px;
+        }
+        >li{
+            margin: 20px 0 0 50px;
+            >a{
+                text-decoration: none;
+                color: #333333;
+                &:hover{
+                cursor: pointer;
+                color: #97e69d;
+                }
+            }
+        }
+    }
+}
+.chuongs{
+  
+    width: 90%;
+    border: 1px solid;
+    margin: 50px 0 30px 0;
+    >h5{
+        margin: 20px;
+    }
+    >li{
+        margin: 20px 0 0 50px;
+       
+        >a{
+            text-decoration: none;
+            color: #333333;
+             &:hover{
+            cursor: pointer;
+            color: #97e69d;
+            }
+        }
+    }
+}
+.hot-stories-wrapper {
+  background-color: #e5e5e5;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+
+  
+}
+.hot-title {
+  color: #A45A27;
+  font-family: 'Prata', serif;
+}
+.hot-stories-container {
+  // display: grid;
+  // grid-template-columns: repeat(auto-fill, minmax(13%, 13%));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+}
