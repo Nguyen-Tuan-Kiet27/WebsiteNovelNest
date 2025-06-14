@@ -22,7 +22,7 @@ class CheckLogin
         $user = NguoiDung::find(NguoiDung::maHoa($parsed->claims()->get('uid')));
         if(!$user || (!empty($roles) && !in_array($user->vaiTro, $roles))){
             if(max($roles) < 3){
-                return redirect('/admin/login');
+                return redirect('/admin/dangnhap');
             }
             return redirect('/');
         }

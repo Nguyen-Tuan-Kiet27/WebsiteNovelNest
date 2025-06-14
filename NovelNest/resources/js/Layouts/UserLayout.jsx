@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import './Userlayout.scss';
+import './UserLayout.scss';
 import { Head, usePage } from '@inertiajs/react';
 import UserLogin from '@/Components/UserLogin';
 import { useState, useEffect } from 'react';
