@@ -7,6 +7,8 @@ use Laravel\Socialite\Facades\Socialite;
 use Exception;
 use App\Models\NguoiDung;
 use App\Services\JwtService;
+use App\Models\Truyen;
+use App\Models\Chuong;
 
 class User_Controller extends Controller
 {
@@ -43,18 +45,6 @@ class User_Controller extends Controller
             ]);
 
             $token = $jwtService->generateToken('F' . $fbUser->getId());
-            // return Inertia::render('User/Home')->toResponse(request())
-            // ->cookie(
-            //     'auth_token',
-            //     $token,
-            //     60 * 24 * 7, // 7 ngày
-            //     '/',
-            //     null,
-            //     true,
-            //     true,
-            //     false,
-            //     'Strict'
-            // );
             return redirect('http://localhost:8000/auth/callback?token='. $token);
             
         }catch (Exception $e){
@@ -139,4 +129,28 @@ class User_Controller extends Controller
                 false, 
                 'Strict'));
     }
+    public function category(){
+        return Inertia::render('User/TheLoai');
+    }
+
+
+    public function danhSachTruyenTheLoai(Request $request, $id){
+        return Inertia::render('User/DetailCategory');
+    }
+
+    public function stories(Request $request, $id){
+        $truyen=Truyen::find($id);
+        // if(!$truyen){
+        //     return abort(404);
+        // }
+        $chuongs = null; //tam
+        // $chuongs = $truyen->Chuongs(); 
+        return Inertia::render('User/Stories',['truyen'=>$truyen,'chuongs'=>$chuongs]);
+    }
+    public function detailStory(Request $request, $id){
+        $chuong = Chuong::find($id); //tam
+        // $chuongs = $truyen->Chuongs(); 
+        return Inertia::render('User/DetailStory',['chuong'=>$chuong]);
+    }
+
 }

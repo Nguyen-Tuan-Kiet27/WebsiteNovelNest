@@ -22,7 +22,7 @@ class Truyen extends Model
     public function YeuThichs(){
         return $this->hasMany(YeuThich::class,"id_Truyen");
     }
-    public function DaMuas(){
-        return $this->hasMany(Damua::class,"id_Truyen");
+    public function Chuongs(){
+        return $this->hasMany(Chuong::class,"id_Truyen");
     }
 }

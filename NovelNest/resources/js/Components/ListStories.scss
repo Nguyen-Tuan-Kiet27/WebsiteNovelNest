@@ -1,0 +1,45 @@
+.story-table {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  width: 90%;
+  overflow-x: auto;
+  margin-top: 2%;
+
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #A45A27;
+    
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    td {
+      padding: 10px 5px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .story-title {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      &:hover{
+        color: #AC7446;
+    }
+    }
+
+    .story-genres {
+      color: #777;
+      font-size: 14px;
+      text-align: right;
+      white-space: nowrap;
+    }
+  }
+}
