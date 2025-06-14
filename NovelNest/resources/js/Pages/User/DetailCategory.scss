@@ -1,0 +1,61 @@
+*{
+  font-size: 14px;
+}
+.detail-category-page {
+  padding: 20px;
+
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    .back-arrow {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      &:hover{
+        color: red;
+      }
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+
+    .detail-card {
+      cursor: pointer;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s;
+
+      &:hover {
+        transform: scale(1.02);
+      }
+
+      img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .info {
+        padding: 10px;
+
+       
+        
+      }
+    }
+  }
+}
+  

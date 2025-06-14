@@ -36,7 +36,9 @@ export default function Userlayout({children,title,login}){
                                 <img src="/img/khampha.svg" alt="" />
                                 Khám Phá
                             </button>
-                            <button className='buttonHeader'>
+                            <button className='buttonHeader'
+                                onClick={()=>router.visit('/theloai')}
+                            >
                                 <img src="/img/theloai.svg" alt="" />
                                 Thể Loại
                             </button>

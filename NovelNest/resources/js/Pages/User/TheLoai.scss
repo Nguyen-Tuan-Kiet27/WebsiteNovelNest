@@ -1,0 +1,119 @@
+
+.category-page {
+  padding: 20px;
+  text-align: center;
+
+
+  h2 {
+    color: green;
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 10px;
+  justify-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 60%;
+}
+
+.category-card {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 50%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.03);
+  }
+
+  img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+   .info {
+    text-align: left;}
+
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fefcf5;
+  padding: 15px;
+  max-width: 90%;
+  width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-radius: 15px;
+   >button{
+    margin-top: 5px;
+    border: 1px solid;
+     border-radius: 15px;
+  }
+}
+
+.modal-content h4 {
+  margin-bottom: 1rem;
+  text-align: center;
+  margin: 15px;
+ 
+}
+
+.filter-group {
+  margin-bottom: 1rem;
+ 
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+   >button{
+    border-radius: 15px;
+    margin: 5px 10px 5px 5px;
+    border:1px solid;
+  }
+}
+
+.toggle-btn {
+  border: none;
+  background: #EFE3B9;
+  cursor: pointer;
+  margin: 5px 10px 20px 0;
+}
+
+button.active {
+  background: #f7d794;
+  font-weight: bold;
+ 
+}
+
+.apply-btn {
+  background: #f7d794;
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 1rem;
+ 
+}
+
+
