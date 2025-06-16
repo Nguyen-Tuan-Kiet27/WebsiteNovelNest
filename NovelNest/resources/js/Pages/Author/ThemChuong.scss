@@ -1,0 +1,22 @@
+.ThemChuong{
+    padding: 0 20px;
+    background-color: white;
+}
+.head{
+    padding-bottom: 20px;
+}
+.body{
+    background-color: #d5d5d5;
+    width: 100%;
+    >div:first-of-type{
+        display: flex;
+        width: 100%;
+    }
+}
+.tenChuong{
+    width: 70%;
+
+}
+.gia{
+    width: 30%;
+}
