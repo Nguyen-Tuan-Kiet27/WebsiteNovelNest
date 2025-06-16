@@ -1,0 +1,129 @@
+main{
+    background-color: white;
+}
+.ThemTruyen{
+    padding: 0 20px;
+    background-color: white;
+}
+.head{
+    padding: 10px 0;
+}
+.body{
+    padding: 30px;
+    background-color: #D9D9D9;
+    >div:first-of-type{
+        display: flex;
+    }
+}
+.inputAnhBia{
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    >img{
+        width: 50%;
+        aspect-ratio: 2/3;
+        background-color: white;
+        &:hover{
+            cursor: pointer;
+        }
+    }
+}
+.inputTen{
+    width: 33%;
+    display: flex;
+    flex-direction: column;
+    >input{
+        width: 100%;
+        aspect-ratio: 8/1;
+    }
+}
+.inputTLaAN{
+    width: 34%;
+    padding-left: 10%;
+    >.inputTL{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        >.dropTheLoai{
+            width: 100%;
+            aspect-ratio: 10/1;
+            background-color: white;
+            border: 1px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            &:hover{
+                cursor: pointer;
+            }
+            >.icon{
+                transform: rotate(-90deg);
+                transition: transform 0.3s ease;
+            }
+        }
+        >.listTheLoai{
+            z-index: 1000;
+            position: absolute;
+            top:100%;
+            left: 20%;
+            background-color: white;
+            width: 100%;
+            aspect-ratio: 2/1;
+            overflow: auto;
+            border: 1px solid;
+            >div{
+                width: 100%;
+                display: flex;
+                align-items: center;
+                aspect-ratio: 10/1;
+                border: 1px solid;
+                &:hover{
+                    cursor: pointer;
+                    background-color: #D9D9D9;
+                }
+            }
+        }       
+    }
+    >.inputAN{
+        width: 100%;
+        display: flex;
+        margin-top: 10px;
+        flex-direction: column;
+        >img{
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: white;
+            &:hover{
+                cursor: pointer;
+            }
+        }
+    }
+}
+.inputGioiThieu{
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    >textarea{
+        min-height: 300px;
+    }
+}
+
+.buttonSM{
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-top: 20px;
+    >button:first-of-type{
+        margin-right: 20px;
+    }
+    >button{
+        width: 10%;
+        aspect-ratio: 4/1;
+    }
+}
+
+.error{
+    color: red;
+}
