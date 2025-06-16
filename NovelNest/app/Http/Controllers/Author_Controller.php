@@ -90,4 +90,39 @@ class Author_Controller extends Controller
             'message'=> 'Tạo truyện mới thành công!'
         ],201);
     }
+    public function TruyenChuong(Request $request, $id){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect("/");
+        }
+        $truyen = Truyen::find($id);
+        if(!$truyen || $truyen->id_NguoiDung != $user->id){
+            return redirect('/author/truyen');
+        }
+        return Inertia::render('Author/TruyenChuong',[
+            "user"=> [
+                'ten'=>$user->ten,
+                'anhDaiDien' =>$user->anhDaiDien,
+            ],
+            'truyen'=> $truyen,
+            'chuong'=>$truyen->Chuongs()->get(),
+        ]);
+    }
+    public function ThemChuong(Request $request, $id){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect("/");
+        }
+        $truyen = Truyen::find($id);
+        if(!$truyen || $truyen->id_NguoiDung != $user->id){
+            return redirect('/author/truyen');
+        }
+        return Inertia::render('Author/ThemChuong',[
+            "user"=> [
+                'ten'=>$user->ten,
+                'anhDaiDien' =>$user->anhDaiDien,
+            ],
+            'truyen'=> $truyen,
+        ]);
+    }
 }

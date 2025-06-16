@@ -2,7 +2,6 @@ import AuthorLayout from "../../Layouts/AuthorLayout";
 import './Truyen.scss'
 import { router } from "@inertiajs/react";
 export default function Truyen({user, truyens}){
-    console.log(truyens)
     return(
         <AuthorLayout page='2' user={user} title='Quản lý truyện'>
             <div className="Truyen">
@@ -42,7 +41,7 @@ export default function Truyen({user, truyens}){
                         </thead>
                         <tbody>
                             {truyens.map((truyen) => (
-                            <tr key={truyen.id}>
+                            <tr key={truyen.id} onClick={()=>{router.visit(`/author/truyen/${truyen.id}`)}} className="rowTruyen">
                                 <td>{truyen.ten}</td>
                                 <td>{truyen.the_loai.ten}</td>
                                 <td>

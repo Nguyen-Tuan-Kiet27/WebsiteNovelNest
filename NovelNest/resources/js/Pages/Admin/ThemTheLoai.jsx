@@ -20,7 +20,7 @@ export default function ThemTheLoai({user}){
                 img.onload = ()=>{
                     const { width, height } = img;
                     if (width !== height) {
-                        setFileError("Vui lòng chọn hình ảnh vuống (1:1)!")
+                        setFileError("Vui lòng chọn hình ảnh vuông (1:1)!")
                         setPreview(null);
                         setFile(null);
                     }else{

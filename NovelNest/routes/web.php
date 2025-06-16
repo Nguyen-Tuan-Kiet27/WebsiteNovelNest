@@ -25,6 +25,9 @@ Route::get('/taikhoan', [User_Controller::class,'taiKhoan'])->middleware('CheckL
 Route::get('/author', [Author_Controller::class,'DoanhThu'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/truyen', [Author_Controller::class,'Truyen'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/themtruyen', [Author_Controller::class,'ThemTruyen'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/truyen/{id}', [Author_Controller::class,'TruyenChuong'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/themchuong/{id}', [Author_Controller::class,'ThemChuong'])->middleware('CheckLogin:1,2,3');
+
 
 
 //Admin

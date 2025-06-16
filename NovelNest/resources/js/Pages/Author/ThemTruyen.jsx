@@ -134,7 +134,7 @@ export default function ThemTruyen({user,theLoais}){
     }
 
     return(
-        <AuthorLayout page='2' user={user} title='Quản lý truyện'>
+        <AuthorLayout page='2' user={user} title='Thêm truyện mới'>
             <div className="ThemTruyen">
                 <div className="head">
                         <h1>Thêm truyện</h1>
