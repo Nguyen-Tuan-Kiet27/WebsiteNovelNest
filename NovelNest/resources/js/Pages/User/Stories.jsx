@@ -1,5 +1,5 @@
 import Userlayout from '@/Layouts/UserLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
 import './Stories.scss';
 import CardStories from '../../Components/CardStories';
@@ -46,61 +46,82 @@ const stories=[{id :1, ten:'Đấu Phá Thương Khung – Thiên Tằm Thổ Đ
                 
   ];
 
+    const traiRef = useRef();
+    const [traiHeight, setTraiHeight] = useState(0);
+    const [traiHeight2, setTraiHeight2] = useState(0);
+
+    useEffect(() => {
+        if (traiRef.current) {
+            setTraiHeight(traiRef.current.offsetHeight);
+            setTraiHeight2(traiRef.current.offsetHeight-2);
+        }
+    }, []);
+
 return(
 <Userlayout title="Stories">
-    <div className='container'>
-        <div className='storyInformation'>
-            <img src="/img/truyen/hinhNen/tai-anh-anime-nam-1.jpg" alt="" />
-            <div className='subStoryInformation'>
-                    <img src="/img/truyen/hinhAnh/Dau-pha-thuong-khung-cover.jpg" alt="" />
-                <div className='information'>
-                     <h4>Tên truyện: {truyen.ten}</h4>
-                     <h4>Thể loại: {truyen.theLoai}</h4>
-                     <h4>Trạng thái: {truyen.trangThai}</h4>
-                     <h4>Chương: {truyen.chuong}</h4>
-                     
+
+    <div className='container' >
+        <div ref={traiRef}>
+            <div>
+                <div className='storyInformation'>
+                    <img src="/img/truyen/hinhNen/tai-anh-anime-nam-1.jpg" alt="" />
+                    <div className='subStoryInformation'>
+                        <img src="/img/truyen/hinhAnh/Dau-pha-thuong-khung-cover.jpg" alt="" />
+                        <div className='information'>
+                            <h5>Tên truyện: {truyen.ten}</h5>
+                            <h5>Thể loại: {truyen.theLoai}</h5>
+                            <h5>Trạng thái: {truyen.trangThai}</h5>
+                            <h5>Chương: {truyen.chuong}</h5>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className='gioiThieu'>
+                <h4>Giới thiệu truyện:</h4>
+                <div>
+                    <p>Giới thiệu: {truyen.gioiThieu}</p>
                 </div>
             </div>
         </div>
-        <div className='storyChapter'> 
-            <h4>Giới thiệu truyện:</h4>
-            <div>
-                 <p>Giới thiệu: {truyen.gioiThieu}</p>
-            </div>
-            <button>Đọc từ đầu</button>
-            <div className='chuongMoi'>
-                <h5>Chương mới ra</h5>
-                { chapters.slice(chapters.length-4).reverse().map((chapter) =>(
+        <div style={{maxHeight: traiHeight}}>
+            <div className='storyChapter' style={{maxHeight: traiHeight2}}> 
+            
+                <button onClick={()=>router.visit(`/chuong/${chapters[0].id}`)}>
+                    Đọc từ đầu
+                </button>
+                <div className='chuongMoi'>
+                    <h5>Chương mới ra</h5>
+                    { chapters.slice(chapters.length-4).reverse().map((chapter) =>(
+                            <li key={chapter.id}
+                            >
+                                <a href={`/chuong/${chapter.id}`}>{chapter.ten}</a>
+                            </li>
+                        ))}
+                </div>
+                <div className='chuongs'>
+                    <h5>Danh sách chương</h5>
+                    {chapters.map((chapter) =>(
                         <li key={chapter.id}
+                            // onClick={()=>{router.visit(`/chuong/${chapter.number}`)}}
+                            
                         >
                             <a href={`/chuong/${chapter.id}`}>{chapter.ten}</a>
                         </li>
-                     ))}
-            </div>
-            <div className='chuongs'>
-                <h5>Danh sách chương</h5>
-                {chapters.map((chapter) =>(
-                    <li key={chapter.id}
-                        // onClick={()=>{router.visit(`/chuong/${chapter.number}`)}}
-                        
-                    >
-                        <a href={`/chuong/${chapter.id}`}>{chapter.ten}</a>
-                    </li>
-                ))}
+                    ))}
 
+                </div>
             </div>
         </div>
-        <div className='d-flex justify-content-center mt-4 h-100'>
-                  <div className="hot-stories-wrapper">
-                    <h3 className="hot-title">Đã hoàn thành</h3>
-                    <div className="hot-stories-container">
-                      {stories.map((story, id) => (
-                        <CardStories key={story.id} ten={story.ten} hinhAnh={story.hinhAnh} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
+    </div>
+    <div className='d-flex justify-content-center mt-4 h-100'>
+        <div className="hot-stories-wrapper">
+            <h3 className="hot-title">Đã hoàn thành</h3>
+            <div className="hot-stories-container">
+            {stories.map((story, id) => (
+                <CardStories key={story.id} ten={story.ten} hinhAnh={story.hinhAnh} />
+            ))}
+            </div>
+        </div>
     </div>
 
 </Userlayout>
