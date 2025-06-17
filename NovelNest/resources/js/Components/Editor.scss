@@ -1,5 +1,7 @@
-.mention {
-  background-color: #e0f7fa;
-  padding: 2px 4px;
-  border-radius: 4px;
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #aaa;
+  pointer-events: none;
+  height: 0;
 }

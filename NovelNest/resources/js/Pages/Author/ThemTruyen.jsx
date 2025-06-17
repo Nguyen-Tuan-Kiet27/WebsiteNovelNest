@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AuthorLayout from "../../Layouts/AuthorLayout";
 import './ThemTruyen.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,6 +22,7 @@ export default function ThemTruyen({user,theLoais}){
     const [idTheLoai,setIDTheLoai] = useState(null);
     const [showTheLoai,setShowTheLoai] = useState(false);
     const [gioiThieu,setGioiThieu] = useState('');
+
     const handleABChange = (e)=>{
         const sfile = e.target.files[0];
         if(sfile){
@@ -114,7 +115,7 @@ export default function ThemTruyen({user,theLoais}){
                 '/api/author/themtruyen',
                 formData,
                 {
-                     headers: {
+                    headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 }
