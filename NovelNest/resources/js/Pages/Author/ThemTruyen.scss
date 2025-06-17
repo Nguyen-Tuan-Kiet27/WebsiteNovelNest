@@ -4,16 +4,29 @@ main{
 .ThemTruyen{
     padding: 0 20px;
     background-color: white;
+    >.body{
+        padding: 30px;
+        background-color: #D9D9D9;
+        >div:first-of-type{
+            display: flex;
+        }
+        >.buttonSM{
+            width: 100%;
+            display: flex;
+            justify-content: end;
+            margin-top: 20px;
+            >button:first-of-type{
+                margin-right: 20px;
+            }
+            >button{
+                width: 10%;
+                aspect-ratio: 4/1;
+            }
+        }
+}
 }
 .head{
     padding: 10px 0;
-}
-.body{
-    padding: 30px;
-    background-color: #D9D9D9;
-    >div:first-of-type{
-        display: flex;
-    }
 }
 .inputAnhBia{
     width: 25%;
@@ -107,20 +120,6 @@ main{
     flex-direction: column;
     >textarea{
         min-height: 300px;
-    }
-}
-
-.buttonSM{
-    width: 100%;
-    display: flex;
-    justify-content: end;
-    margin-top: 20px;
-    >button:first-of-type{
-        margin-right: 20px;
-    }
-    >button{
-        width: 10%;
-        aspect-ratio: 4/1;
     }
 }
 

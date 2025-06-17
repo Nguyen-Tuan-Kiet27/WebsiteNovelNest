@@ -8,7 +8,7 @@ class Chuong extends Model
 {
     protected $table = "chuong";
     protected $primaryKey = "id";
-    protected $fillable = ["ten","soChuong","tomTat","noiDung","gia","ngayTao","luotXem","amThanh","id_Truyen"];
+    protected $fillable = ["ten","soChuong","tomTat","noiDung","gia","ngayTao","luotXem","amThanh","id_Truyen","trangThai"];
     public $timestamps = false;
     public function LichSuDocs(){
         return $this->hasMany(LichSuDoc::class,"id_Chuong");
