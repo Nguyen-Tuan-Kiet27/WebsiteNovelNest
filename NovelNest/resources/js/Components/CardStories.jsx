@@ -1,12 +1,12 @@
 import { router } from '@inertiajs/react';
 import './CardStories.scss';
-export default function Home({ten, hinhAnh,id}) {
-    const tenCut = ten.length > 20 ? ten.slice(0,20) + "..." : ten;
+export default function Home({truyen}) {
+    const tenCut = truyen.ten.length > 20 ? truyen.ten.slice(0,20) + "..." : truyen.ten;
     return (
-        <div className="story-card" title={ten}
-            onClick={()=>{router.visit(`/truyen/${id}`)}}
+        <div className="story-card" title={truyen.ten}
+            onClick={()=>{router.visit(`/truyen/${truyen.id}`)}}
         >
-            <img src={`/img/truyen/hinhAnh/${hinhAnh}`} alt={ten} className="story-image" />
+            <img src={`/img/truyen/hinhAnh/${truyen.hinhAnh}`} alt={truyen.ten} className="story-image" />
             <p className="story-title">{tenCut}</p>
         </div>
     );
