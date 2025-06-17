@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import AuthorLayout from "../../Layouts/AuthorLayout";
 import './Truyen.scss'
 import { router } from "@inertiajs/react";

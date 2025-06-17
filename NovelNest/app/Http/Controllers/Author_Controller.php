@@ -7,12 +7,14 @@ use Exception;
 use App\Services\JwtService;
 use App\Models\NguoiDung;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use App\Models\TheLoai;
 use App\Models\Truyen;
+use App\Models\Chuong;
 
 class Author_Controller extends Controller
 {
-    public function DoanhThu(Request $request){
+    public function doanhThu(Request $request){
         $user = $request->attributes->get("user");
         if(!$user){
             return redirect("/");
@@ -25,7 +27,7 @@ class Author_Controller extends Controller
         ]);
     }
 
-    public function Truyen(Request $request){
+    public function truyen(Request $request){
         $user = $request->attributes->get("user");
         $truyens = $user->Truyens()->orderBy('ngayBatDau', 'desc')->with('TheLoai:id,ten')->withSum('Chuongs as luotXem', 'luotXem')->get();
         if(!$user){ 
@@ -40,7 +42,7 @@ class Author_Controller extends Controller
         ]);
     }
 
-    public function ThemTruyen(Request $request){
+    public function themTruyen(Request $request){
         $user = $request->attributes->get("user");
         $theLoais = TheLoai::where("trangThai", 1)->get();
         if(!$user){ 
@@ -90,7 +92,7 @@ class Author_Controller extends Controller
             'message'=> 'Tạo truyện mới thành công!'
         ],201);
     }
-    public function TruyenChuong(Request $request, $id){
+    public function truyenChuong(Request $request, $id){
         $user = $request->attributes->get('user');
         if(!$user){
             return redirect("/");
@@ -105,15 +107,15 @@ class Author_Controller extends Controller
                 'anhDaiDien' =>$user->anhDaiDien,
             ],
             'truyen'=> $truyen,
-            'chuong'=>$truyen->Chuongs()->get(),
+            'chuongs'=>$truyen->Chuongs()->get(),
         ]);
     }
-    public function ThemChuong(Request $request, $id){
+    public function themChuong(Request $request, $id){
         $user = $request->attributes->get('user');
         if(!$user){
             return redirect("/");
         }
-        $truyen = Truyen::find($id);
+        $truyen = Truyen::withCount('chuongs as soLuongChuong')->find($id);
         if(!$truyen || $truyen->id_NguoiDung != $user->id){
             return redirect('/author/truyen');
         }
@@ -124,5 +126,54 @@ class Author_Controller extends Controller
             ],
             'truyen'=> $truyen,
         ]);
+    }
+
+    public function apiThemChuong(Request $request, $id){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        $ten = $request->input('ten');
+        $gia = $request->input('gia');
+        $noiDung = $request->input('noiDung');
+        $soChuong = $request->input('soChuong');
+        $truyen = Truyen::find($id);
+        if (!$truyen) {
+            return response()->json(['errorTruyen' => 'Truyện không tồn tại!'], 404);
+        }
+        $response = [];
+        $errorR = false;
+        if($truyen->chuongs()->where('ten', $ten)->exists()){
+            $response['errorTen'] = 'Tên chương đã tồn tại!';
+            $errorR = true;
+        }
+        if($truyen->chuongs()->where('soChuong',$soChuong)->first()){
+            $response['errorSoChuong'] = 'Đã có người thêm chuong '.$soChuong.', hãy kiểm tra lại!';
+            $errorR = true;
+        }
+        if($errorR){
+            return response()->json($response,409);
+        }
+        
+        try{
+            $chuong = new Chuong();
+            $chuong->id_Truyen = $id;
+            $chuong->ten = $ten;
+            $chuong->gia = $gia;
+            $chuong->noiDung = $noiDung;
+            $chuong->soChuong = $soChuong;
+            $chuong->tomTat = 'Tóm Tắt';
+            $chuong->ngayTao = now();
+            $chuong->save();
+            $truyen->updatePhanLoai();
+            return response()->json(['message' => 'Thêm chương thành công!'], 200);
+        }catch(Exception $e){
+            return response()->json([
+                'message' => 'Đã có lỗi không mong muốn xảy ra khi thêm chương.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

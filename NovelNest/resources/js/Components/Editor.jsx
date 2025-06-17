@@ -9,10 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
+import Placeholder from '@tiptap/extension-placeholder';
 import { Box, Stack, IconButton, Tooltip, Select, MenuItem, Button } from '@mui/material';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
@@ -26,12 +23,8 @@ import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
-import TableChartIcon from '@mui/icons-material/TableChart';
-import AddIcon from '@mui/icons-material/Add';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import DeleteIcon from '@mui/icons-material/Delete';
 import * as docx from 'docx-preview';
-
+import './Editor.scss'
 const FontSize = TextStyle.extend({
   addAttributes() {
     return {
@@ -52,7 +45,7 @@ const FontSize = TextStyle.extend({
   },
 });
 
-export default function RichTextEditor() {
+export default function RichTextEditor({value = '', onChange}) {
   const fileInputRef = useRef();
   const [fontSizes, setFontSizes] = useState(["12px", "14px", "16px", "18px", "24px", "32px"]);
 
@@ -63,15 +56,13 @@ export default function RichTextEditor() {
         orderedList: { keepMarks: true },
       }),
       Underline,
-      TextStyle,
       FontSize,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Table.configure({ resizable: true, lastColumnResizable: false }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      Placeholder.configure({
+        placeholder: 'Soạn thảo nội dung tại đây...',
+      }),
     ],
-    content: '<p>Soạn thảo nội dung tại đây...</p>',
+    content: value,
     editorProps: {
       handleKeyDown(view, event) {
         if (event.key === 'Tab') {
@@ -89,6 +80,10 @@ export default function RichTextEditor() {
         return false;
       },
     },
+    onUpdate:({editor})=>{
+      const html = editor.getHTML();
+      onChange && onChange(html);
+    }
   });
 
   const handleFileUpload = async (e) => {
@@ -98,6 +93,7 @@ export default function RichTextEditor() {
     if (file.name.endsWith('.txt')) {
       const text = await file.text();
       editor.commands.setContent(`<p>${text.replace(/\n/g, '</p><p>')}</p>`);
+      onChange && onChange(editor.getHTML());
     } else if (file.name.endsWith('.docx')) {
       const buffer = await file.arrayBuffer();
       const container = document.createElement('div');
@@ -134,6 +130,7 @@ export default function RichTextEditor() {
       const merged = new Set([...fontSizes, ...sizes]);
       setFontSizes(Array.from(merged).sort((a, b) => parseInt(a) - parseInt(b)));
       editor.commands.setContent(html);
+      onChange && onChange(editor.getHTML());
     }
   };
 
@@ -152,10 +149,6 @@ export default function RichTextEditor() {
         <Tooltip title="Blockquote"><IconButton onClick={() => editor.chain().focus().toggleBlockquote().run()}><FormatQuoteIcon /></IconButton></Tooltip>
         <Tooltip title="Undo"><IconButton onClick={() => editor.chain().focus().undo().run()}><UndoIcon /></IconButton></Tooltip>
         <Tooltip title="Redo"><IconButton onClick={() => editor.chain().focus().redo().run()}><RedoIcon /></IconButton></Tooltip>
-        <Tooltip title="Thêm bảng"><IconButton onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}><TableChartIcon /></IconButton></Tooltip>
-        <Tooltip title="Thêm hàng dưới"><IconButton onClick={() => editor.chain().focus().addRowAfter().run()}><AddIcon /></IconButton></Tooltip>
-        <Tooltip title="Thêm cột phải"><IconButton onClick={() => editor.chain().focus().addColumnAfter().run()}><ViewColumnIcon /></IconButton></Tooltip>
-        <Tooltip title="Xoá bảng"><IconButton onClick={() => editor.chain().focus().deleteTable().run()}><DeleteIcon /></IconButton></Tooltip>
         <Select
           value={editor.getAttributes('textStyle').fontSize || '16px'}
           onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
@@ -179,11 +172,13 @@ export default function RichTextEditor() {
       </Stack>
       <Box
         sx={{
-          border: '1px solid #ccc',
+          border: '1px solid',
           padding: 2,
           minHeight: '300px',
           borderRadius: 2,
           boxShadow: 1,
+          backgroundColor: '#fff',
+          cursor: 'text',
           '& blockquote': {
             borderLeft: '4px solid #ccc',
             marginLeft: 0,
@@ -193,18 +188,13 @@ export default function RichTextEditor() {
             fontStyle: 'italic',
             backgroundColor: '#f9f9f9',
           },
-          '& table': {
-            borderCollapse: 'collapse',
-            width: '100%',
-            tableLayout: 'fixed',
-          },
-          '& td, & th': {
-            border: '1px solid #000',
-            padding: '8px',
-            minWidth: '50px',
-            overflow: 'hidden',
-            wordWrap: 'break-word',
-          },
+        }}  
+        onClick={(e) => {
+          if (!editor) return;
+          const prose = e.currentTarget.querySelector('.ProseMirror');
+          if (prose && !prose.contains(e.target)) {
+            editor.commands.focus('end'); 
+          }
         }}
       >
         <EditorContent editor={editor} />

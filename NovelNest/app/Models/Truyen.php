@@ -25,4 +25,22 @@ class Truyen extends Model
     public function Chuongs(){
         return $this->hasMany(Chuong::class,"id_Truyen");
     }
+
+    public function updatePhanLoai(){
+        $gias = $this->chuongs()->where('trangThai', 1)->pluck('gia');
+
+        if ($gias->isEmpty()) {
+            return;
+        }
+
+        if ($gias->every(fn($gia) => $gia == 0)) {
+            $this->phanLoai = 1; // Tất cả miễn phí
+        } elseif ($gias->every(fn($gia) => $gia > 0)) {
+            $this->phanLoai = 3; // Tất cả có phí
+        } else {
+            $this->phanLoai = 2; // Trộn lẫn miễn phí và có phí
+        }
+
+        $this->save();
+    }
 }
