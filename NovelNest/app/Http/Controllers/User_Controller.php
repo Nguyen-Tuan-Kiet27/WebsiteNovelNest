@@ -9,13 +9,11 @@ use App\Models\NguoiDung;
 use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
+use App\Models\TheLoai;
 
 class User_Controller extends Controller
 {
-    public function index(Request $request){
-        $user = $request->attributes->get('user');
-        return Inertia::render('User/Home',['login'=> $user?true:false]);
-    }
+    
     public function taiKhoan(Request $request){
         $user = $request->attributes->get('user');
         if(!$user){
@@ -129,28 +127,106 @@ class User_Controller extends Controller
                 false, 
                 'Strict'));
     }
-    public function category(){
-        return Inertia::render('User/TheLoai');
+    public function index(Request $request){
+        $user = $request->attributes->get('user');
+        $theLoais = TheLoai::where('trangThai', 1)->get();
+        $truyenHots = Truyen::with(['Chuongs' => function($query) {
+                $query->where('trangThai', 1);
+            }])
+            ->where('trangThai', 1)
+            ->get()
+            ->map(function($truyen) {
+                $truyen->tongLuotXem = $truyen->Chuongs->sum('luotXem');
+                return $truyen;
+            })
+            ->sortByDesc('tongLuotXem')
+            ->take(14)
+            ->values();
+        $truyenMois = Truyen::where('trangThai', 1)
+            ->orderByDesc('ngayBatDau')
+            ->take(10)
+            ->get();
+        $truyenDaHoanThanhs = Truyen::where('trangThai', 1)
+            ->whereNotNull('ngayKetThuc')
+            ->orderByDesc('ngayKetThuc')
+            ->take(14)
+            ->get();
+        return Inertia::render('User/Home',[
+            'login'=> $user?true:false,
+            'theLoais'=> $theLoais,
+            'truyenHots' => $truyenHots,
+            'truyenMois' => $truyenMois,
+            'truyenDaHoanThanhs' => $truyenDaHoanThanhs,
+        ]);
+    }
+    public function category(Request $request){
+        $user = $request->attributes->get('user');
+        $theLoais = TheLoai::withCount([
+            'Truyens as soLuongTruyen' => function ($query) {
+                $query->where('trangThai', 1);
+            }
+        ])
+        ->where('trangThai', 1)
+        ->get();
+        return Inertia::render('User/TheLoai',[
+            'theLoais' => $theLoais,
+            'login'=> $user?true:false,
+        ]);
     }
 
-
     public function danhSachTruyenTheLoai(Request $request, $id){
-        return Inertia::render('User/DetailCategory');
+        $theLoai = TheLoai::find($id);
+        $truyens = $theLoai->Truyens()
+            ->where('trangThai', 1)
+            ->with(['Chuongs' => function ($query) {
+                $query->where('trangThai', 1);
+            }])
+            ->get()
+            ->map(function ($truyen) {
+                $truyen->luotXem = $truyen->Chuongs->sum('luotXem');
+                return $truyen;
+            });
+        return Inertia::render('User/DetailCategory',[
+            'truyens'=>$truyens,
+            'theLoai'=>$theLoai,
+        ]);
     }
 
     public function stories(Request $request, $id){
-        $truyen=Truyen::find($id);
-        // if(!$truyen){
-        //     return abort(404);
-        // }
-        $chuongs = null; //tam
-        // $chuongs = $truyen->Chuongs(); 
-        return Inertia::render('User/Stories',['truyen'=>$truyen,'chuongs'=>$chuongs]);
+        $user=$request->attributes->get('user');
+        $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
+        $soLuong = $truyen->Chuongs()->count();
+        $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
+        $truyenDaHoanThanhs = Truyen::where('trangThai', 1)
+            ->whereNotNull('ngayKetThuc')
+            ->orderByDesc('ngayKetThuc')
+            ->take(14)
+            ->get();
+        return Inertia::render('User/Stories',[
+            'truyen'=>$truyen,
+            'chuongs'=>$chuongs,
+            'login'=>$user?true:false,
+            'soLuong'=>$soLuong,
+            'truyenDaHoanThanhs'=>$truyenDaHoanThanhs,
+        ]);
     }
     public function detailStory(Request $request, $id){
-        $chuong = Chuong::find($id); //tam
-        // $chuongs = $truyen->Chuongs(); 
-        return Inertia::render('User/DetailStory',['chuong'=>$chuong]);
+        $user=$request->attributes->get('user');
+        $chuong = Chuong::where('id', $id)
+            ->where('trangThai', 1)
+            ->first();
+        $truyen = $chuong->Truyen;
+        $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
+        $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
+        $chuongSau=$truyen->Chuongs()->where('soChuong',$chuong->soChuong + 1)->first();
+        return Inertia::render('User/DetailStory',[
+            'chuong'=>$chuong,
+            'truyen'=>$chuong->Truyen,
+            'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
+            'idChuongTruoc'=>$chuongTruoc?->id??null,
+            'idChuongSau'=>$chuongSau?->id??null,
+
+        ]);
     }
 
 }

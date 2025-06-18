@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import './ListStories.scss';
-export default function Home({ten, stories}) {
+export default function Home({stories}) {
      return (
     <div className="story-table">
       <h3 className="title">Truyện Mới</h3>
