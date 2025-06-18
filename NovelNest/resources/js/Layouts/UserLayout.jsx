@@ -4,7 +4,7 @@ import { Head, usePage } from '@inertiajs/react';
 import UserLogin from '@/Components/UserLogin';
 import { useState, useEffect } from 'react';
 
-export default function Userlayout({children,title,login}){
+export default function Userlayout({children,title,login,page}){
     /////test
     /////////
     const {flash} = usePage().props;
@@ -32,17 +32,21 @@ export default function Userlayout({children,title,login}){
                         </div>
                             <button className='buttonHeader'
                                 onClick={()=>router.visit('/')}
+                                style={page==1?{backgroundColor:'#E9CF73'}:{}}
                             >
                                 <img src="/img/khampha.svg" alt="" />
                                 Khám Phá
                             </button>
                             <button className='buttonHeader'
                                 onClick={()=>router.visit('/theloai')}
+                                style={page==2?{backgroundColor:'#E9CF73'}:{}}
                             >
                                 <img src="/img/theloai.svg" alt="" />
                                 Thể Loại
                             </button>
-                            <button className='buttonHeader'>
+                            <button className='buttonHeader'
+                                style={page==3?{backgroundColor:'#E9CF73'}:{}}
+                            >
                                 <img src="/img/blog.svg" alt="" />
                                 Blog Truyện
                             </button>
@@ -52,6 +56,7 @@ export default function Userlayout({children,title,login}){
                             </button>
                             <button className='buttonHeader'
                                 onClick={handleClickLogin}
+                                style={page==4?{backgroundColor:'#E9CF73'}:{}}
                             >
                                 <img src="/img/dangnhap.svg" alt="" />
                                 {login||flash.loginf?"Tài Khoản":"Đăng Nhập"}

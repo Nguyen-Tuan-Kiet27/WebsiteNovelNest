@@ -5,7 +5,7 @@ import { router } from '@inertiajs/react';
 import './ListCategory.scss'
 
 
-export default function ListCategory({ items, onClickItem }) {
+export default function ListCategory({ items, onClickItem,theloais }) {
   return (
     <div className="category-grid">
       {items.map((item) => (
@@ -14,10 +14,10 @@ export default function ListCategory({ items, onClickItem }) {
           className="category-card"
           onClick={() => router.visit(`/theloai/${item.id}`)}
         >
-          <img src={`/img/theLoai/${item.img}`} alt={item.title} />
+          <img src={`/img/theLoai/${item.hinhAnh}`} alt={item.title} />
           <div className="info">
-            <div className="title">{item.title}</div>
-            <div className="count">{item.count} truyện</div>
+            <div className="title">{item.ten}</div>
+            <div className="count">{item.soLuongTruyen} truyện</div>
           </div>
         </div>
       ))}

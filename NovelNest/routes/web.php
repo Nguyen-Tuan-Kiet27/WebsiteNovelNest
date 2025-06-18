@@ -9,9 +9,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 
 //user
 Route::get('/', [User_Controller::class, 'index'])->middleware('CheckLogin');
-Route::get('/theloai', [User_Controller::class,'category']);
+Route::get('/theloai', [User_Controller::class,'category'])->middleware('CheckLogin');
 Route::get('/theloai/{id}', [User_Controller::class,'danhSachTruyenTheLoai']);
-Route::get('/truyen/{id}', [User_Controller::class,'stories']);
+Route::get('/truyen/{id}', [User_Controller::class,'stories'])->middleware('CheckLogin');
 Route::get('/chuong/{id}', [User_Controller::class,'detailStory']);
 
 
