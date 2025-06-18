@@ -211,9 +211,22 @@ class User_Controller extends Controller
         ]);
     }
     public function detailStory(Request $request, $id){
-        $chuong = Chuong::find($id); //tam
-        // $chuongs = $truyen->Chuongs(); 
-        return Inertia::render('User/DetailStory',['chuong'=>$chuong]);
+        $user=$request->attributes->get('user');
+        $chuong = Chuong::where('id', $id)
+            ->where('trangThai', 1)
+            ->first();
+        $truyen = $chuong->Truyen;
+        $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
+        $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
+        $chuongSau=$truyen->Chuongs()->where('soChuong',$chuong->soChuong + 1)->first();
+        return Inertia::render('User/DetailStory',[
+            'chuong'=>$chuong,
+            'truyen'=>$chuong->Truyen,
+            'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
+            'idChuongTruoc'=>$chuongTruoc?->id??null,
+            'idChuongSau'=>$chuongSau?->id??null,
+
+        ]);
     }
 
 }

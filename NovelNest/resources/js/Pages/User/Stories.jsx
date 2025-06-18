@@ -4,9 +4,6 @@ import { router } from '@inertiajs/react';
 import './Stories.scss';
 import CardStories from '../../Components/CardStories';
 export default function Stories({login,truyen,chuongs, soLuong,truyenDaHoanThanhs}) {
-console.log(chuongs);
-console.log(truyen);
-
     const traiRef = useRef();
     const [traiHeight, setTraiHeight] = useState(0);
     const [traiHeight2, setTraiHeight2] = useState(0);
@@ -47,7 +44,7 @@ return(
         <div style={{maxHeight: traiHeight, minHeight:traiHeight}}>
             <div className='storyChapter' style={{maxHeight: traiHeight2}}> 
             
-                <button onClick={()=>router.visit(`/chuong/${chapters[0].id}`)}>
+                <button onClick={()=>router.visit(`/chuong/${chuongs[0].id}`)}>
                     Đọc từ đầu
                 </button>
                 <div className='chuongMoi'>
