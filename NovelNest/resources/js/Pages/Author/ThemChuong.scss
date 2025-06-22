@@ -66,6 +66,23 @@
                 aspect-ratio: 4/1;
             }
         }
+        >.tomTat{
+            display: flex;
+            flex-direction: column;
+            >div{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            >textarea{
+                min-height: 100px;
+            }
+        }
+        >.end{
+            display: flex;
+            justify-content: center;
+        }
     }
 }
 .error{

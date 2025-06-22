@@ -13,6 +13,11 @@ export default function Truyen({user, truyen}){
     const tenLabelRef = useRef(null);
     const [mrErrorTen,setMrErrorTen] = useState(0);
     const [errorNoiDung,setErrorNoiDung] = useState('');
+    const [tomTat,setTomTat] = useState('');
+    const [errorTomTat,setErrorTomTat] = useState('');
+    const [loading, setLoading] = useState(false);
+    const textareaRef = useRef(null);
+    const [end,setEnd] = useState(false);
     useEffect(() => {
         if (tenLabelRef.current) {
             const el = tenLabelRef.current;
@@ -38,7 +43,28 @@ export default function Truyen({user, truyen}){
             e.target.value = num;
         }
     }
+    const handleTomTat = async ()=>{
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                '/api/tomtat',{
+                    text: noiDung,
+                }
+            );
+            alert('Đã tóm tắt nội dung chương!');
+            setTomTat(response.data.summary);
+        } catch (error) {
+            alert('Có lỗi không xác định, hãy kiểm tra lại nội dung đã được tóm tắt!')
+            setTomTat(error.response.data.summary);
+        }
+        setLoading(false);
+    }
     const handleSubmit =  async ()=>{
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'   // cuộn mượt; bỏ dòng này nếu muốn cuộn ngay lập tức
+        });
+        console.log(end);
         let b = false;
         if(!ten){
             setErrorTen('Chưa nhập tên chương!');
@@ -48,12 +74,18 @@ export default function Truyen({user, truyen}){
             setErrorNoiDung("Chưa viết nội dung chương!");
             b = true;
         }
+        if(!tomTat){
+            setErrorTomTat("Chưa viết tóm tắt nội dung chương!");
+            b = true;
+        }
         if(b) return;
         const formData = new FormData();
         formData.append('ten',ten);
         formData.append('gia',xu);
         formData.append('noiDung',noiDung);
         formData.append('soChuong',parseInt(truyen.soLuongChuong)+1);
+        formData.append('tomTat',tomTat);
+        formData.append('end',end);
         try {
             const response = await axios.post(
                 `/api/author/themchuong/${truyen.id}`,
@@ -77,8 +109,14 @@ export default function Truyen({user, truyen}){
     }
     useEffect(()=>{
         setErrorNoiDung('');
-        console.log(noiDung);
     },[noiDung]);
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+        textarea.style.height = 'auto'; // Reset trước
+        textarea.style.height = `${textarea.scrollHeight}px`; // Resize theo nội dung mới
+        }
+    }, [tomTat]);
     return(
         <AuthorLayout page='2' user={user} title={`Thêm chương truyện ${truyen.ten}`}>
             <div className="ThemChuong">
@@ -113,6 +151,24 @@ export default function Truyen({user, truyen}){
                         <Editor onChange={setNoiDung} value={noiDung}/>
                     </div>
                     <label className="error" style={{marginTop:'10px'}}>{errorNoiDung}</label>
+                    <div className="tomTat">
+                        <div>
+                            <label>Tóm tắt chương</label>
+                            {
+                                user.premium && <button onClick={handleTomTat} disabled={loading}>AI {loading&&'đang'} tóm tắt</button>
+                            }
+                        </div>
+                        <textarea 
+                            ref={textareaRef}
+                            value={tomTat} 
+                            onChange={(e)=>{setTomTat(e.target.value);setErrorTomTat('')}}  
+                        ></textarea>
+                        <label className="error" style={{marginTop:'10px'}}>{errorTomTat}</label>
+                    </div>
+                    <div className="end">
+                        <input type="checkBox" onChange={e=>setEnd(e.target.checked)}/>
+                        <label style={{marginLeft:'10px',color:'green'}}>Chương cuối, hoàn thành truyện!</label>
+                    </div>
                     <div className="buttonSM">
                         <button onClick={() => window.history.back()}>Hủy</button>
                         <button onClick={handleSubmit} >Thêm</button>

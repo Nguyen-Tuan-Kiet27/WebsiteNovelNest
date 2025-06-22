@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User_Controller;
 use App\Http\Controllers\Admin_Controller;
 use App\Http\Controllers\Author_Controller;
+use App\Http\Controllers\Summary_Controller;
+use App\Http\Controllers\TextToSpeech_Controller;
 
 
 Route::get('/user', function (Request $request) {
@@ -13,10 +15,13 @@ Route::get('/user', function (Request $request) {
 
 //User
 Route::post('/logout',[User_Controller::class,'logout']);
+Route::get('/audio/{id}/{speakerId}',[TextToSpeech_Controller::class,'get']);
+Route::get('/damua/{id}',[User_Controller::class,'checkDaMua'])->middleware(['web','CheckChuong']);
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);
 Route::post('/author/themchuong/{id}', [Author_Controller::class,'apiThemChuong'])->middleware(['web','CheckLogin:1,2,3']);
+Route::post('/tomtat', [Summary_Controller::class,'summarize'])->middleware(['web','CheckLogin:1,2,3']);
 
 //Admin
 Route::post('/admin/login', [Admin_Controller::class,'authLogin'])->middleware(['web']);
