@@ -10,6 +10,8 @@ use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
 use App\Models\TheLoai;
+use App\Models\YeuThich;
+use Illuminate\Support\Facades\Log;
 
 class User_Controller extends Controller
 {
@@ -228,5 +230,34 @@ class User_Controller extends Controller
 
         ]);
     }
+    public function changeYeuThich(Request $request, $id){
+        $user=$request->attributes->get('user');
+        Log::info('1');
+        $yeuThich=YeuThich::where('id_NguoiDung',$user->id)
+            ->where('id_Truyen',$id)
+            ->first();
+        Log::info('2');
+        if($yeuThich){
+            Log::info('3');
+            try{
+                YeuThich::where('id_NguoiDung', $user->id)
+                    ->where('id_Truyen', $id)
+                    ->delete();
+                Log::info('4');
+                return response()->json(['message'=>'Bỏ yêu thích thành công','flag'=>0],200);
+            }catch(Exception $e){
+                Log::info('5');
+                return response()->json(['message'=>$e->getMessage()],500);
+            }
+            
+        }
+        Log::info('6');
+        $yeuThich = new YeuThich();
+        $yeuThich->id_NguoiDung = $user->id;
+        $yeuThich->id_Truyen = $id;
+        $yeuThich->save();
+        Log::info('7');
+        return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>1],200);
 
+    }
 }

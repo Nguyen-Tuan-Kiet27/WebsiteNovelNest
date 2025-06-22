@@ -13,6 +13,7 @@ Route::get('/user', function (Request $request) {
 
 //User
 Route::post('/logout',[User_Controller::class,'logout']);
+Route::post('/favorite/{id}',[User_Controller::class,'changeYeuThich'])->middleware(['web','CheckLogin']);
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);
