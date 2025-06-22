@@ -260,4 +260,11 @@ class User_Controller extends Controller
         return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>1],200);
 
     }
+
+    public function blogTruyen(Request $request){
+        $user=$request->attributes->get('user');
+         return Inertia::render('User/DetailCategory',[
+            
+        ]);
+    }
 }

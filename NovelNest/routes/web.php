@@ -13,6 +13,7 @@ Route::get('/theloai', [User_Controller::class,'category'])->middleware('CheckLo
 Route::get('/theloai/{id}', [User_Controller::class,'danhSachTruyenTheLoai']);
 Route::get('/truyen/{id}', [User_Controller::class,'stories'])->middleware('CheckLogin');
 Route::get('/chuong/{id}', [User_Controller::class,'detailStory']);
+Route::get('/blogtruyen', [User_Controller::class,'blogTruyen']);
 
 
 Route::get('/auth/facebook', [User_Controller::class,'LoginFB']);
