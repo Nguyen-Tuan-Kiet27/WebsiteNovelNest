@@ -211,10 +211,16 @@ class User_Controller extends Controller
         ]);
     }
     public function detailStory(Request $request, $id){
+        if(!$request->attributes->get('bnought')){
+
+        }
         $user=$request->attributes->get('user');
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
+        if(!$chuong){
+            return re
+        }
         $truyen = $chuong->Truyen;
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
@@ -225,8 +231,16 @@ class User_Controller extends Controller
             'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
             'idChuongTruoc'=>$chuongTruoc?->id??null,
             'idChuongSau'=>$chuongSau?->id??null,
-
+            'user'=> !$user
+            ?false
+            :[
+                'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
+            ]
         ]);
+    }
+    public function checkDaMua(Request $request){
+        $daMua = $request->attributes->get('bought');
+        return response()->json(['daMua'=>$daMua] ,200);
     }
 
 }

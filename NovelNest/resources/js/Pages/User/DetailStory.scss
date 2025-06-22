@@ -47,6 +47,56 @@
           margin: 10px 10px 10px 10px;
       }
     }
+
+    >.audio{
+      display: flex;
+      width: 100%;
+      justify-content: end;
+      align-items: center;
+      >.pickVoice{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 20%;
+        border: 1px solid;
+        padding: 5px 15px;
+        margin-right: 20px;
+        position: relative;
+        background-color: #d5d5d5;
+        &:hover{
+          cursor: pointer;
+        }
+        >.icon{
+          transform: rotate(-90deg);
+          transition: transform 0.3s ease;
+        }
+        >label:hover{
+          cursor: pointer;
+        }
+        >div{
+          position: absolute;
+          left: 0;
+          top: calc(100% + 3px);
+          width: 100%;
+          height: calc(100%*4);
+          border: 1px solid;
+          border-bottom: 0;
+          background-color: #d5d5d5;
+          >label{
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            width: 100%;
+            height: 25%;
+            border-bottom: 1px solid;
+            &:hover{
+              cursor: pointer;
+              background-color: greenyellow;
+            }
+          }
+        }
+      }
+    }
   }
 
   .doc-report {
