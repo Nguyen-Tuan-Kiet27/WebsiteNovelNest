@@ -123,6 +123,9 @@ class Author_Controller extends Controller
             "user"=> [
                 'ten'=>$user->ten,
                 'anhDaiDien' =>$user->anhDaiDien,
+                'premium' => $user->premium > now() 
+                    ? true 
+                    : ($user->vaiTro == 3 ? false : true),
             ],
             'truyen'=> $truyen,
         ]);
@@ -139,6 +142,8 @@ class Author_Controller extends Controller
         $gia = $request->input('gia');
         $noiDung = $request->input('noiDung');
         $soChuong = $request->input('soChuong');
+        $tomTat = $request->input('tomTat');
+        $end = $request->input('end');
         $truyen = Truyen::find($id);
         if (!$truyen) {
             return response()->json(['errorTruyen' => 'Truyện không tồn tại!'], 404);
@@ -164,10 +169,14 @@ class Author_Controller extends Controller
             $chuong->gia = $gia;
             $chuong->noiDung = $noiDung;
             $chuong->soChuong = $soChuong;
-            $chuong->tomTat = 'Tóm Tắt';
+            $chuong->tomTat = $tomTat;
             $chuong->ngayTao = now();
             $chuong->save();
             $truyen->updatePhanLoai();
+            if($end){
+                $truyen->ngayKetThuc = $end?now():null;
+                $truyen->save();
+            }
             return response()->json(['message' => 'Thêm chương thành công!'], 200);
         }catch(Exception $e){
             return response()->json([

@@ -2,6 +2,9 @@
     color:black;
     font-size: 14px;
 }
+img:hover{
+    cursor: default !important;
+}
 .container{
     display: flex;
     align-items: flex-start;
@@ -55,6 +58,16 @@
                     }    
                 }
                 
+            }
+            >.ied{
+                >path{
+                    color: red;
+                }
+                &:hover{
+                    >path{
+                        color: black !important;
+                    }
+                }
             }
             
         }

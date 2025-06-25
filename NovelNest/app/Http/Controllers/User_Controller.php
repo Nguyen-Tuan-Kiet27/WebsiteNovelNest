@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\BaiViet;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -196,6 +198,8 @@ class User_Controller extends Controller
 
     public function stories(Request $request, $id){
         $user=$request->attributes->get('user');
+        $yeuThich = YeuThich::where('id_NguoiDung',$user->id)
+                        ->where('id_Truyen',$id)->first();
         $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
         $soLuong = $truyen->Chuongs()->count();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
@@ -205,6 +209,7 @@ class User_Controller extends Controller
             ->take(14)
             ->get();
         return Inertia::render('User/Stories',[
+            'favorite'=>$yeuThich?true:false,
             'truyen'=>$truyen,
             'chuongs'=>$chuongs,
             'login'=>$user?true:false,
@@ -213,10 +218,16 @@ class User_Controller extends Controller
         ]);
     }
     public function detailStory(Request $request, $id){
+        if(!$request->attributes->get('bnought')){
+
+        }
         $user=$request->attributes->get('user');
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
+        // if(!$chuong){
+        //     return;
+        // }
         $truyen = $chuong->Truyen;
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
@@ -227,26 +238,25 @@ class User_Controller extends Controller
             'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
             'idChuongTruoc'=>$chuongTruoc?->id??null,
             'idChuongSau'=>$chuongSau?->id??null,
-
+            'user'=> !$user
+            ?false
+            :[
+                'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
+            ]
         ]);
     }
     public function changeYeuThich(Request $request, $id){
         $user=$request->attributes->get('user');
-        Log::info('1');
         $yeuThich=YeuThich::where('id_NguoiDung',$user->id)
             ->where('id_Truyen',$id)
             ->first();
-        Log::info('2');
         if($yeuThich){
-            Log::info('3');
             try{
                 YeuThich::where('id_NguoiDung', $user->id)
                     ->where('id_Truyen', $id)
                     ->delete();
-                Log::info('4');
-                return response()->json(['message'=>'Bỏ yêu thích thành công','flag'=>0],200);
+                return response()->json(['message'=>'Bỏ yêu thích thành công','flag'=>false],200);
             }catch(Exception $e){
-                Log::info('5');
                 return response()->json(['message'=>$e->getMessage()],500);
             }
             
@@ -257,14 +267,36 @@ class User_Controller extends Controller
         $yeuThich->id_Truyen = $id;
         $yeuThich->save();
         Log::info('7');
-        return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>1],200);
-
+        return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>true],200);
+    }
+    public function checkDaMua(Request $request){
+        $daMua = $request->attributes->get('bought');
+        return response()->json(['daMua'=>$daMua] ,200);
     }
 
     public function blogTruyen(Request $request){
         $user=$request->attributes->get('user');
-         return Inertia::render('User/DetailCategory',[
-            
+        $blogtruyen=BaiViet::all();
+         return Inertia::render('User/BlogStories',[
+            'blogTruyen'=>$blogtruyen,
+        ]);
+    }
+     public function detailBlogTruyen(Request $request, $id){
+        $user=$request->attributes->get('user');
+        $detailBlog=BaiViet::find($id);
+        
+         // Lấy 20 bài viết mới nhất, loại trừ bài hiện tại
+        $recentBlogs = BaiViet::where('id', '!=', $id)
+            ->orderBy('ngayTao', 'desc') 
+            ->take(20)
+            ->get();
+
+        // Random chọn 5 bài trong số 20 bài mới nhất
+        $randomBlogs = $recentBlogs->random(min(5, $recentBlogs->count()));
+
+        return Inertia::render('User/DetailBlogStory', [
+            'detailBlog' => $detailBlog,
+            'randomBlogs' => $randomBlogs, // gửi thêm bài viết ngẫu nhiên
         ]);
     }
 }

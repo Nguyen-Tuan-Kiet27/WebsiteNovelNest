@@ -51,11 +51,10 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
       const response = await axios.post(
         `/api/favorite/${truyen.id}`
       )
+      setLove(response.data.flag);
     } catch (error) {
       console.log(error.response.data.message)
     }
-   
-    
   }
 return(
 <Userlayout title="Stories" login={login} >
@@ -66,7 +65,7 @@ return(
                     <img src={`/img/truyen/hinhNen/${truyen.hinhNen}`} alt="" />
                     <div className='fas' style={login?{}:{display:'none'}}>
                       <button className='favorite' onClick={handleFavorite}>
-                        <FaRegHeart className='i'/>
+                        {love && <FaHeart className='i ied'/> ||<FaRegHeart className='i'/>}
                       </button>
                       <button>
                         <FaShareSquare className='i'/>

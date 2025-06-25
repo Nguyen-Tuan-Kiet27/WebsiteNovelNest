@@ -1,14 +1,18 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faList, faChevronLeft, faChevronRight, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import './DetailStory.scss';
 import { router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Userlayout from '@/Layouts/UserLayout';
 
-export default function DocTruyen({chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau}) {
-  console.log(idChuongTruoc);
-  console.log(idChuongSau);
-
+export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau}) {
+  const [premium,setPremium] = useState(false);
+  useEffect(()=>{
+    console.log(user)
+    if(user){
+      setPremium(user.premium);
+    }
+  },[])
   const handleChuongTruoc=()=>{
     router.visit(`/chuong/${idChuongTruoc}`);
   }
@@ -26,8 +30,40 @@ export default function DocTruyen({chuong,truyen,chuongCuoi,idChuongTruoc,idChuo
         router.visit(`/chuong/${chapter.id}`);
       }
   };
+
+  const [selectedVoice, setSelectedVoice] = useState(null); // 0, 1, 2, 3
+  const [audioSrc, setAudioSrc] = useState(null);
+  const [type, setType] = useState('');
+  const [showVoice, setShowVoice] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const handleSelect = async (t,e) => {
+    setLoading(true);
+    setType(e);
+    try {
+      const res = await fetch(`http://localhost:8000/api/audio/${chuong.id}/${t}`);
+      
+      if (!res.ok) throw new Error('Tạo audio thất bại');
+
+      const blob = await res.blob(); // Lấy file nhị phân
+      const audioUrl = URL.createObjectURL(blob); // Tạo URL tạm
+      setAudioSrc(audioUrl);
+    } catch (error) {
+      alert('Không thể tạo file audio');
+      console.error(error);
+    }
+    setLoading(false);
+  };
+  const handleShowVoice = ()=>{
+    if(!premium){
+      alert('Bạn cần nâng cấp tài khoản premium để sử dụng tính năng này!')
+      return;
+    }
+    if(loading) return;
+    setShowVoice(!showVoice)
+  }
+
   return (
-    <Userlayout>
+    <Userlayout login={user?true:false} title={`${truyen.ten} - Chương ${chuong.soChuong}: ${chuong.ten}`}>
       <div className="doc-truyen">
         <div className="doc-header">
           <button className="back-btn"
@@ -36,6 +72,24 @@ export default function DocTruyen({chuong,truyen,chuongCuoi,idChuongTruoc,idChuo
         </div>
         <div className="doc-main">
           <div className="doc-content-wrapper">
+            <div className='audio'>
+              <div className='pickVoice'
+                onClick={handleShowVoice}
+              >
+                <label>{loading ? 'Đang lấy âm thanh...': (type || 'Chọn giọng đọc')} </label>
+                <FontAwesomeIcon className="icon" style={{transform:showVoice?'rotate(0deg)':'rotate(-90deg)'}} icon={faCaretDown} />
+                <div style={{display:showVoice?'block':'none'}}>
+                  <label onClick={()=>handleSelect(5,'Giọng nữ miền bắc')}>Giọng nữ miền bắc</label>
+                  <label onClick={()=>handleSelect(4,'Giọng nam miền bắc')}>Giọng nam miền bắc</label>
+                  <label onClick={()=>handleSelect(6,'Giọng nữ miền nam')}>Giọng nữ miền nam</label>
+                  <label onClick={()=>handleSelect(3,'Giọng nam miền nam')}>Giọng nam miền nam</label>
+                </div>
+              </div>
+              <audio controls key={audioSrc}>
+                <source src={audioSrc} type="audio/mpeg" />
+                Trình duyệt của bạn không hỗ trợ audio.
+              </audio>
+            </div>
             <div className="doc-nav">
               <button onClick={handleChuongTruoc} style={{opacity:chuong.soChuong==1?'0.5':'1'}} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
               <button>

@@ -46,6 +46,7 @@ export default function Userlayout({children,title,login,page}){
                             </button>
                             <button className='buttonHeader'
                                 style={page==3?{backgroundColor:'#E9CF73'}:{}}
+                                onClick={()=>router.visit('/blogtruyen')}
                             >
                                 <img src="/img/blog.svg" alt="" />
                                 Blog Truyện
