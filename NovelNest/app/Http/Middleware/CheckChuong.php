@@ -15,8 +15,6 @@ class CheckChuong
         $jwtService = app(JwtService::class);
         $token = $request->cookie('auth_token');
         $parsed = false;
-        if ($token) $parsed = $jwtService->parseToken($token);
-        $uid = $parsed->claims()->get('uid');
         $chuong = Chuong::find($request->route('id'));
         if (!$chuong || $chuong->trangThai == 0) {
             abort(404,'Chương này không tồn tại!');
@@ -25,10 +23,12 @@ class CheckChuong
             $request->attributes->set('bought',true);
             return $next($request);
         }
+        if ($token) $parsed = $jwtService->parseToken($token);
         if (!$token || !$parsed) {
             $request->attributes->set('bought',false);
             return $next($request);
         }
+        $uid = $parsed->claims()->get('uid');
         $daMua = DaMua::where('id_NguoiDung',$uid)->where('id_Chuong',$chuong->id)->first();
         if (!$daMua) {
             $request->attributes->set('bought',false);

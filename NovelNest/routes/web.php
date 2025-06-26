@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User_Controller;
 use App\Http\Controllers\Author_Controller;
 use App\Http\Controllers\Admin_Controller;
+use App\Http\Controllers\Payment_Controller;
 use Inertia\Inertia;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 
@@ -13,6 +14,10 @@ Route::get('/theloai', [User_Controller::class,'category'])->middleware('CheckLo
 Route::get('/theloai/{id}', [User_Controller::class,'danhSachTruyenTheLoai']);
 Route::get('/truyen/{id}', [User_Controller::class,'stories'])->middleware('CheckLogin');
 Route::get('/chuong/{id}', [User_Controller::class,'detailStory'])->middleware(['CheckLogin','CheckChuong']);
+Route::get('/muaxu', [User_Controller::class,'muaXu'])->middleware('CheckLogin:3,4');
+Route::get('/vnpay_return', [Payment_Controller::class, 'vnpayReturn'])->middleware('CheckLogin');
+Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middleware('CheckLogin');
+
 
 
 Route::get('/auth/facebook', [User_Controller::class,'LoginFB']);

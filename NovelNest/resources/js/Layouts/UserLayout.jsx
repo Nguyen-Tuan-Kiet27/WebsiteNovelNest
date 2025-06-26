@@ -3,6 +3,7 @@ import './UserLayout.scss';
 import { Head, usePage } from '@inertiajs/react';
 import UserLogin from '@/Components/UserLogin';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Userlayout({children,title,login,page}){
     /////test
@@ -19,6 +20,24 @@ export default function Userlayout({children,title,login,page}){
             router.visit('/taikhoan');
         else
             setUserLoginIsVisible(true);
+    }
+    const handleClickDangTruyen = async ()=>{
+        if(login || flash.loginf){
+            try {
+                const response = await axios.get('/api/checkrole');
+                const role = response.data.role;
+                if(role<3){
+                    router.visit('/author');
+                }else{
+                    //đến trang đăng ký author
+                }
+            } catch (error) {
+                alert('Đã có lỗi xảy ra, bạn chưa đăng nhập');
+                setUserLoginIsVisible(true);
+            }
+        }else{
+            setUserLoginIsVisible(true);
+        }
     }
     return(
         <>
@@ -50,7 +69,7 @@ export default function Userlayout({children,title,login,page}){
                                 <img src="/img/blog.svg" alt="" />
                                 Blog Truyện
                             </button>
-                            <button className='buttonHeader'>
+                            <button className='buttonHeader' onClick={handleClickDangTruyen}>
                                 <img src="/img/dangtruyen.svg" alt="" />
                                 Đăng Truyện
                             </button>
