@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 use App\Models\NguoiDung;
 use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
 use App\Models\TheLoai;
+use Carbon\Carbon;
+use App\Models\LichSuNap;
+use Illuminate\Support\Facades\Log;
 
 class User_Controller extends Controller
 {
@@ -127,6 +132,7 @@ class User_Controller extends Controller
                 false, 
                 'Strict'));
     }
+
     public function index(Request $request){
         $user = $request->attributes->get('user');
         $theLoais = TheLoai::where('trangThai', 1)->get();
@@ -211,16 +217,13 @@ class User_Controller extends Controller
         ]);
     }
     public function detailStory(Request $request, $id){
-        if(!$request->attributes->get('bnought')){
-
-        }
-        $user=$request->attributes->get('user');
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
-        if(!$chuong){
-            return re
+        if(!$request->attributes->get('bought')){
+            return redirect('/truyen/'. $chuong->id_Truyen);
         }
+        $user=$request->attributes->get('user');
         $truyen = $chuong->Truyen;
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
@@ -235,12 +238,212 @@ class User_Controller extends Controller
             ?false
             :[
                 'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
+                'id'=>$user->id
             ]
         ]);
     }
     public function checkDaMua(Request $request){
         $daMua = $request->attributes->get('bought');
         return response()->json(['daMua'=>$daMua] ,200);
+    }
+
+    public function apiCheckRole(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user)
+           return response()->json(['message'=>'Chưa đăng nhập'],401);
+        return response()->json(['role'=>$user->vaiTro] ,200);    
+    }
+
+    public function muaXu(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user)
+            $user = session('user') ?? null;
+        if(!$user) redirect('/');
+        return Inertia::render('User/MuaXu',[
+            'user'=>$user,
+            'pay'=>session('pay') | null,
+        ]);
+    }
+
+    public function sendOtpEmail(Request $request)
+    {
+        try{
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+        $user = $request->attributes->get('user');
+        //Kiểm tra thời gian chờ
+        $checkTime = Cache::get('otp_sent_' . $user->id);
+
+        if ($checkTime) {
+            $remaining = Carbon::parse($checkTime)->diffInSeconds(now(), false);
+            if ($remaining > 0) {
+                return response()->json(['time' => 60-$remaining], 429);
+            }
+        }
+        //Tạo thời gian chừo
+        Cache::put('otp_sent_' . $user->id, now(), now()->addSeconds(60));
+
+        $email = $request->email;
+        $otp = rand(100000, 999999); // Mã OTP 6 chữ số
+        // $otp = 111111; // Mã OTP 6 chữ số
+
+        // Lưu OTP vào Cache trong 5 phút
+        Cache::put("otp_" . $user->id, ['otp' => $otp, 'email' => $email], now()->addMinutes(5));
+
+
+        // Gửi email
+        Mail::raw("Mã xác nhận của $user->ten là: $otp", function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Mã xác nhận từ NovelNest');
+        });
+
+        return response()->json([
+            'message' => 'Đã gửi mã xác thực đến email.'
+        ],200);
+        }catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 429);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|digits:6'
+        ],
+        [
+            'otp.digits' => 'Mã xác thực phải đủ 6 chữ số!',
+            'otp.required' => 'Vui lòng nhập mã xác thực.'
+        ]);
+        $user = $request->attributes->get('user');
+        $email = $request->email;
+        $inputOtp = $request->otp;
+        $pass = $request->pass;
+        $cachedOtp = Cache::get("otp_" . $user->id);
+
+        if (!$cachedOtp) {
+            return response()->json([
+                'message' => 'Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.'
+            ], 410); // 410 Gone
+        }
+
+        if ($inputOtp != $cachedOtp['otp'] || $cachedOtp['email'] != $email) {
+            return response()->json([
+                'message' => 'Mã xác nhận không đúng.'
+            ], 422);
+        }
+
+        // Xác minh thành công
+        Cache::forget("otp_" . $user->id); // Xoá mã sau khi dùng
+
+        $user->email = NguoiDung::maHoa($email);
+        $user->matKhau = NguoiDung::maHoa($pass);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Xác nhận thành công.'
+        ],200);
+    }
+
+    public function createPayment(Request $request){
+        $user = $request->attributes->get('user');
+        $vnp_TxnRef = time(); 
+
+        $vnp_TmnCode    = 'KA0W8FKD';
+        $vnp_HashSecret = 'L7T0QVNBJTZ13ZEG2FLVIIJHJEXV1ARG';
+        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        $vnp_Returnurl = "http://localhost:8000/vnpay_return?uid=".$user->id;
+
+
+        $vnp_OrderInfo = 'Nạp '.$request->xu.'Xu vào ví NovelNest cho người dùng có id: '.$user->id;
+        $vnp_OrderType = 'billpayment';
+        $vnp_Amount = $request->amount;
+        $vnp_Locale = 'vn';
+        $vnp_IpAddr = $request->ip();
+        $vnp_BankCode = 'NCB';
+
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount* 100,
+            "vnp_Command" => $vnp_OrderType,
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => "other",
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef
+        );
+
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+
+        $redirectUrl = $vnp_Url;
+        return response()->json(['redirect_url' => $redirectUrl]);
+    }
+
+
+    public function vnpayReturn(Request $request)
+    {
+        
+        $inputData = $request->all();
+        $user = NguoiDung::find($inputData['uid']);
+        unset($inputData['uid']);
+        $vnp_HashSecret = 'L7T0QVNBJTZ13ZEG2FLVIIJHJEXV1ARG';
+
+        $vnp_SecureHash = $inputData['vnp_SecureHash'] ?? '';
+        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
+
+        ksort($inputData);
+        $query = http_build_query($inputData);
+        $secureHash = hash_hmac('sha512', $query, $vnp_HashSecret);
+
+        if ($secureHash === $vnp_SecureHash) {
+            if ($inputData['vnp_ResponseCode'] == '00') {
+                $amount = $inputData['vnp_Amount'] / 100;
+                $price = ['10000'=>10,'20000'=>20, '50000'=>50, '98000'=>100, '192000'=>200, '480000'=>50];
+                $user = NguoiDung::find($user->id);
+                $user->soDu += $price[$amount];
+                $user->save();
+
+                $hn = new LichSuNap();
+                $hn->soLuongXu = $price[$amount];
+                $hn->menhGia = $amount;
+                $hn->thoiGian = now();
+                $hn->id_NguoiDung = $user->id;
+                $hn->save();
+
+                return redirect('/muaxu')->with(['pay' => 1,'user'=> $user]);
+            } else {
+                return redirect('/muaxu')->with(['pay' => 2,'user'=> $user]);
+            }
+        } else {
+            return redirect('/muaxu')->with(['pay' => 3,'user'=> $user]);
+        }
     }
 
 }

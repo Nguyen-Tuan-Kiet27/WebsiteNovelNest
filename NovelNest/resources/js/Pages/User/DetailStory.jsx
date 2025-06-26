@@ -4,15 +4,96 @@ import './DetailStory.scss';
 import { router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Userlayout from '@/Layouts/UserLayout';
+import useDetectDevTools from '@/hooks/useDetectDevTools';
+import usePageVisibility from '@/hooks/usePageVisibility';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau}) {
   const [premium,setPremium] = useState(false);
+  const [hiden,setHiden] = useState(false);
+  const [devTool,setDevTool] = useState(false);
+  const [content,setContent] = useState(chuong.noiDung);
+  const [scrollY,setScrollY] = useState(0);
+  const [reScrool,setReScrool] = useState(true);
+
+  useDetectDevTools(
+    () => {
+      if(reScrool){
+        setScrollY(window.scrollY || window.pageYOffset);
+        setReScrool(false);
+      }
+      setContent('<h1>DevTool đang mở, hãy tắt DevTool để tải lại nội dung!</h1>');
+      setDevTool(true);
+    },
+    ()=>{
+      setDevTool(false);
+      if(!hiden)
+        setContent(chuong.noiDung);
+    }
+  );
+
+  usePageVisibility(
+    ()=>{
+      setHiden(true);
+      if(!devTool){
+        if(reScrool){
+          setScrollY(window.scrollY || window.pageYOffset);
+          setReScrool(false);
+        }
+        setContent('<h1>Bạn đang không focus page, hãy quay lại nội dung sẽ được cập nhật!</h1>');
+      }
+    },
+    ()=>{
+      setHiden(false);
+      if(!devTool){
+        setContent(chuong.noiDung);
+      }
+    }
+  )
+
+
   useEffect(()=>{
-    console.log(user)
     if(user){
       setPremium(user.premium);
     }
+    const blockKeys = (e) => {
+      if (
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(e.key.toLowerCase())) ||
+        ((e.ctrlKey || e.metaKey) && ['u', 's', 'p'].includes(e.key.toLowerCase()))
+      ) {
+        e.preventDefault();
+      }
+      if (key === 'printscreen') {
+        e.preventDefault();
+      }
+    };
+
+    const disableContextMenu = (e) => e.preventDefault();
+
+    document.addEventListener('keydown', blockKeys);
+    document.addEventListener('contextmenu', disableContextMenu);
+
+    return () => {
+      document.removeEventListener('keydown', blockKeys);
+      document.removeEventListener('contextmenu', disableContextMenu);
+    };
   },[])
+
+  useEffect(() => {
+    if (content === chuong.noiDung) {
+      const scroll = () => {
+        if(!reScrool){
+          window.scrollTo({ top: scrollY, behavior: 'smooth' });
+          setReScrool(true);
+        }
+      };
+      // đảm bảo DOM render xong rồi mới cuộn
+      const timeout = setTimeout(scroll, 100); 
+      return () => clearTimeout(timeout);
+    }
+  }, [content]);
+
   const handleChuongTruoc=()=>{
     router.visit(`/chuong/${idChuongTruoc}`);
   }
@@ -86,7 +167,21 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
               </button>
               <button onClick={handleChuongSau} disabled={chuongCuoi} >Chương tiếp</button>
             </div>
-            <div className="doc-content" dangerouslySetInnerHTML={{ __html: chuong.noiDung }}/>
+            <div className='hidenDoc'>
+                {(!devTool && !hiden) &&
+                  <div className='hiden' style={{opacity:'0.19'}}>
+                   
+                      {Array.from({ length: 30 }).map((_, index) => (
+                        <div key={index} className='waterMask'>
+                          <img src="/img/logo_v4.png" alt="" />
+                          <h3>{user.email || '0306221133@caothang.edu.vn'}</h3>
+                        </div>
+                      ))}
+                    
+                  </div>
+                }
+                <div className="doc-content" dangerouslySetInnerHTML={{ __html: content }}/>
+              </div>
             <div className="doc-nav">
               <button onClick={handleChuongTruoc} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
               <button>
