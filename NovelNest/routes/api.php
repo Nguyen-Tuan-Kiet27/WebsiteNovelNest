@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin_Controller;
 use App\Http\Controllers\Author_Controller;
 use App\Http\Controllers\Summary_Controller;
 use App\Http\Controllers\TextToSpeech_Controller;
+use App\Http\Controllers\Payment_Controller;
 
 
 Route::get('/user', function (Request $request) {
@@ -17,7 +18,13 @@ Route::get('/user', function (Request $request) {
 Route::post('/logout',[User_Controller::class,'logout']);
 Route::post('/favorite/{id}',[User_Controller::class,'changeYeuThich'])->middleware(['web','CheckLogin']);
 Route::get('/audio/{id}/{speakerId}',[TextToSpeech_Controller::class,'get']);
-Route::get('/damua/{id}',[User_Controller::class,'checkDaMua'])->middleware(['web','CheckChuong']);
+Route::get('/damua/{id}',[User_Controller::class,'checkDaMua'])->middleware(['web','CheckChuong'] );
+Route::get('/checkrole',[User_Controller::class,'apiCheckRole'])->middleware(['web','CheckLogin'] );
+Route::post('/send-otp', [User_Controller::class, 'sendOtpEmail'])->middleware(['web','CheckLogin']);
+Route::post('/verify-otp', [User_Controller::class, 'verifyOtp'])->middleware(['web','CheckLogin']);
+Route::post('/vnpay/create-payment', [Payment_Controller::class, 'vnpayPayment'])->middleware(['web','CheckLogin']);
+Route::post('/momo/create-payment', [Payment_Controller::class, 'momoPayment'])->middleware(['web','CheckLogin']);
+
 
 
 //Author

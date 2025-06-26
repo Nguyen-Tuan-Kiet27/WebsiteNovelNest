@@ -11,7 +11,7 @@ class NguoiDung extends Model
     protected $primaryKey = "id";
     public $incrementing = false;
     public $keyType = "string";
-    protected $fillable = ["id","ten","tenDangNhap","matKhau","vaiTro","soDu","premium","anhDaiDien","ngayTao"] ;
+    protected $fillable = ["id","ten","tenDangNhap","email","matKhau","vaiTro","soDu","premium","anhDaiDien","ngayTao"] ;
     public $timestamps = false;
     public function BaiViets(){
         return $this->hasMany(BaiViet::class, "id_NguoiDung");
