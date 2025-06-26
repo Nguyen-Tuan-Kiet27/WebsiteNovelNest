@@ -11,6 +11,7 @@ use App\Models\NguoiDung;
 use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
+use App\Models\DaMua;
 use App\Models\TheLoai;
 use App\Models\YeuThich;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +24,23 @@ class User_Controller extends Controller
         if(!$user){
             return redirect('/');
         }
-        return Inertia::render('User/TaiKhoan');
+        $daMua = $user->daMuas()->with('chuong.truyen')->get();
+        $subDaMua = [];
+        foreach($daMua as $row){
+            $chuong = $row->chuong;
+            if (!$chuong || !$chuong->truyen) continue;
+                $truyenId = $chuong->truyen->id;
+                $subDaMua[$truyenId]['truyen'] = $chuong->truyen;
+                $subDaMua[$truyenId]['sub'][] = $chuong;
+                $subDaMua[$truyenId]['total'] = $subDaMua[$truyenId]['total']?$row->gia:$subDaMua[$truyenId]['total']+$row->gia;
+        }
+            $user->id=NguoiDung::giaiMa($user->id);
+            return Inertia::render('User/TaiKhoan',[
+                'user'=> $user,
+                'daMua'=>$subDaMua,
+                
+             
+        ]);
     }
 //////////////////////////////////////////////////////////////
     public function LoginFB( Request $request){
@@ -198,8 +215,11 @@ class User_Controller extends Controller
 
     public function stories(Request $request, $id){
         $user=$request->attributes->get('user');
-        $yeuThich = YeuThich::where('id_NguoiDung',$user->id)
-                        ->where('id_Truyen',$id)->first();
+        if($user)
+            $yeuThich = YeuThich::where('id_NguoiDung',$user->id)
+                            ->where('id_Truyen',$id)->first();
+        else
+            $yeuThich=false;
         $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
         $soLuong = $truyen->Chuongs()->count();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
@@ -279,6 +299,7 @@ class User_Controller extends Controller
         $blogtruyen=BaiViet::all();
          return Inertia::render('User/BlogStories',[
             'blogTruyen'=>$blogtruyen,
+            'login'=>$user?true:false,
         ]);
     }
      public function detailBlogTruyen(Request $request, $id){
@@ -296,7 +317,8 @@ class User_Controller extends Controller
 
         return Inertia::render('User/DetailBlogStory', [
             'detailBlog' => $detailBlog,
-            'randomBlogs' => $randomBlogs, // gửi thêm bài viết ngẫu nhiên
+            'randomBlogs' => $randomBlogs,
+            'login'=>$user?true:false,
         ]);
     }
 }

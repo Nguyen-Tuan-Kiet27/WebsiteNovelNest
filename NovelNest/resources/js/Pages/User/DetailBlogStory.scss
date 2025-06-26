@@ -1,6 +1,6 @@
 .blog-detail {
-  padding: 2rem;
-  background: #fefefc;
+  padding: 0;
+  background: #F3F2EC;
 
   .blog-main {
     background: #f1f1f1;
@@ -17,12 +17,13 @@
       display: block;
       aspect-ratio: 16 / 9;
       object-fit: cover;
-      margin-bottom: 50px;
+      margin:20px 0 50px 0;
     }
 
     .blog-content {
       padding: 1.5rem;
-
+      }
+      
       .blog-title {
         font-size: 2rem;
         font-weight: bold;
@@ -35,14 +36,15 @@
         font-size: 1rem;
         line-height: 1.6;
         color: #333;
+       
       }
-    }
+    
   }
 
   .related-blogs {
     margin-top: 3rem;
     padding: 1rem;
-    background: #ddd;
+    background: #F3F2EC;
     border-radius: 10px;
     
     h3 {
@@ -61,7 +63,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         &:hover{
-          color: red;
+          color: #AC7446;
         }
 
 
@@ -80,3 +82,20 @@
     }
   }
 }
+ .back-arrow {
+      position: absolute;
+      width: 100px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      margin: 20px 0 20px 15px;
+      cursor: pointer;
+      &:hover{
+        color: red;
+      }
+    }
+    .blog-text p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+      text-align: justify;
+    }

@@ -1,0 +1,148 @@
+.tai-khoan-page {
+  background: #f4f4f0;
+  padding: 2rem;
+
+  .tai-khoan-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 2rem;
+    border: 1px solid #ccc;
+
+    .logout-btn {
+      text-align: right;
+      margin-bottom: 1rem;
+
+      button {
+        background: none;
+        border: none;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    }
+
+    .profile-section {
+      text-align: center;
+
+      .profile-avatar {
+        margin: 0 auto;
+
+        .avatar-img {
+          width: 100px;
+          height: 100px;
+          border: 2px solid #000;
+          border-radius: 50%;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          >img{
+                width: 100%;
+                aspect-ratio: 1/1;
+            }
+        }
+
+        .edit-avatar {
+          margin-top: 0.5rem;
+          font-size: 0.9rem;
+          cursor: pointer;
+          background: none;
+          border: none;
+          text-decoration: underline;
+        }
+      }
+
+      .profile-info {
+        margin-top: 1rem;
+
+        .user-id,
+        .user-title {
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
+        }
+      }
+
+      .balance-section {
+        margin-top: 1rem;
+
+        p {
+          display: inline-block;
+          margin-right: 1rem;
+        }
+
+        .recharge-btn {
+          background: #c6f7c3;
+          border: 1px solid #aaa;
+          padding: 0.3rem 1rem;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .tab-section {
+      margin-top: 2rem;
+
+      .tabs {
+        display: flex;
+        justify-content: space-around;
+        background: #f0f0f0;
+        padding: 0.5rem;
+
+        .tab {
+          flex: 1;
+          text-align: center;
+          cursor: pointer;
+          font-weight: bold;
+
+          &.active {
+            border-bottom: 3px solid #000;
+          }
+        }
+      }
+
+      .list-items {
+        margin-top: 1rem;
+
+        .item {
+          display: flex;
+          align-items: center;
+          border: 1px solid #ccc;
+          margin-bottom: 0.5rem;
+          padding: 0.5rem;
+
+          .item-image {
+            width: 60px;
+            height: 60px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            
+          }
+
+          .item-info {
+            flex: 1;
+
+            p {
+              margin: 0.2rem 0;
+            }
+          }
+
+          .item-arrow {
+            font-size: 1.2rem;
+            margin-left: 1rem;
+          }
+        }
+
+        .load-more {
+          text-align: center;
+          margin-top: 1rem;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

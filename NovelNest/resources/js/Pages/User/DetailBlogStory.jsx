@@ -3,18 +3,23 @@ import './DetailBlogStory.scss';
 import { router } from '@inertiajs/react';
 import Userlayout from '@/Layouts/UserLayout';
 
-export default function DetailBlogStory({detailBlog,randomBlogs}){
+export default function DetailBlogStory({login,detailBlog,randomBlogs,blogTruyen}){
+    
     return(
-        <Userlayout title={'Detail Blog'}>
+        <Userlayout title='Detail Blog' login={login} page={3}>
+            <button className="back-arrow" onClick={() => window.history.back()}>←</button>
              <div className="blog-detail">
                 <div className="blog-main">
-                    <img className="blog-image" src={detailBlog.hinhAnh} alt />
+                    <img className="blog-image" src={detailBlog.hinhAnh} alt={detailBlog.hinhAnh} />
                     <h3 className='blog-title'>
                         {detailBlog.tieuDe}
                     </h3>
                     <div className="blog-content">
-                        <p>{detailBlog.noiDung}</p>
-                        <div className="blog-text" dangerouslySetInnerHTML={{ __html: detailBlog.content }} />
+                        <div className="blog-text">
+                            {detailBlog.noiDung.split('\n').map((line, index) => (
+                                <p key={index}>{line.trim()}</p>
+                            ))}
+                        </div>
                     </div>
                 </div>
                     <div className="related-blogs">
