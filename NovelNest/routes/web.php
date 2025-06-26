@@ -14,6 +14,8 @@ Route::get('/theloai', [User_Controller::class,'category'])->middleware('CheckLo
 Route::get('/theloai/{id}', [User_Controller::class,'danhSachTruyenTheLoai']);
 Route::get('/truyen/{id}', [User_Controller::class,'stories'])->middleware('CheckLogin');
 Route::get('/chuong/{id}', [User_Controller::class,'detailStory'])->middleware(['CheckLogin','CheckChuong']);
+Route::get('/blogtruyen', [User_Controller::class,'blogTruyen'])->middleware('CheckLogin');
+Route::get('/blogtruyen/{id}', [User_Controller::class,'detailBlogTruyen'])->middleware('CheckLogin');
 Route::get('/muaxu', [User_Controller::class,'muaXu'])->middleware('CheckLogin:3,4');
 Route::get('/vnpay_return', [Payment_Controller::class, 'vnpayReturn'])->middleware('CheckLogin');
 Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middleware('CheckLogin');

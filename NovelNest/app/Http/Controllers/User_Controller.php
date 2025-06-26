@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\BaiViet;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -11,7 +13,9 @@ use App\Models\NguoiDung;
 use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
+use App\Models\DaMua;
 use App\Models\TheLoai;
+use App\Models\YeuThich;
 use Carbon\Carbon;
 use App\Models\LichSuNap;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +28,23 @@ class User_Controller extends Controller
         if(!$user){
             return redirect('/');
         }
-        return Inertia::render('User/TaiKhoan');
+        $daMua = $user->daMuas()->with('chuong.truyen')->get();
+        $subDaMua = [];
+        foreach($daMua as $row){
+            $chuong = $row->chuong;
+            if (!$chuong || !$chuong->truyen) continue;
+                $truyenId = $chuong->truyen->id;
+                $subDaMua[$truyenId]['truyen'] = $chuong->truyen;
+                $subDaMua[$truyenId]['sub'][] = $chuong;
+                $subDaMua[$truyenId]['total'] = $subDaMua[$truyenId]['total']?$row->gia:$subDaMua[$truyenId]['total']+$row->gia;
+        }
+            $user->id=NguoiDung::giaiMa($user->id);
+            return Inertia::render('User/TaiKhoan',[
+                'user'=> $user,
+                'daMua'=>$subDaMua,
+                
+             
+        ]);
     }
 //////////////////////////////////////////////////////////////
     public function LoginFB( Request $request){
@@ -200,6 +220,11 @@ class User_Controller extends Controller
 
     public function stories(Request $request, $id){
         $user=$request->attributes->get('user');
+        if($user)
+            $yeuThich = YeuThich::where('id_NguoiDung',$user->id)
+                            ->where('id_Truyen',$id)->first();
+        else
+            $yeuThich=false;
         $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
         $soLuong = $truyen->Chuongs()->count();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
@@ -209,6 +234,7 @@ class User_Controller extends Controller
             ->take(14)
             ->get();
         return Inertia::render('User/Stories',[
+            'favorite'=>$yeuThich?true:false,
             'truyen'=>$truyen,
             'chuongs'=>$chuongs,
             'login'=>$user?true:false,
@@ -220,6 +246,9 @@ class User_Controller extends Controller
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
+        // if(!$chuong){
+        //     return;
+        // }
         if(!$request->attributes->get('bought')){
             return redirect('/truyen/'. $chuong->id_Truyen);
         }
@@ -242,11 +271,62 @@ class User_Controller extends Controller
             ]
         ]);
     }
+    public function changeYeuThich(Request $request, $id){
+        $user=$request->attributes->get('user');
+        $yeuThich=YeuThich::where('id_NguoiDung',$user->id)
+            ->where('id_Truyen',$id)
+            ->first();
+        if($yeuThich){
+            try{
+                YeuThich::where('id_NguoiDung', $user->id)
+                    ->where('id_Truyen', $id)
+                    ->delete();
+                return response()->json(['message'=>'Bỏ yêu thích thành công','flag'=>false],200);
+            }catch(Exception $e){
+                return response()->json(['message'=>$e->getMessage()],500);
+            }
+            
+        }
+        Log::info('6');
+        $yeuThich = new YeuThich();
+        $yeuThich->id_NguoiDung = $user->id;
+        $yeuThich->id_Truyen = $id;
+        $yeuThich->save();
+        Log::info('7');
+        return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>true],200);
+    }
     public function checkDaMua(Request $request){
         $daMua = $request->attributes->get('bought');
         return response()->json(['daMua'=>$daMua] ,200);
     }
 
+    public function blogTruyen(Request $request){
+        $user=$request->attributes->get('user');
+        $blogtruyen=BaiViet::all();
+         return Inertia::render('User/BlogStories',[
+            'blogTruyen'=>$blogtruyen,
+            'login'=>$user?true:false,
+        ]);
+    }
+     public function detailBlogTruyen(Request $request, $id){
+        $user=$request->attributes->get('user');
+        $detailBlog=BaiViet::find($id);
+        
+         // Lấy 20 bài viết mới nhất, loại trừ bài hiện tại
+        $recentBlogs = BaiViet::where('id', '!=', $id)
+            ->orderBy('ngayTao', 'desc') 
+            ->take(20)
+            ->get();
+
+        // Random chọn 5 bài trong số 20 bài mới nhất
+        $randomBlogs = $recentBlogs->random(min(5, $recentBlogs->count()));
+
+        return Inertia::render('User/DetailBlogStory', [
+            'detailBlog' => $detailBlog,
+            'randomBlogs' => $randomBlogs,
+            'login'=>$user?true:false,
+        ]);
+    }
     public function apiCheckRole(Request $request){
         $user = $request->attributes->get('user');
         if(!$user)
@@ -344,106 +424,6 @@ class User_Controller extends Controller
         return response()->json([
             'message' => 'Xác nhận thành công.'
         ],200);
-    }
-
-    public function createPayment(Request $request){
-        $user = $request->attributes->get('user');
-        $vnp_TxnRef = time(); 
-
-        $vnp_TmnCode    = 'KA0W8FKD';
-        $vnp_HashSecret = 'L7T0QVNBJTZ13ZEG2FLVIIJHJEXV1ARG';
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "http://localhost:8000/vnpay_return?uid=".$user->id;
-
-
-        $vnp_OrderInfo = 'Nạp '.$request->xu.'Xu vào ví NovelNest cho người dùng có id: '.$user->id;
-        $vnp_OrderType = 'billpayment';
-        $vnp_Amount = $request->amount;
-        $vnp_Locale = 'vn';
-        $vnp_IpAddr = $request->ip();
-        $vnp_BankCode = 'NCB';
-
-        $inputData = array(
-            "vnp_Version" => "2.1.0",
-            "vnp_TmnCode" => $vnp_TmnCode,
-            "vnp_Amount" => $vnp_Amount* 100,
-            "vnp_Command" => $vnp_OrderType,
-            "vnp_CreateDate" => date('YmdHis'),
-            "vnp_CurrCode" => "VND",
-            "vnp_IpAddr" => $vnp_IpAddr,
-            "vnp_Locale" => $vnp_Locale,
-            "vnp_OrderInfo" => $vnp_OrderInfo,
-            "vnp_OrderType" => "other",
-            "vnp_ReturnUrl" => $vnp_Returnurl,
-            "vnp_TxnRef" => $vnp_TxnRef
-        );
-
-        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
-            $inputData['vnp_BankCode'] = $vnp_BankCode;
-        }
-
-        ksort($inputData);
-        $query = "";
-        $i = 0;
-        $hashdata = "";
-        foreach ($inputData as $key => $value) {
-            if ($i == 1) {
-                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-            } else {
-                $hashdata .= urlencode($key) . "=" . urlencode($value);
-                $i = 1;
-            }
-            $query .= urlencode($key) . "=" . urlencode($value) . '&';
-        }
-
-        $vnp_Url = $vnp_Url . "?" . $query;
-        if (isset($vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
-            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
-        }
-
-        $redirectUrl = $vnp_Url;
-        return response()->json(['redirect_url' => $redirectUrl]);
-    }
-
-
-    public function vnpayReturn(Request $request)
-    {
-        
-        $inputData = $request->all();
-        $user = NguoiDung::find($inputData['uid']);
-        unset($inputData['uid']);
-        $vnp_HashSecret = 'L7T0QVNBJTZ13ZEG2FLVIIJHJEXV1ARG';
-
-        $vnp_SecureHash = $inputData['vnp_SecureHash'] ?? '';
-        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
-
-        ksort($inputData);
-        $query = http_build_query($inputData);
-        $secureHash = hash_hmac('sha512', $query, $vnp_HashSecret);
-
-        if ($secureHash === $vnp_SecureHash) {
-            if ($inputData['vnp_ResponseCode'] == '00') {
-                $amount = $inputData['vnp_Amount'] / 100;
-                $price = ['10000'=>10,'20000'=>20, '50000'=>50, '98000'=>100, '192000'=>200, '480000'=>50];
-                $user = NguoiDung::find($user->id);
-                $user->soDu += $price[$amount];
-                $user->save();
-
-                $hn = new LichSuNap();
-                $hn->soLuongXu = $price[$amount];
-                $hn->menhGia = $amount;
-                $hn->thoiGian = now();
-                $hn->id_NguoiDung = $user->id;
-                $hn->save();
-
-                return redirect('/muaxu')->with(['pay' => 1,'user'=> $user]);
-            } else {
-                return redirect('/muaxu')->with(['pay' => 2,'user'=> $user]);
-            }
-        } else {
-            return redirect('/muaxu')->with(['pay' => 3,'user'=> $user]);
-        }
     }
 
 }

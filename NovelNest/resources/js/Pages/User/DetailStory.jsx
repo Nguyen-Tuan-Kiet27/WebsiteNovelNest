@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import Userlayout from '@/Layouts/UserLayout';
 import useDetectDevTools from '@/hooks/useDetectDevTools';
 import usePageVisibility from '@/hooks/usePageVisibility';
-import { renderToStaticMarkup } from 'react-dom/server';
 
 export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau}) {
   const [premium,setPremium] = useState(false);
@@ -35,6 +34,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   usePageVisibility(
     ()=>{
       setHiden(true);
+      console.log(devTool)
       if(!devTool){
         if(reScrool){
           setScrollY(window.scrollY || window.pageYOffset);
@@ -100,6 +100,17 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   const handleChuongSau=()=>{
     router.visit(`/chuong/${idChuongSau}`);
   }
+  const [showModal, setShowModal] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState(null);
+
+  const handleClickChapter = (chapter) => {
+      if (chapter?.gia > 0 && !chapter?.daMua) {
+        setSelectedChapter(chapter);
+        setShowModal(true);
+      } else {
+        router.visit(`/chuong/${chapter.id}`);
+      }
+  };
 
   const [selectedVoice, setSelectedVoice] = useState(null); // 0, 1, 2, 3
   const [audioSrc, setAudioSrc] = useState(null);
@@ -161,11 +172,11 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
               </audio>
             </div>
             <div className="doc-nav">
-              <button onClick={handleChuongTruoc} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
+              <button onClick={handleChuongTruoc} style={{opacity:chuong.soChuong==1?'0.5':'1'}} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
               <button>
                 Tóm tắt chương trước 
               </button>
-              <button onClick={handleChuongSau} disabled={chuongCuoi} >Chương tiếp</button>
+              <button onClick={handleChuongSau} style={{opacity:chuongCuoi?'0.5':'1'}} disabled={chuongCuoi} >Chương tiếp</button>
             </div>
             <div className='hidenDoc'>
                 {(!devTool && !hiden) &&
@@ -183,11 +194,11 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
                 <div className="doc-content" dangerouslySetInnerHTML={{ __html: content }}/>
               </div>
             <div className="doc-nav">
-              <button onClick={handleChuongTruoc} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
+              <button onClick={handleChuongTruoc} style={{opacity:chuong.soChuong==1?'0.5':'1'}} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
               <button>
                 <FontAwesomeIcon icon={faList} />
               </button>
-              <button onClick={handleChuongSau} disabled={chuongCuoi}>Chương tiếp</button>
+              <button onClick={handleChuongSau} style={{opacity:chuongCuoi?'0.5':'1'}} disabled={chuongCuoi}>Chương tiếp</button>
             </div>
           </div>
           <div className="doc-report">
@@ -200,6 +211,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
           </div>
         </div>
       </div>
+
     </Userlayout>
    
   );
