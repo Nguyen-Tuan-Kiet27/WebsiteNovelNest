@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\BaiViet;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -11,9 +13,12 @@ use App\Models\NguoiDung;
 use App\Services\JwtService;
 use App\Models\Truyen;
 use App\Models\Chuong;
+use App\Models\DaMua;
 use App\Models\TheLoai;
+use App\Models\YeuThich;
 use Carbon\Carbon;
 use App\Models\LichSuNap;
+use App\Models\ThongTin;
 use Illuminate\Support\Facades\Log;
 
 class User_Controller extends Controller
@@ -24,7 +29,23 @@ class User_Controller extends Controller
         if(!$user){
             return redirect('/');
         }
-        return Inertia::render('User/TaiKhoan');
+        $daMua = $user->daMuas()->with('chuong.truyen')->get();
+        $subDaMua = [];
+        foreach($daMua as $row){
+            $chuong = $row->chuong;
+            if (!$chuong || !$chuong->truyen) continue;
+                $truyenId = $chuong->truyen->id;
+                $subDaMua[$truyenId]['truyen'] = $chuong->truyen;
+                $subDaMua[$truyenId]['sub'][] = $chuong;
+                $subDaMua[$truyenId]['total'] = $subDaMua[$truyenId]['total']?$row->gia:$subDaMua[$truyenId]['total']+$row->gia;
+        }
+            $user->id=NguoiDung::giaiMa($user->id);
+            return Inertia::render('User/TaiKhoan',[
+                'user'=> $user,
+                'daMua'=>$subDaMua,
+                
+             
+        ]);
     }
 //////////////////////////////////////////////////////////////
     public function LoginFB( Request $request){
@@ -158,7 +179,7 @@ class User_Controller extends Controller
             ->take(14)
             ->get();
         return Inertia::render('User/Home',[
-            'login'=> $user?true:false,
+            'login'=> $user,
             'theLoais'=> $theLoais,
             'truyenHots' => $truyenHots,
             'truyenMois' => $truyenMois,
@@ -176,11 +197,12 @@ class User_Controller extends Controller
         ->get();
         return Inertia::render('User/TheLoai',[
             'theLoais' => $theLoais,
-            'login'=> $user?true:false,
+            'login'=> $user,
         ]);
     }
 
     public function danhSachTruyenTheLoai(Request $request, $id){
+        $user = $request->attributes->get('user');
         $theLoai = TheLoai::find($id);
         $truyens = $theLoai->Truyens()
             ->where('trangThai', 1)
@@ -195,11 +217,17 @@ class User_Controller extends Controller
         return Inertia::render('User/DetailCategory',[
             'truyens'=>$truyens,
             'theLoai'=>$theLoai,
+            'user'=> $user
         ]);
     }
 
     public function stories(Request $request, $id){
         $user=$request->attributes->get('user');
+        if($user)
+            $yeuThich = YeuThich::where('id_NguoiDung',$user->id)
+                            ->where('id_Truyen',$id)->first();
+        else
+            $yeuThich=false;
         $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
         $soLuong = $truyen->Chuongs()->count();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
@@ -209,9 +237,10 @@ class User_Controller extends Controller
             ->take(14)
             ->get();
         return Inertia::render('User/Stories',[
+            'favorite'=>$yeuThich?true:false,
             'truyen'=>$truyen,
             'chuongs'=>$chuongs,
-            'login'=>$user?true:false,
+            'login'=>$user,
             'soLuong'=>$soLuong,
             'truyenDaHoanThanhs'=>$truyenDaHoanThanhs,
         ]);
@@ -220,6 +249,9 @@ class User_Controller extends Controller
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
+        // if(!$chuong){
+        //     return;
+        // }
         if(!$request->attributes->get('bought')){
             return redirect('/truyen/'. $chuong->id_Truyen);
         }
@@ -228,25 +260,78 @@ class User_Controller extends Controller
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
         $chuongSau=$truyen->Chuongs()->where('soChuong',$chuong->soChuong + 1)->first();
+        if($user)
+            $user->premium = $user->vaiTro < 3?true:($user->premium > now() ? true : false);
         return Inertia::render('User/DetailStory',[
             'chuong'=>$chuong,
             'truyen'=>$chuong->Truyen,
             'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
             'idChuongTruoc'=>$chuongTruoc?->id??null,
             'idChuongSau'=>$chuongSau?->id??null,
-            'user'=> !$user
-            ?false
-            :[
-                'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
-                'id'=>$user->id
-            ]
+            'user'=> $user
+            // ?false
+            // :[
+            //     'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
+            //     'id'=>$user->id
+            // ]
         ]);
+    }
+    public function changeYeuThich(Request $request, $id){
+        $user=$request->attributes->get('user');
+        $yeuThich=YeuThich::where('id_NguoiDung',$user->id)
+            ->where('id_Truyen',$id)
+            ->first();
+        if($yeuThich){
+            try{
+                YeuThich::where('id_NguoiDung', $user->id)
+                    ->where('id_Truyen', $id)
+                    ->delete();
+                return response()->json(['message'=>'Bỏ yêu thích thành công','flag'=>false],200);
+            }catch(Exception $e){
+                return response()->json(['message'=>$e->getMessage()],500);
+            }
+            
+        }
+        Log::info('6');
+        $yeuThich = new YeuThich();
+        $yeuThich->id_NguoiDung = $user->id;
+        $yeuThich->id_Truyen = $id;
+        $yeuThich->save();
+        Log::info('7');
+        return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>true],200);
     }
     public function checkDaMua(Request $request){
         $daMua = $request->attributes->get('bought');
         return response()->json(['daMua'=>$daMua] ,200);
     }
 
+    public function blogTruyen(Request $request){
+        $user=$request->attributes->get('user');
+        $blogtruyen=BaiViet::all();
+         return Inertia::render('User/BlogStories',[
+            'blogTruyen'=>$blogtruyen,
+            'login'=>$user,
+        ]);
+    }
+     public function detailBlogTruyen(Request $request, $id){
+        $user=$request->attributes->get('user');
+        $detailBlog=BaiViet::find($id);
+        
+         // Lấy 20 bài viết mới nhất, loại trừ bài hiện tại
+        $recentBlogs = BaiViet::where('id', '!=', $id)
+            ->orderBy('ngayTao', 'desc') 
+            ->take(20)
+            ->get();
+
+        // Random chọn 5 bài trong số 20 bài mới nhất
+        $randomBlogs = $recentBlogs->random(min(5, $recentBlogs->count()));
+
+        return Inertia::render('User/DetailBlogStory', [
+            'detailBlog' => $detailBlog,
+            'randomBlogs' => $randomBlogs,
+            'login'=>$user,
+        ]);
+    }
     public function apiCheckRole(Request $request){
         $user = $request->attributes->get('user');
         if(!$user)
@@ -319,7 +404,6 @@ class User_Controller extends Controller
         $user = $request->attributes->get('user');
         $email = $request->email;
         $inputOtp = $request->otp;
-        $pass = $request->pass;
         $cachedOtp = Cache::get("otp_" . $user->id);
 
         if (!$cachedOtp) {
@@ -336,7 +420,12 @@ class User_Controller extends Controller
 
         // Xác minh thành công
         Cache::forget("otp_" . $user->id); // Xoá mã sau khi dùng
-
+        $pass = $request->pass;
+        if(!$pass){
+            return response()->json([
+                'message' => 'Xác nhận thành công.'
+            ],200);
+        }
         $user->email = NguoiDung::maHoa($email);
         $user->matKhau = NguoiDung::maHoa($pass);
         $user->save();
@@ -346,6 +435,44 @@ class User_Controller extends Controller
         ],200);
     }
 
-    
+    public function apiCheckEP(Request $request){
+        $user = $request->attributes->get('user');
+        if (!$user) {
+            return response()->json(['message'=>'Chưa đăng nhập'],401);
+        }
+        if(!$user->email || !$user->matKhau){
+            if($user->vaiTro>2)
+                return response()->json(['value'=>false],200);
+        }
+        return response()->json(['value'=>true],200);
+    }
 
+    public function signupAuthor(Request $request){
+        $user = $request->attributes->get('user');
+        if (!$user || !$user->email) {
+            return redirect('/');
+        }
+        if($user->vaiTro < 4){
+            return redirect('/author');
+        }
+        $user->email = NguoiDung::giaiMa($user->email);
+        $dieuKhoan = ThongTin::where('khoa','DKTG')->where('trangThai',1)->first();
+        return Inertia::render('User/SignupAuthor', [
+            'user'=> $user,
+            'dieuKhoan' => $dieuKhoan->giaTri
+        ]);
+    }
+    public function apiSignupAuthor(Request $request){
+        $user = $request->attributes->get('user');
+        if (!$user) {
+            return redirect('/');
+        }
+        try {
+            $user->vaiTro = 3;
+            $user->save();
+            return response()->json(['message'=>'Đăng ký trở thành tác giả thành công!'],200);
+        } catch (\Exception $e) {
+            return response()->json(['message'=> $e->getMessage()],500);
+        }
+    }
 }
