@@ -4,12 +4,14 @@ import { Head, usePage } from '@inertiajs/react';
 import UserLogin from '@/Components/UserLogin';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import EmailAndPassword from '../Components/EmailAndPassword';
 
 export default function Userlayout({children,title,login,page}){
     /////test
     /////////
     const {flash} = usePage().props;
     const [userLoginIsVisible, setUserLoginIsVisible] = useState(false);
+    const [modalEP,setModalEP] = useState(false);
     useEffect(() => {
         if (window.location.hash === '#_=_') {
             window.history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -24,12 +26,22 @@ export default function Userlayout({children,title,login,page}){
     const handleClickDangTruyen = async ()=>{
         if(login || flash.loginf){
             try {
+                const response = await axios.get('/api/checkep');
+                if(!response.data.value){
+                    setModalEP(true);
+                    return;
+                }
+            } catch (error) {
+                setUserLoginIsVisible(true);
+                return;
+            }
+            try {
                 const response = await axios.get('/api/checkrole');
                 const role = response.data.role;
                 if(role<3){
                     router.visit('/author');
                 }else{
-                    //đến trang đăng ký author
+                    router.visit('/signupauthor')
                 }
             } catch (error) {
                 alert('Đã có lỗi xảy ra, bạn chưa đăng nhập');
@@ -42,6 +54,7 @@ export default function Userlayout({children,title,login,page}){
     return(
         <>
             <UserLogin userLoginIsVisible={userLoginIsVisible} setUserLoginIsVisible={setUserLoginIsVisible} ></UserLogin>
+            <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
             <Head title={`NovelNest - ${title}`} />
             <header>
                 <div className="header">
@@ -70,7 +83,10 @@ export default function Userlayout({children,title,login,page}){
                                 <img src="/img/blog.svg" alt="" />
                                 Blog Truyện
                             </button>
-                            <button className='buttonHeader' onClick={handleClickDangTruyen}>
+                            <button className='buttonHeader' 
+                                onClick={handleClickDangTruyen}
+                                style={page==5?{backgroundColor:'#E9CF73'}:{}}
+                            >
                                 <img src="/img/dangtruyen.svg" alt="" />
                                 Đăng Truyện
                             </button>

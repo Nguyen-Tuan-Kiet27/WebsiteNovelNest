@@ -159,7 +159,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
               >
                 <label>{loading ? 'Đang lấy âm thanh...': (type || 'Chọn giọng đọc')} </label>
                 <FontAwesomeIcon className="icon" style={{transform:showVoice?'rotate(0deg)':'rotate(-90deg)'}} icon={faCaretDown} />
-                <div style={{display:showVoice?'block':'none'}}>
+                <div style={{display:showVoice?'block':'none',zIndex:'1002'}}>
                   <label onClick={()=>handleSelect(5,'Giọng nữ miền bắc')}>Giọng nữ miền bắc</label>
                   <label onClick={()=>handleSelect(4,'Giọng nam miền bắc')}>Giọng nam miền bắc</label>
                   <label onClick={()=>handleSelect(6,'Giọng nữ miền nam')}>Giọng nữ miền nam</label>

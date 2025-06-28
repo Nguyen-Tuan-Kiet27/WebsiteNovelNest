@@ -113,7 +113,7 @@ return(
                                         }
                                         }}
                                     >
-                                    {chapter.ten}
+                                    {chapter.ten + ` (${chapter.ngayTao})`}
                                 </a>
                             </li>
                     ))}
@@ -134,7 +134,7 @@ return(
                                     }
                                     }}
                             >
-                                {chapter.ten}
+                                {chapter.ten + ` (${chapter.ngayTao})`}
                             </a>
                         </li>
                     ))}
