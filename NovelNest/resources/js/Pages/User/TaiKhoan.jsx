@@ -2,6 +2,7 @@ import Userlayout from '@/Layouts/UserLayout';
 import { Inertia } from '@inertiajs/inertia';
 import { useState, useEffect } from 'react';
 import './TaiKhoan.scss';
+import { router } from '@inertiajs/react';
 
 export default function TaiKhoan({user,daMua}){
     const [expandedId, setExpandedId] = useState(null);
@@ -28,7 +29,7 @@ export default function TaiKhoan({user,daMua}){
           </div>
           <div className="balance-section">
             <p>Số lượng xu: {user.soDu}</p>
-            <button className="recharge-btn">Nạp xu</button>
+            <button className="recharge-btn" onClick={()=>router.visit('/muaxu')}>Nạp xu</button>
           </div>
         </div>
 

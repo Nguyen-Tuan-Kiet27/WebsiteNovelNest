@@ -5,7 +5,7 @@ import './DetailCategory.scss';
 import Userlayout from '@/Layouts/UserLayout';
 
 
-export default function DetailCategory({truyens,theLoai}) {
+export default function DetailCategory({user,truyens,theLoai}) {
 console.log(truyens)
 
     const [status, setStatus] = useState('all');
@@ -46,7 +46,7 @@ console.log(truyens)
     { label: 'Đánh giá cao', value: 'top-rated' }
   ];
   return (
-    <Userlayout title="Home">
+    <Userlayout title="Đọc truyện" login={user} page={2}>
       <div className="detail-category-page">
         <div className="detail-header">
           <button className="back-arrow" onClick={() => router.visit('/theloai')}>

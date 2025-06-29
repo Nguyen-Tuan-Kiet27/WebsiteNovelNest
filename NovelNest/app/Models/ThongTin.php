@@ -8,6 +8,6 @@ class ThongTin extends Model
 {
     protected $table = "thongtin";
     protected $primaryKey = "id";
-    protected $fillable = ["khoa","giaTri","loai"];
+    protected $fillable = ["khoa","giaTri","loai","ngayTao","trangThai"];
     public $timestamps = false;
 }

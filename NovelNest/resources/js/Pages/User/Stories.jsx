@@ -116,7 +116,7 @@ return(
                                         }}
                                       title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
                                     >
-                                    {chapter.ten}
+                                    {chapter.ten + ` (${chapter.ngayTao})`}
                                 </a>
                             </li>
                     ))}
@@ -138,7 +138,7 @@ return(
                                     }}
                                     title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
                             >
-                                {chapter.ten}
+                                {chapter.ten + ` (${chapter.ngayTao})`}
                             </a>
                         </li>
                     ))}

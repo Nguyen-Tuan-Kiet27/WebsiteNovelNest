@@ -6,6 +6,7 @@ body{
 *{
    
 }
+
 .header{
     border: 1.5px solid #C5A992 ;
     border-radius: 40px;
@@ -16,7 +17,7 @@ body{
     top: 0;
     left: 15px;
     right: 15px;
-    z-index: 999;
+    z-index: 1004;
     background-color: #F3F2EC;
     height: 80px;
     margin: 0;
@@ -124,4 +125,7 @@ footer{
     }
 }
  
+}
+main{
+    min-height: 80vh;
 }
