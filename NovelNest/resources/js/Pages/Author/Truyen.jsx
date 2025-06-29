@@ -45,12 +45,14 @@ export default function Truyen({user, truyens}){
                             <tr key={truyen.id} onClick={()=>{router.visit(`/author/truyen/${truyen.id}`)}} className="rowTruyen">
                                 <td>{truyen.ten}</td>
                                 <td>{truyen.the_loai.ten}</td>
-                                <td>
-                                {truyen.trangThai == 1 ? 'Hoạt động' : 'Khóa'}
+                                <td style={truyen.trangThai==0?{backgroundColor:red}:{}}>
+                                {truyen.trangThai == 1 ? 'Hoạt động' : (truyen.trangThai == 2?'Đã khóa':'Bị cấm')}
                                 </td>
                                 <td>{truyen.luotXem ?? 0}</td>
                                 <td>
-                                    <button>Sửa</button>
+                                    <button
+                                        onClick={(e)=>{e.stopPropagation(); router.visit(`/author/suatruyen/${truyen.id}`);}}
+                                    >Sửa</button>
                                 </td>
                             </tr>
                             ))}

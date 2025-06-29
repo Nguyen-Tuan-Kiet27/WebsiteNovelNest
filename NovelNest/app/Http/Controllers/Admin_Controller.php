@@ -55,7 +55,7 @@ class Admin_Controller extends Controller
         if(!$user){
             return redirect('admin/dangnhap');
         }
-        return Inertia::render('Admin/DashBoard');
+        return Inertia::render('Admin/DashBoard',['user'=> $user]);
     }
 
     public function quanlytruyen(Request $request){

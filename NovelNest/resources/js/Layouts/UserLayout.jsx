@@ -14,6 +14,8 @@ export default function Userlayout({children,title,login,page}){
     const {flash} = usePage().props;
     const [userLoginIsVisible, setUserLoginIsVisible] = useState(false);
     const [modalEP,setModalEP] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [show, setShow] = useState(false);
     useEffect(() => {
         if (window.location.hash === '#_=_') {
             window.history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -54,6 +56,9 @@ export default function Userlayout({children,title,login,page}){
             setUserLoginIsVisible(true);
         }
     }
+    const handleMouseMove = (e) => {
+        setPosition({ x: e.pageX, y: e.pageY });
+    };
     return(
         <>
             <UserLogin userLoginIsVisible={userLoginIsVisible} setUserLoginIsVisible={setUserLoginIsVisible} ></UserLogin>
@@ -96,9 +101,24 @@ export default function Userlayout({children,title,login,page}){
                             <button className='buttonHeader'
                                 onClick={handleClickLogin}
                                 style={page==4?{backgroundColor:'#E9CF73'}:{}}
+                                onMouseEnter={() => setShow(true)}
+                                onMouseLeave={() => setShow(false)}
+                                onMouseMove={handleMouseMove}
                             >
                                 <img src="/img/dangnhap.svg" alt="" />
                                 {login||flash.loginf?"Tài Khoản":"Đăng Nhập"}
+                                {(show&&login) && (
+                                    <div
+                                        className="custom-tooltip"
+                                        style={{
+                                            position: 'absolute',
+                                            top: position.y + 20,
+                                            left: position.x + 10,
+                                        }}
+                                    >
+                                        {login.ten}
+                                    </div>
+                                )}
                             </button>
                             
                             <div className='searchHeader'>

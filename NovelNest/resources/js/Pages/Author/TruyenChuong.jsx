@@ -23,7 +23,8 @@ export default function TruyenChuong({user, truyen, chuongs}){
                         <div>
                             <button
                                 onClick={()=>router.visit(`/author/themchuong/${truyen.id}`)}
-                            >+ Chương mới</button>
+                                disable={truyen.ngayketThuc?true:false}
+                            >{truyen.ngayketThuc?'Đã kết thúc':'+ Chương mới'}</button>
                         </div>
                     </div>
                 </div>
@@ -41,7 +42,7 @@ export default function TruyenChuong({user, truyen, chuongs}){
                         </thead>
                         <tbody>
                             {chuongs.map((chuong) => (
-                            <tr key={chuong.id} onClick={()=>{router.visit(`/author/truyen/${chuong.id}`)}} className="rowChuong">
+                            <tr key={chuong.id} onClick={()=>{window.open(`/chuong/${chuong.id}`,'__blank')}} className="rowChuong">
                                 <td>{chuong.soChuong}</td>
                                 <td>{chuong.ten}</td>
                                 <td>{chuong.gia}</td>
@@ -50,7 +51,10 @@ export default function TruyenChuong({user, truyen, chuongs}){
                                 </td>
                                 <td>{chuong.luotXem}</td>
                                 <td>
-                                    <button>Sửa</button>
+                                    <button onClick={
+                                        (e)=>{e.stopPropagation();
+                                        router.visit(`/author/suachuong/${chuong.id}`)
+                                    }}>Sửa</button>
                                 </td>
                             </tr>
                             ))}

@@ -20,7 +20,7 @@ Route::get('/muaxu', [User_Controller::class,'muaXu'])->middleware('CheckLogin:3
 Route::get('/vnpay_return', [Payment_Controller::class, 'vnpayReturn'])->middleware('CheckLogin');
 Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middleware('CheckLogin');
 Route::get('/signupauthor', [User_Controller::class,'signupAuthor'])->middleware('CheckLogin');
-Route::get('/dieukhoandichvu',[User_Controller::class,'dieuKhoanDichVu']);
+Route::get('/dieukhoandichvu',[User_Controller::class,'dieuKhoanDichVu'])->middleware('CheckLogin');
 
 
 
@@ -36,7 +36,8 @@ Route::get('/author/truyen', [Author_Controller::class,'truyen'])->middleware('C
 Route::get('/author/themtruyen', [Author_Controller::class,'themTruyen'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/truyen/{id}', [Author_Controller::class,'truyenChuong'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/themchuong/{id}', [Author_Controller::class,'themChuong'])->middleware('CheckLogin:1,2,3');
-
+Route::get('/author/suatruyen/{id}', [Author_Controller::class,'suaTruyen'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/suachuong/{id}', [Author_Controller::class,'suaChuong'])->middleware('CheckLogin:1,2,3');
 
 
 //Admin

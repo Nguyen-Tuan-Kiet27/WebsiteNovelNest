@@ -1,30 +1,37 @@
 import { Head, usePage, router} from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
+import './Login.scss';
 export default function Login(){
+    const [error, setError] = useState('');
     const handleSubmit = (e)=>{
         e.preventDefault();
         const formData = new FormData(e.target)
+        if(!formData.get('tenDangNhap') || !formData.get('matKhau')){
+            setError('Không được để trống tài khoản hoặc mật khẩu!')
+            return;
+        }
         axios.post('/api/admin/login', formData)
         .then(res => {
             router.visit('/admin');
         })
         .catch(error => {
-            console.log(error.response?.data);
+            setError('Tài khoản hoặc mật khẩu không chính xác!')
         });
     }
-    
+
     return(
-        <div className='admin_Login'>
+        <div className='adminLogin'>
             <div>
-                <h4>TRANG QUẢN TRỊ NOVELNEST</h4>
+                <h1>TRANG QUẢN TRỊ NOVELNEST</h1>
                 <form onSubmit={handleSubmit}>
                     <div>
                         <label>Tên đăng nhập:</label>
                         <input
                             type="text"
                             name='tenDangNhap'
+                            onChange={()=>setError('')}
                         />
                     </div>
                     <div>
@@ -32,9 +39,15 @@ export default function Login(){
                         <input 
                             type="password"
                             name='matKhau'
+                            onChange={()=>setError('')}
                         />
                     </div>
-                    <p style={{color:"blue"}}>Nếu bạn quyên mật khẩu, cần liên hệ với Super Admin hoặc kỹ thuật viên!</p>
+                    <div>
+                        <lable style={{width:'80%', color:'red'}}>{error}</lable>
+                    </div>
+                    <div>
+                        <p style={{color:"blue"}}>Nếu bạn quyên mật khẩu, cần liên hệ với Super Admin hoặc kỹ thuật viên!</p>
+                    </div>
                     <button type='submit'>Đăng nhập</button>
                 </form>
             </div>

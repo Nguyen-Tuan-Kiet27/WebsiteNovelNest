@@ -1,0 +1,91 @@
+.ThemChuong{
+    padding: 0 20px;
+    background-color: white;
+    >.head{
+        padding-top: 10px;
+    }
+    >.body{
+        background-color: #d5d5d5;
+        width: 100%;
+        padding: 20px 20px;
+        border-radius: 20px;
+        >div:first-of-type{
+            display: flex;
+            width: 100%;
+            >.tenChuong{
+                width: 70%;
+                >div{
+                    width: 100%;
+                    >label{
+                        margin-right: 20px;
+                    }
+                    >input{
+                        width: 60%;
+                    }
+                }
+            }
+            >.gia{
+                width: 30%;
+                display: flex;
+                flex-direction: column;
+                align-items: end;
+                >div:first-of-type{
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    >label{
+                        background-color: white;
+                        border: 1px solid;
+                        margin-left: 10px;
+                        padding: 0 15px;
+                    }
+                }
+                >div:nth-of-type(2){
+                    display: flex;
+                    align-items: center;
+                    justify-content: end;
+                    >input{
+                        width: 70%;
+                    }
+                    >label{
+                        margin-left: 10px;
+                    }
+                }
+            }
+        }
+        >.buttonSM{
+            width: 100%;
+            display: flex;
+            justify-content: end;
+            margin-top: 20px;
+            >button:first-of-type{
+                margin-right: 20px;
+            }
+            >button{
+                width: 10%;
+                aspect-ratio: 4/1;
+            }
+        }
+        >.tomTat{
+            display: flex;
+            flex-direction: column;
+            >div{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            >textarea{
+                min-height: 100px;
+            }
+        }
+        >.end{
+            display: flex;
+            justify-content: center;
+        }
+    }
+}
+.error{
+    color: red;
+    font-size: 16px;
+}

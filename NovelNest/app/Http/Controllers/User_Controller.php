@@ -475,4 +475,13 @@ class User_Controller extends Controller
             return response()->json(['message'=> $e->getMessage()],500);
         }
     }
+
+    public function dieuKhoanDichVu(Request $request){
+        $user = $request->attributes->get('user');
+        $dkdv = ThongTin::where('khoa','dieuKhoanDichVu')->where('trangThai',1)->first();
+        return Inertia::render('User/DieuKhoanDichVu', [
+            'user'=> $user,
+            'dieuKhoanDichVu'=> $dkdv->giaTri
+        ]);
+    }
 }

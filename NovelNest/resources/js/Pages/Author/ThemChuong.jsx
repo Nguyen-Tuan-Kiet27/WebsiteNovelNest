@@ -64,7 +64,6 @@ export default function Truyen({user, truyen}){
             top: 0,
             behavior: 'smooth'   // cuộn mượt; bỏ dòng này nếu muốn cuộn ngay lập tức
         });
-        console.log(end);
         let b = false;
         if(!ten){
             setErrorTen('Chưa nhập tên chương!');
@@ -161,7 +160,8 @@ export default function Truyen({user, truyen}){
                         <textarea 
                             ref={textareaRef}
                             value={tomTat} 
-                            onChange={(e)=>{setTomTat(e.target.value);setErrorTomTat('')}}  
+                            onChange={(e)=>{setTomTat(e.target.value);setErrorTomTat('')}}
+                            spellCheck={false}
                         ></textarea>
                         <label className="error" style={{marginTop:'10px'}}>{errorTomTat}</label>
                     </div>
