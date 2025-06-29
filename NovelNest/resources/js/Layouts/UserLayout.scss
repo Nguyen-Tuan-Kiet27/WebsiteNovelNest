@@ -9,11 +9,17 @@ body{
 .header{
     border: 1.5px solid #C5A992 ;
     border-radius: 40px;
-    margin: 16px 25px 16px 25px;
-    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: fixed;
+    top: 0;
+    left: 15px;
+    right: 15px;
+    z-index: 999;
+    background-color: #F3F2EC;
+    height: 80px;
+    margin: 0;
     >div{
         >button{
         font-size: 13px;
@@ -56,7 +62,7 @@ body{
     align-items: center;
     >img{
         width: 25%;
-        margin: 5px;
+        margin-top: 5px;
     }
     
 }

@@ -8,8 +8,10 @@ img:hover{
 .container{
     display: flex;
     align-items: flex-start;
+    margin-top: 100px;
    >div:first-of-type{
     width: 60%;
+    
    }
    >div:nth-of-type(2){
     width: 40%;
@@ -217,3 +219,15 @@ img:hover{
   max-height: 80vh;
   overflow-y: auto;
 }
+.back-arrow {
+      position: absolute;
+      width: 100px;
+      left: 0;
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      &:hover{
+        color: red;
+      }
+    }

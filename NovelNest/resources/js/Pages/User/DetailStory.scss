@@ -1,6 +1,7 @@
 .doc-truyen {
   background: #faf9f6;
   padding: 20px;
+  margin-top: 100px;
 
   .doc-header {
     display: flex;
@@ -145,3 +146,15 @@
     }
   }
 }
+.back-arrow {
+      position: absolute;
+      width: 100px;
+      left: 0;
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      &:hover{
+        color: red;
+      }
+    }

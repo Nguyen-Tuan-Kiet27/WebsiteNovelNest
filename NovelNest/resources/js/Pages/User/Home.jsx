@@ -31,9 +31,9 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
 
   return (
     <Userlayout title="Home" login={login} page={1}>
-      <div>
+      <div className='tong'>
         <div className='banner'>
-          <img src="/img/banner.jpg" alt="" />
+          <img src="/img/banner2.jpg" alt="" />
         </div>
         <div>
           <button className='TheLoai'>
@@ -70,7 +70,7 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
             </div>
           </div>
         </div>
-        <div className='d-flex justify-content-center'>
+        <div className='truyenMoi d-flex justify-content-center'>
           <ListStories stories={truyenMois} />
         </div>
         <div className='d-flex justify-content-center mt-4 h-100'>
