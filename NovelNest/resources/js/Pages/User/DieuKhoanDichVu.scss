@@ -1,0 +1,9 @@
+.dieuKhoanDichVu{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    >.mainDKDV{
+        width: 80%;
+    }
+}

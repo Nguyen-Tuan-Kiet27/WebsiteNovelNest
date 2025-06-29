@@ -34,7 +34,9 @@ export default function UserLogin({setUserLoginIsVisible, userLoginIsVisible}){
                         <p>
                             <input type='checkbox'
                                 onChange={(e)=>setDieuKhoanDV(e.target.checked)}
-                            ></input> Đồng ý với điều khoản dịch vụ <span style={{display: !dieuKhoanDV ? 'inline' : 'none', color:"red",fontSize:"20px"}}>*</span>
+                            ></input>
+                            <label>&ensp;Đồng ý với <a href="/dieukhoandichvu" target="_blank" rel="noopener noreferrer">điều khoản dịch vụ</a></label>
+                            <span style={{display: !dieuKhoanDV ? 'inline' : 'none', color:"red",fontSize:"20px"}}>*</span>
                         </p> 
                         <button onClick={handleFacebook}>Facebook</button>
                         <button onClick={handleGoogle}>Google</button>

@@ -1,10 +1,10 @@
 import AuthorLayout from "../../Layouts/AuthorLayout";
-import './ThemChuong.scss'
+import './SuaChuong.scss'
 import { router } from "@inertiajs/react";
 import Editor from '@/Components/Editor';
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-export default function Truyen({user, truyen}){
+export default function SuaChuong({user, truyen, chuong}){
     const [ten,setTen] = useState('');
     const [phi,setPhi] = useState(false);
     const [xu,setXu] = useState(0);
@@ -18,6 +18,8 @@ export default function Truyen({user, truyen}){
     const [loading, setLoading] = useState(false);
     const textareaRef = useRef(null);
     const [end,setEnd] = useState(false);
+    const refCheckBox = useRef(null);
+
     useEffect(() => {
         if (tenLabelRef.current) {
             const el = tenLabelRef.current;
@@ -27,7 +29,19 @@ export default function Truyen({user, truyen}){
             const total = width + marginRight;
             setMrErrorTen(total);
         }
+        setTen(chuong.ten)
+        setNoiDung(chuong.noiDung)
+        setTomTat(chuong.tomTat)
+        if(chuong.gia > 0){
+            setXu(chuong.gia)
+            setPhi(true)
+        }
     }, []);
+
+    useEffect(()=>{
+        refCheckBox.current.checked = phi;
+    },[phi])
+
     const handleChangePhi = (e)=>{
         setPhi(e.target.checked);
         if(e.target.checked==false)
@@ -64,6 +78,10 @@ export default function Truyen({user, truyen}){
             top: 0,
             behavior: 'smooth'   // cuộn mượt; bỏ dòng này nếu muốn cuộn ngay lập tức
         });
+        if(!isChanged()){
+            alert('Không có thay đổi để lưu!')
+            return;
+        }
         let b = false;
         if(!ten){
             setErrorTen('Chưa nhập tên chương!');
@@ -82,12 +100,11 @@ export default function Truyen({user, truyen}){
         formData.append('ten',ten);
         formData.append('gia',xu);
         formData.append('noiDung',noiDung);
-        formData.append('soChuong',parseInt(truyen.soLuongChuong)+1);
         formData.append('tomTat',tomTat);
-        formData.append('end',end);
+        formData.append('_method', 'PUT');
         try {
             const response = await axios.post(
-                `/api/author/themchuong/${truyen.id}`,
+                `/api/author/suachuong/${chuong.id}`,
                 formData,
                 {
                     headers: {
@@ -100,8 +117,6 @@ export default function Truyen({user, truyen}){
         } catch (error) {
             if(error.response.data.errorTen)
                 alert(error.response.data.errorTen);
-            if(error.response.data.errorSoChuong)
-                alert(error.response.data.errorSoChuong);
             if(error.response.data.message)
                 alert(error.response.data.message, ' :', error.response.data.error)
         }
@@ -116,12 +131,20 @@ export default function Truyen({user, truyen}){
         textarea.style.height = `${textarea.scrollHeight}px`; // Resize theo nội dung mới
         }
     }, [tomTat]);
+
+    const isChanged = ()=>{
+         const tenChanged = ten.trim() != chuong.ten?.trim();
+        const noiDungChanged = noiDung.trim() != chuong.noiDung?.trim();
+        const tomTatChanged = tomTat.trim() != chuong.tomTat?.trim();
+        const xuChanged = parseInt(xu) != parseInt(chuong.gia || 0);
+        return tenChanged || noiDungChanged || tomTatChanged || xuChanged;
+    }
     return(
-        <AuthorLayout page='2' user={user} title={`Thêm chương truyện ${truyen.ten}`}>
-            <div className="ThemChuong">
+        <AuthorLayout page='2' user={user} title={`Sửa chương ${chuong.soChuong} truyện ${truyen.ten}`}>
+            <div className="suaChuong">
                 <div className="head">
                     <div>
-                        <h1>Thêm chương {parseInt(truyen.soLuongChuong)+1} truyện: {truyen.ten}</h1>
+                        <h1>Sửa chương {chuong.soChuong} truyện: {truyen.ten}</h1>
                     </div>
                 </div>
                 <div className="body">
@@ -135,7 +158,7 @@ export default function Truyen({user, truyen}){
                         </div>
                         <div className="gia">
                             <div>
-                                <input type="checkBox" onChange={handleChangePhi}/>
+                                <input ref={refCheckBox} type="checkBox" onChange={handleChangePhi}/>
                                 <label>Có phí</label>
                             </div>
                             <div style={{display:phi?'flex':'none'}}>
@@ -166,12 +189,12 @@ export default function Truyen({user, truyen}){
                         <label className="error" style={{marginTop:'10px'}}>{errorTomTat}</label>
                     </div>
                     <div className="end">
-                        <input type="checkBox" onChange={e=>setEnd(e.target.checked)}/>
+                        <input type="checkBox" checked={chuong.gia==null?true:false}/>
                         <label style={{marginLeft:'10px',color:'green'}}>Chương cuối, hoàn thành truyện!</label>
                     </div>
                     <div className="buttonSM">
                         <button onClick={() => window.history.back()}>Hủy</button>
-                        <button onClick={handleSubmit} >Thêm</button>
+                        <button onClick={handleSubmit} >Sửa</button>
                     </div>
                 </div>
             </div>

@@ -31,6 +31,8 @@ Route::put('/signupauthor',[User_Controller::class,'apiSignupAuthor'])->middlewa
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);
 Route::post('/author/themchuong/{id}', [Author_Controller::class,'apiThemChuong'])->middleware(['web','CheckLogin:1,2,3']);
 Route::post('/tomtat', [Summary_Controller::class,'summarize'])->middleware(['web','CheckLogin:1,2,3']);
+Route::put('/author/suatruyen/{id}', [Author_Controller::class,'apiSuaTruyen'])->middleware(['web','CheckLogin:1,2,3']);
+Route::put('/author/suachuong/{id}', [Author_Controller::class,'apiSuaChuong'])->middleware(['web','CheckLogin:1,2,3']);
 
 //Admin
 Route::post('/admin/login', [Admin_Controller::class,'authLogin'])->middleware(['web']);

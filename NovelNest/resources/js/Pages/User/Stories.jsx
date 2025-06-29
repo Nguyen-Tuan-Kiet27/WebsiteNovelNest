@@ -86,7 +86,14 @@ return(
             <div className='gioiThieu'>
                 <h4>Giới thiệu truyện:</h4>
                 <div>
-                    <p>Giới thiệu: {truyen.gioiThieu}</p>
+                    <p>
+                      {truyen.gioiThieu.split('\n').map((line, index) => (
+                        <span key={index}>
+                          {line}
+                          <br />
+                        </span>
+                      ))}
+                    </p>
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 // import Link from '@tiptap/extension-link';
 // import Mention from '@tiptap/extension-mention';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -133,6 +133,12 @@ export default function RichTextEditor({value = '', onChange}) {
       onChange && onChange(editor.getHTML());
     }
   };
+  useEffect(() => {
+    if (editor && editor.getHTML() !== value) {
+        editor.commands.setContent(value);
+    }
+  }, [value]);
+
 
   return (
     <Box>
@@ -197,7 +203,7 @@ export default function RichTextEditor({value = '', onChange}) {
           }
         }}
       >
-        <EditorContent editor={editor} />
+        <EditorContent editor={editor} spellCheck={false}/>
       </Box>
     </Box>
   );
