@@ -59,8 +59,10 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
 return(
 <Userlayout title="Stories" login={login} >
     <div className='container' >
+      <button className="back-arrow" onClick={() => window.history.back()}>←</button>
         <div ref={traiRef}>
             <div>
+              
                 <div className='storyInformation'>
                     <img src={`/img/truyen/hinhNen/${truyen.hinhNen}`} alt="" />
                     <div className='fas' style={login?{}:{display:'none'}}>
@@ -75,10 +77,10 @@ return(
                     <div className='subStoryInformation'>
                         <img src={`/img/truyen/hinhAnh/${truyen.hinhAnh}`} alt="" />
                         <div className='information'>
-                            <h5>Tên truyện: {truyen.ten}</h5>
-                            <h5>Thể loại: {truyen.the_loai.ten}</h5>
-                            <h5>Trạng thái: {truyen.ngayKetThuc?'Chưa hoàn thành':'Đã hoàn thành'}</h5>
-                            <h5>Chương: {soLuong}</h5>  
+                            <h4>Tên truyện: {truyen.ten}</h4>
+                            <h4>Thể loại: {truyen.the_loai.ten}</h4>
+                            <h4>Trạng thái: {truyen.ngayKetThuc?'Chưa hoàn thành':'Đã hoàn thành'}</h4>
+                            <h4>Chương: {soLuong}</h4>  
                         </div>
                     </div>
                 </div>
@@ -112,6 +114,7 @@ return(
                                             setTotalPrice(chapter.gia);
                                         }
                                         }}
+                                      title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
                                     >
                                     {chapter.ten + ` (${chapter.ngayTao})`}
                                 </a>
@@ -133,6 +136,7 @@ return(
                                         setTotalPrice(chapter.gia);
                                     }
                                     }}
+                                    title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
                             >
                                 {chapter.ten + ` (${chapter.ngayTao})`}
                             </a>

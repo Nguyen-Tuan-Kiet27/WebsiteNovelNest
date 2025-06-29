@@ -2,13 +2,15 @@ import { router } from '@inertiajs/react';
 import './UserLayout.scss';
 import { Head, usePage } from '@inertiajs/react';
 import UserLogin from '@/Components/UserLogin';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import EmailAndPassword from '../Components/EmailAndPassword';
 
 export default function Userlayout({children,title,login,page}){
     /////test
     /////////
+    const headRef = useRef();
+    const [mrtMain, setMrtMain] = useState(0)
     const {flash} = usePage().props;
     const [userLoginIsVisible, setUserLoginIsVisible] = useState(false);
     const [modalEP,setModalEP] = useState(false);
@@ -16,6 +18,7 @@ export default function Userlayout({children,title,login,page}){
         if (window.location.hash === '#_=_') {
             window.history.replaceState(null, null, window.location.pathname + window.location.search);
         }
+        setMrtMain(headRef.current.offsetHeight+20)
     }, []);
     const handleClickLogin = ()=>{
         if(login || flash.loginf)
@@ -57,7 +60,7 @@ export default function Userlayout({children,title,login,page}){
             <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
             <Head title={`NovelNest - ${title}`} />
             <header>
-                <div className="header">
+                <div ref={headRef} className="header">
                     <div className='subHeader'>
                         <div>
                             <img src="/img/logo_v4.png" alt="" />
@@ -108,7 +111,7 @@ export default function Userlayout({children,title,login,page}){
                    
               
             </header>
-            <main>
+            <main style={{marginTop: mrtMain}}>
                 {children}
             </main>
             <footer>
