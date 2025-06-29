@@ -1,5 +1,5 @@
 .story-table {
-  background-color: #fff;
+  background-color: #ffref;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 0 5px rgba(0,0,0,0.1);
@@ -18,7 +18,7 @@
   .table {
     width: 100%;
     border-collapse: collapse;
-
+   
     td {
       padding: 10px 5px;
       border-bottom: 1px solid #eee;
@@ -31,7 +31,7 @@
       text-overflow: ellipsis;
       cursor: pointer;
       &:hover{
-        color: #AC7446;
+        color: red;
     }
     }
 

@@ -4,12 +4,17 @@
   border-radius: 12px;
   overflow: hidden;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   width: 13%;
   margin-top: 15px;
-  &:hover{
-    >p{
-      color: #AC7446;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    > p {
+      color: #e46a06;
     }
   }
 }
