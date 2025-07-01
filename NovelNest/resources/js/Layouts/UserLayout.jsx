@@ -57,7 +57,7 @@ export default function Userlayout({children,title,login,page}){
         }
     }
     const handleMouseMove = (e) => {
-        setPosition({ x: e.pageX, y: e.pageY });
+        setPosition({ x: e.pageX, y: e.pageY% headRef.current.offsetHeight });
     };
     return(
         <>
@@ -113,7 +113,7 @@ export default function Userlayout({children,title,login,page}){
                                         style={{
                                             position: 'absolute',
                                             top: position.y + 20,
-                                            left: position.x + 10,
+                                            left: position.x,
                                         }}
                                     >
                                         {login.ten}

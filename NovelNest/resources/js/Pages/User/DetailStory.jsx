@@ -2,18 +2,55 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faList, faChevronLeft, faChevronRight, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import './DetailStory.scss';
 import { router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Userlayout from '@/Layouts/UserLayout';
 import useDetectDevTools from '@/hooks/useDetectDevTools';
 import usePageVisibility from '@/hooks/usePageVisibility';
+import axios from 'axios';
+import { TbLockDollar } from "react-icons/tb";
+import { GoDotFill } from "react-icons/go";
+import BuyChapter from '../../Components/BuyChappter';
+import UserLogin from '@/Components/UserLogin';
+import EmailAndPassword from '@/Components/EmailAndPassword';
 
-export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau}) {
+export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau,chuongChuaMua,chuongs}) {
   const [premium,setPremium] = useState(false);
   const [hiden,setHiden] = useState(false);
   const [devTool,setDevTool] = useState(false);
   const [content,setContent] = useState(chuong.noiDung);
   const [scrollY,setScrollY] = useState(0);
   const [reScrool,setReScrool] = useState(true);
+  //Lượt xem:
+  const [count, setCount] = useState(0); // bộ đếm
+  const [paused, setPaused] = useState(false); // điều kiện tạm dừng
+  const intervalRef = useRef(null);
+  const idleTimerRef = useRef(null);
+  const resetIdleTimer = () => {
+    clearTimeout(idleTimerRef.current);
+    if(!devTool && !hiden)
+      setPaused(false)
+
+    idleTimerRef.current = setTimeout(() => {
+      setPaused(true)
+    }, 15000); // 15 giây
+  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!paused) {
+        setCount(prev => {
+          const next = prev + 1;
+          console.log(next)
+          if (next === 30) {
+            clearInterval(interval); // dừng interval tại đây
+            axios.post(`/api/lichsudoc/${chuong.id}`);
+          }
+          return next;
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [paused]);
 
   useDetectDevTools(
     () => {
@@ -23,30 +60,33 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
       }
       setContent('<h1>DevTool đang mở, hãy tắt DevTool để tải lại nội dung!</h1>');
       setDevTool(true);
+      setPaused(true)
     },
     ()=>{
       setDevTool(false);
       if(!hiden)
         setContent(chuong.noiDung);
+      setPaused(false);
     }
   );
 
   usePageVisibility(
     ()=>{
       setHiden(true);
-      console.log(devTool)
       if(!devTool){
         if(reScrool){
           setScrollY(window.scrollY || window.pageYOffset);
           setReScrool(false);
         }
         setContent('<h1>Bạn đang không focus page, hãy quay lại nội dung sẽ được cập nhật!</h1>');
+        setPaused(true);
       }
     },
     ()=>{
       setHiden(false);
       if(!devTool){
         setContent(chuong.noiDung);
+        setPaused(false);
       }
     }
   )
@@ -73,11 +113,18 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
 
     document.addEventListener('keydown', blockKeys);
     document.addEventListener('contextmenu', disableContextMenu);
+    //Lượt xem
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer);
+    resetIdleTimer();
 
     return () => {
       document.removeEventListener('keydown', blockKeys);
       document.removeEventListener('contextmenu', disableContextMenu);
-    };
+      window.removeEventListener('mousemove', resetIdleTimer);
+      window.removeEventListener('scroll', resetIdleTimer);
+      clearTimeout(idleTimerRef.current);
+    }
   },[])
 
   useEffect(() => {
@@ -94,29 +141,19 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
     }
   }, [content]);
 
-  const handleChuongTruoc=()=>{
-    router.visit(`/chuong/${idChuongTruoc}`);
+  const handleChuongTruoc=(e)=>{
+    handleCheckChuong(e,{id:idChuongTruoc})
   }
-  const handleChuongSau=()=>{
-    router.visit(`/chuong/${idChuongSau}`);
+  const handleChuongSau=(e)=>{
+    handleCheckChuong(e,{id:idChuongSau})
   }
   const [showModal, setShowModal] = useState(false);
-  const [selectedChapter, setSelectedChapter] = useState(null);
 
-  const handleClickChapter = (chapter) => {
-      if (chapter?.gia > 0 && !chapter?.daMua) {
-        setSelectedChapter(chapter);
-        setShowModal(true);
-      } else {
-        router.visit(`/chuong/${chapter.id}`);
-      }
-  };
-
-  const [selectedVoice, setSelectedVoice] = useState(null); // 0, 1, 2, 3
   const [audioSrc, setAudioSrc] = useState(null);
   const [type, setType] = useState('');
   const [showVoice, setShowVoice] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const handleSelect = async (t,e) => {
     setLoading(true);
     setType(e);
@@ -143,8 +180,88 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
     setShowVoice(!showVoice)
   }
 
+  const [showTT,setShowTT] = useState(false);
+  const [tomTat,setTomTat] = useState('');
+  const handleTomTat = async ()=>{
+    const response = await axios.get(`/api/tomtat/${idChuongTruoc}`);
+    setTomTat(response.data.message);
+    setShowTT(true);
+  }
+
+  const [showModalChapter,setShowModalChapter] = useState(false)
+  const chuongChuaMuaIds = new Set(chuongChuaMua.map(c => c.id));
+  const [showLogin,setShowLogin] = useState(false);
+  const [modalEP,setModalEP] = useState(false);
+  const [showDate,setShowDate] = useState(false)
+  const [date,setDate] = useState('')
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [select,setSelect] = useState(null);
+  const handleMouseMove = (e) => {
+    setPosition({ x: e.pageX, y: e.pageY });
+  };
+  const handleCheckChuong = async (e,chapter)=>{
+    if(user.vaiTro<3) return;
+    if (chuongChuaMuaIds.has(chapter.id)) {
+        e.preventDefault();
+        //chưa đăng nhập
+        if(!user){
+          setShowLogin(true)
+          return;
+        }
+        try {
+            const response = await axios.get('/api/checkep');
+            if(!response.data.value){
+                setModalEP(true);
+                return;
+            }
+        } catch (error) {
+            setShowLogin(true);
+            return;
+        }
+        //hiển thị modal mua chương và truyền set chương đã chọn 
+        setShowModal(true);
+        setSelect(chapter);
+    }
+  }
+
   return (
-    <Userlayout login={user?true:false} title={`${truyen.ten} - Chương ${chuong.soChuong}: ${chuong.ten}`}>
+    <Userlayout login={user} title={`${truyen.ten} - Chương ${chuong.soChuong}: ${chuong.ten}`}>
+      <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
+      <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
+      <BuyChapter isShow={showModal} changeShow={setShowModal} select={select} chuongChuaMua={chuongChuaMua}/>
+      {(showTT)&&(
+        <div className='tomTat'
+              onClick={()=>setShowTT(false)}
+        >
+            <div className='mainTT'
+                  onClick={(e)=>e.stopPropagation()}
+            >
+              <div>
+                <h5>Tóm tắt chương trước</h5>
+              </div>
+              <p>
+                {tomTat.split('\n').map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </p>
+            </div>
+        </div>
+      )}
+      {(showDate) && (
+          <div
+              className="custom-tooltip"
+              style={{
+                  position: 'absolute',
+                  top: position.y + 20,
+                  left: position.x + 10,
+              }}
+          >
+              {`Ngày đăng: `+date}
+          </div>
+      )}
       <div className="doc-truyen">
         <div className="doc-header">
           <button className="back-btn"
@@ -172,11 +289,33 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
               </audio>
             </div>
             <div className="doc-nav">
-              <button onClick={handleChuongTruoc} style={{opacity:chuong.soChuong==1?'0.5':'1'}} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
-              <button>
+              <a href={`/chuong/${idChuongTruoc}`}
+                 onClick={(e) => {
+                  if (chuong.soChuong === 1) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleChuongTruoc(e);
+                 }} 
+                 style={{opacity:chuong.soChuong==1?'0.5':'1'}} 
+                 disabled={chuong.soChuong==1?true:false}
+              >Chương trước</a>
+              <button onClick={handleTomTat}
+                      disabled={chuong.soChuong==1?true:false}
+              >
                 Tóm tắt chương trước 
               </button>
-              <button onClick={handleChuongSau} style={{opacity:chuongCuoi?'0.5':'1'}} disabled={chuongCuoi} >Chương tiếp</button>
+              <a href={`/chuong/${idChuongSau}`}
+                  onClick={(e) => {
+                    if (chuongCuoi) {
+                      e.preventDefault();
+                      return;
+                    }
+                    handleChuongSau(e);
+                  }}
+                  style={{opacity:chuongCuoi?'0.5':'1'}}
+                  disabled={chuongCuoi} 
+              >Chương tiếp</a>
             </div>
             <div className='hidenDoc'>
                 {(!devTool && !hiden) &&
@@ -194,11 +333,32 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
                 <div className="doc-content" dangerouslySetInnerHTML={{ __html: content }}/>
               </div>
             <div className="doc-nav">
-              <button onClick={handleChuongTruoc} style={{opacity:chuong.soChuong==1?'0.5':'1'}} disabled={chuong.soChuong==1?true:false}>Chương trước</button>
-              <button>
+              <a 
+                href={`/chuong/${idChuongTruoc}`} 
+                onClick={(e) => {
+                  if (chuong.soChuong === 1) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleChuongTruoc(e);
+                }} 
+                style={{opacity:chuong.soChuong==1?'0.5':'1'}} 
+                disabled={chuong.soChuong==1?true:false}
+              >Chương trước</a>
+              <button onClick={()=>setShowModalChapter(true)}>
                 <FontAwesomeIcon icon={faList} />
               </button>
-              <button onClick={handleChuongSau} style={{opacity:chuongCuoi?'0.5':'1'}} disabled={chuongCuoi}>Chương tiếp</button>
+              <a href={`/chuong/${idChuongSau}`}
+                  onClick={(e) => {
+                    if (chuongCuoi) {
+                      e.preventDefault();
+                      return;
+                    }
+                    handleChuongSau(e);
+                  }}
+                  style={{opacity:chuongCuoi?'0.5':'1'}}
+                  disabled={chuongCuoi} 
+              >Chương tiếp</a>
             </div>
           </div>
           <div className="doc-report">
@@ -211,7 +371,57 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
           </div>
         </div>
       </div>
+      <div className='popupChapter' style={{display:showModalChapter?'flex':'none'}} onClick={()=>{setShowModalChapter(false)}}>
+        <div className='storyChapter' onClick={(e)=>e.stopPropagation()}>
+          <div className='chuongMoi chapter-list'>
+              <h5>Chương mới ra</h5>
+              { chuongs.slice(chuongs.length-4).reverse().map((chapter) =>(
+                      <li key={chapter.id}
+                      >
+                          <a
+                              href={`/chuong/${chapter.id}`}
+                              onClick={(e)=>handleCheckChuong(e,chapter)}
+                              onMouseEnter={() => {setShowDate(true);setDate(new Date(chapter.ngayTao).toLocaleDateString('vi-VN'))}}
+                              onMouseLeave={() => setShowDate(false)}
+                              onMouseMove={handleMouseMove}
+                              >
+                              {chuongChuaMuaIds.has(chapter.id) ? (
+                                <TbLockDollar style={{ color: 'gray' }} />
+                              ) : (
+                                <GoDotFill style={{ color: 'gray' }}/>
+                              )}
+                              &ensp;
+                              {`CHƯƠNG ${chapter.soChuong}:`} &ensp; {chapter.ten.toUpperCase()}
+                          </a>
+                      </li>
+              ))}
+          </div>
+          <div className='chuongs chapter-list'>
+              <h5>Danh sách chương</h5>
+              {chuongs.map((chapter) =>(
+                <li key={chapter.id}>
+                    <a
+                      href={`/chuong/${chapter.id}`}
+                      onClick={(e) => handleCheckChuong(e,chapter)}
+                      onMouseEnter={() => {setShowDate(true); setDate(new Date(chapter.ngayTao).toLocaleDateString('vi-VN'))}}
+                      onMouseLeave={() => setShowDate(false)}
+                      onMouseMove={handleMouseMove}
+                    >
+                      {chuongChuaMuaIds.has(chapter.id) ? (
+                        <TbLockDollar style={{ color: 'gray' }} />
+                      ) : (
+                        <GoDotFill style={{ color: 'gray' }}/>
+                      )}
+                      &ensp;
+                      {`CHƯƠNG ${chapter.soChuong}:`} &ensp; {chapter.ten.toUpperCase()}
+                    </a>
+                </li>
+              ))}
 
+          </div>
+        </div>
+      </div>
+      
     </Userlayout>
    
   );

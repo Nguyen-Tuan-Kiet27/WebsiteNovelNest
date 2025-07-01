@@ -1,3 +1,4 @@
+import React from 'react';
 import Userlayout from '@/Layouts/UserLayout';
 import { useState, useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
@@ -5,19 +6,27 @@ import './Stories.scss';
 import CardStories from '../../Components/CardStories';
 import { FaRegHeart, FaShareSquare, FaHeart  } from 'react-icons/fa';
 import axios from 'axios';
+import { TbLockDollar } from "react-icons/tb";
+import { GoDotFill } from "react-icons/go";
+import BuyChapter from '../../Components/BuyChappter';
+import UserLogin from '@/Components/UserLogin';
+import EmailAndPassword from '@/Components/EmailAndPassword';
 
-
-
-
-
-export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDaHoanThanhs}) {
-    console.log(truyen);
+export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDaHoanThanhs,chuongChuaMua}) {
     const traiRef = useRef();
     const [traiHeight, setTraiHeight] = useState(0);
     const [traiHeight2, setTraiHeight2] = useState(0);
-
+    const chuongChuaMuaIds = new Set(chuongChuaMua.map(c => c.id));
+    const [showLogin,setShowLogin] = useState(false);
+    const [modalEP,setModalEP] = useState(false);
     const [love,setLove]=useState(favorite);
-   
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [showDate,setShowDate] = useState(false)
+    const [date,setDate] = useState('')
+
+    const handleMouseMove = (e) => {
+        setPosition({ x: e.pageX, y: e.pageY });
+    };
 
     useEffect(() => {
         if (traiRef.current) {
@@ -27,25 +36,31 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
     }, []);
 
     const [showModal, setShowModal] = useState(false);
-    const [selectedChapters, setSelectedChapters] = useState([]);
-    const [totalPrice, setTotalPrice] = useState(0);
-    const [isAllSelected, setIsAllSelected] = useState(false);
-
-    const handleToggleSelectAll = () => {
-        const paidChapters = chuongs.filter(ch => ch.gia > 0);
-        
-        if (isAllSelected) {
-            setSelectedChapters([]);
-            setTotalPrice(0);
-            setIsAllSelected(false);
-        } else {
-            setSelectedChapters(paidChapters);
-            const total = paidChapters.reduce((sum, ch) => sum + ch.gia, 0);
-            setTotalPrice(total);
-            setIsAllSelected(true);
+    const [select,setSelect] = useState(null);
+    const handleCheckChuong = async (e,chapter)=>{
+        if(login.vaiTro<3) return;
+        if (chuongChuaMuaIds.has(chapter.id)) {
+            e.preventDefault();
+            //chưa đăng nhập
+            if(!login){
+              setShowLogin(true)
+              return;
+            }
+            try {
+                const response = await axios.get('/api/checkep');
+                if(!response.data.value){
+                    setModalEP(true);
+                    return;
+                }
+            } catch (error) {
+                setShowLogin(true);
+                return;
+            }
+            //hiển thị modal mua chương và truyền set chương đã chọn 
+            setShowModal(true);
+            setSelect(chapter);
         }
-        };
-
+    }
   const handleFavorite= async ()=>{
     try {
       const response = await axios.post(
@@ -58,6 +73,20 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
   }
 return(
 <Userlayout title="Stories" login={login} >
+    <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
+    <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
+    {(showDate) && (
+        <div
+            className="custom-tooltip"
+            style={{
+                position: 'absolute',
+                top: position.y + 20,
+                left: position.x + 10,
+            }}
+        >
+            {`Ngày đăng: `+date}
+        </div>
+    )}
     <div className='container' >
       <button className="back-arrow" onClick={() => window.history.back()}>←</button>
         <div ref={traiRef}>
@@ -105,49 +134,50 @@ return(
                 <button onClick={()=>router.visit(`/chuong/${chuongs[0].id}`)}>
                     Đọc từ đầu
                 </button>
-                <div className='chuongMoi'>
+                <div className='chuongMoi chapter-list'>
                     <h5>Chương mới ra</h5>
                     { chuongs.slice(chuongs.length-4).reverse().map((chapter) =>(
                             <li key={chapter.id}
                             >
                                 <a
                                     href={`/chuong/${chapter.id}`}
-                                   onClick={(e) => {
-                                        if (chapter.gia > 0) {
-                                            e.preventDefault();
-                                            setShowModal(true);
-                                            // tự động chọn chương đang click
-                                            setSelectedChapters([chapter]);
-                                            setTotalPrice(chapter.gia);
-                                        }
-                                        }}
-                                      title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
+                                    onClick={(e)=>handleCheckChuong(e,chapter)}
+                                    onMouseEnter={() => {setShowDate(true);setDate(new Date(chapter.ngayTao).toLocaleDateString('vi-VN'))}}
+                                    onMouseLeave={() => setShowDate(false)}
+                                    onMouseMove={handleMouseMove}
                                     >
-                                    {chapter.ten + ` (${chapter.ngayTao})`}
+                                    {chuongChuaMuaIds.has(chapter.id) ? (
+                                      <TbLockDollar style={{ color: 'gray' }} />
+                                    ) : (
+                                      <GoDotFill style={{ color: 'gray' }}/>
+                                    )}
+                                    &ensp;
+                                    {`CHƯƠNG ${chapter.soChuong}:`} &ensp; {chapter.ten.toUpperCase()}
                                 </a>
                             </li>
                     ))}
                 </div>
-                <div className='chuongs'>
+                <div className='chuongs chapter-list'>
                     <h5>Danh sách chương</h5>
                     {chuongs.map((chapter) =>(
-                        <li key={chapter.id}>
-                           <a
-                                href={`/chuong/${chapter.id}`}
-                               onClick={(e) => {
-                                    if (chapter.gia > 0) {
-                                        e.preventDefault();
-                                        setShowModal(true);
-                                        // tự động chọn chương đang click
-                                        setSelectedChapters([chapter]);
-                                        setTotalPrice(chapter.gia);
-                                    }
-                                    }}
-                                    title={new Date(chapter.ngayTao).toLocaleDateString('vi-VN')}
-                            >
-                                {chapter.ten + ` (${chapter.ngayTao})`}
-                            </a>
-                        </li>
+                      <li key={chapter.id}>
+                          <a
+                            href={`/chuong/${chapter.id}`}
+                            onClick={(e) => handleCheckChuong(e,chapter)}
+                                  // title={}
+                            onMouseEnter={() => {setShowDate(true); setDate(new Date(chapter.ngayTao).toLocaleDateString('vi-VN'))}}
+                            onMouseLeave={() => setShowDate(false)}
+                            onMouseMove={handleMouseMove}
+                          >
+                            {chuongChuaMuaIds.has(chapter.id) ? (
+                              <TbLockDollar style={{ color: 'gray' }} />
+                            ) : (
+                              <GoDotFill style={{ color: 'gray' }}/>
+                            )}
+                            &ensp;
+                            {`CHƯƠNG ${chapter.soChuong}:`} &ensp; {chapter.ten.toUpperCase()}
+                          </a>
+                      </li>
                     ))}
 
                 </div>
@@ -165,95 +195,10 @@ return(
         </div>
     </div>
 
+    <BuyChapter isShow={showModal} changeShow={setShowModal} select={select} chuongChuaMua={chuongChuaMua}/>
    
 
-{showModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h5>Đây là chương trả phí. Mua ngay để đọc tiếp!</h5>
-      <button onClick={handleToggleSelectAll}>
-  {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-</button>
 
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Tên chương</th>
-            <th>Giá (VND)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {chuongs.filter(ch => ch.gia > 0).map(ch => (
-            <tr key={ch.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedChapters.some(c => c.id === ch.id)}
-                 onChange={(e) => {
-                    const isChecked = e.target.checked;
-                    if (isChecked) {
-                        const newSelected = [...selectedChapters, ch];
-                        setSelectedChapters(newSelected);
-                        setTotalPrice(prev => prev + ch.gia);
-                        if (newSelected.length === chuongs.filter(c => c.gia > 0).length) {
-                        setIsAllSelected(true);
-                        }
-                    } else {
-                        const newSelected = selectedChapters.filter(c => c.id !== ch.id);
-                        setSelectedChapters(newSelected);
-                        setTotalPrice(prev => prev - ch.gia);
-                        setIsAllSelected(false);
-                    }
-                    }}
-
-                />
-              </td>
-              <td>{ch.ten}</td>
-              <td>{ch.gia.toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Thông báo ưu đãi nếu chọn chương cuối */}
-      {selectedChapters.some(c => c.soChuong === chuongs[chuongs.length - 1].soChuong) && (
-        <div style={{ color: "green", marginTop: "10px" }}>
-          Khi mua bao gồm chương cuối bạn sẽ được giảm giá 10%
-        </div>
-      )}
-
-      <div style={{ marginTop: '10px' }}>
-        <strong>Tổng:</strong>{' '}
-        {selectedChapters.some(c => c.soChuong === chuongs[chuongs.length - 1].soChuong)
-          ? (totalPrice * 0.9).toLocaleString() + ' VND (đã giảm 10%)'
-          : totalPrice.toLocaleString() + ' VND'}
-      </div>
-
-      {/* Nút điều khiển */}
-      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-        <button onClick={() => {
-          setShowModal(false);
-          router.visit(`/truyen/${truyen.id}`);
-        }}>
-          Hủy
-        </button>
-        <button
-          onClick={() => {
-            if (selectedChapters.length > 0) {
-              // xử lý logic mua ở đây
-              const chapterToRead = selectedChapters[0];
-              setShowModal(false);
-              router.visit(`/chuong/${chapterToRead.id}`);
-            }
-          }}
-        >
-          Mua & Đọc
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
 
 

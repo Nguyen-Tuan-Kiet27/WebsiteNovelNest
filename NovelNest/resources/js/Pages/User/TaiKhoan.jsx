@@ -5,6 +5,7 @@ import './TaiKhoan.scss';
 import { router } from '@inertiajs/react';
 
 export default function TaiKhoan({user,daMua}){
+    console.log(daMua)
     const [expandedId, setExpandedId] = useState(null);
 
     const handleToggle = (id) => {
@@ -41,10 +42,10 @@ export default function TaiKhoan({user,daMua}){
           </div>
 
             <div className="list-items">
-                {daMua.map(item => (
+                {Object.values(daMua).map(item => (
                 <div key={item.truyen.id}>
                     <div className="item">
-                        <div className="item-image">{item.truyen.hinhAnh}</div>
+                        <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.truyen.hinhAnh}`} alt="" /></div>
                         <div className="item-info">
                             <p><strong>{item.truyen.ten}</strong></p>
                             <p>Tác giả: {item.truyen.tacGia}</p>
@@ -52,11 +53,11 @@ export default function TaiKhoan({user,daMua}){
                             <p>Tổng tiền: {item.total} xu</p>
                         </div>
                         <div className="item-arrow" onClick={() => handleToggle(item.truyen.id)}>
-                            {expandedId === item.truyen.id ? '▲' : '▼'}
+                            {expandedId !== item.truyen.id ? '▲' : '▼'}
                         </div>
                     </div>
 
-                    {expandedId === item.id && (
+                    {expandedId === item.truyen.id && (
                         <div className="item-details">
                             {item.sub.map((chuong, idx) => (
                                 <div className="chapter" key={chuong.id}>

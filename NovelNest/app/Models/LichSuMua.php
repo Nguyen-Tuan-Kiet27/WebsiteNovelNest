@@ -8,7 +8,7 @@ class LichSuMua extends Model
 {
     protected $table = "lichsumua";
     protected $primaryKey = "id";
-    protected $fillable = ["thoiGian","id_NguoiDung"];
+    protected $fillable = ["thoiGian","id_NguoiDung","gia"];
     public $timestamps = false;
     public function NguoiDung(){
         return $this->belongsTo(NguoiDung::class,"id_NguoiDung");
