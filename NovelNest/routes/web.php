@@ -21,6 +21,7 @@ Route::get('/vnpay_return', [Payment_Controller::class, 'vnpayReturn'])->middlew
 Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middleware('CheckLogin');
 Route::get('/signupauthor', [User_Controller::class,'signupAuthor'])->middleware('CheckLogin');
 Route::get('/dieukhoandichvu',[User_Controller::class,'dieuKhoanDichVu'])->middleware('CheckLogin');
+Route::get('/datlaimatkhau', [User_Controller::class,'datLaiMatKhau'])->middleware('CheckLogin');
 
 
 

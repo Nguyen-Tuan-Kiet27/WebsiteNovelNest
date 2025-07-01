@@ -649,4 +649,14 @@ class User_Controller extends Controller
             Log::error($e->getMessage());
         }
     }
+    public function datLaiMatKhau(Request $request){
+        $user = $request->attributes->get('user');
+        if (!$user || !$user->email) {
+            return redirect('/');
+        }
+        $user->email = NguoiDung::giaiMa($user->email);
+        return Inertia::render('User/DatLaiMatKhau', [
+            'user'=> $user,
+        ]);
+    }
 }
