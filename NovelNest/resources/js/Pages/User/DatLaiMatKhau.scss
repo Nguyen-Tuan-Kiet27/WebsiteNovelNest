@@ -1,0 +1,28 @@
+
+.DatLaiMatKhau{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:70vh;
+}
+.mainDatLaiMatKhau{
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid;
+    box-shadow: 5px 5px 6px 3px rgba(0, 0, 0, 0.5);
+    >div{
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 300px;
+        display: flex;
+        >input{
+            flex: 1;
+        }
+    }
+}
