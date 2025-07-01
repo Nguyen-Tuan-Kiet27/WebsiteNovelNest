@@ -86,41 +86,41 @@ export default function({user,pay}){
                     <div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 10</p>
+                            <p>Số lượng xu: 10.000</p>
                             <p>Giá: 10.000₫</p>
-                            <button onClick={()=>handleClickMua(10000,10)}>Mua</button>
+                            <button onClick={()=>handleClickMua(10000,10000)}>Mua</button>
                         </div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 20</p>
+                            <p>Số lượng xu: 20.000</p>
                             <p>Giá: 20.000₫</p>
-                            <button onClick={()=>handleClickMua(20000,20)}>Mua</button>
+                            <button onClick={()=>handleClickMua(20000,20000)}>Mua</button>
                         </div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 50</p>
+                            <p>Số lượng xu: 50.000</p>
                             <p>Giá: 50.000₫</p>
-                            <button onClick={()=>handleClickMua(50000,50)}>Mua</button>
+                            <button onClick={()=>handleClickMua(50000,50000)}>Mua</button>
                         </div>
                     </div>
                     <div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 100</p>
+                            <p>Số lượng xu: 100.000</p>
                             <p>Giá: 98.000₫</p>
-                            <button onClick={()=>handleClickMua(98000,100)}>Mua</button>
+                            <button onClick={()=>handleClickMua(98000,100000)}>Mua</button>
                         </div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 200</p>
+                            <p>Số lượng xu: 200.000</p>
                             <p>Giá: 192.000₫</p>
-                            <button onClick={()=>handleClickMua(192000,200)}>Mua</button>
+                            <button onClick={()=>handleClickMua(192000,200000)}>Mua</button>
                         </div>
                         <div className="option">
                             <img src={hinh} alt="" />
-                            <p>Số lượng xu: 500</p>
+                            <p>Số lượng xu: 500.000</p>
                             <p>Giá: 480.000₫</p>
-                            <button onClick={()=>handleClickMua(480000,500)}>Mua</button>
+                            <button onClick={()=>handleClickMua(480000,500.000)}>Mua</button>
                         </div>
                     </div>
                 </div>

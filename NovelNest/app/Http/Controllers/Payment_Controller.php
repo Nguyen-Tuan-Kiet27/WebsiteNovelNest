@@ -88,7 +88,7 @@ class Payment_Controller extends Controller
         if ($secureHash === $vnp_SecureHash) {
             if ($inputData['vnp_ResponseCode'] == '00') {
                 $amount = $inputData['vnp_Amount'] / 100;
-                $price = ['10000'=>10,'20000'=>20, '50000'=>50, '98000'=>100, '192000'=>200, '480000'=>50];
+                $price = ['10000'=>10000,'20000'=>20000, '50000'=>50000, '98000'=>100000, '192000'=>200000, '480000'=>500000];
                 $user = NguoiDung::find($user->id);
                 $user->soDu += $price[$amount];
                 $user->save();
@@ -186,7 +186,7 @@ class Payment_Controller extends Controller
         if ($signature === ($inputData['signature'] ?? '')) {
             if ($inputData['resultCode'] == '0') {
                 $amount = $inputData['amount'];
-                $price = ['10000'=>10,'20000'=>20, '50000'=>50, '98000'=>100, '192000'=>200, '480000'=>50];
+                $price = ['10000'=>10000,'20000'=>20000, '50000'=>50000, '98000'=>100000, '192000'=>200000, '480000'=>500000];
                 
                 $user->soDu += $price[$amount] ?? 0;
                 $user->save();

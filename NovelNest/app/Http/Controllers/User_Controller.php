@@ -19,8 +19,9 @@ use App\Models\YeuThich;
 use Carbon\Carbon;
 use App\Models\LichSuNap;
 use App\Models\ThongTin;
+use App\Models\LichSuMua;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\LichSuDoc;
 class User_Controller extends Controller
 {
     
@@ -37,7 +38,7 @@ class User_Controller extends Controller
                 $truyenId = $chuong->truyen->id;
                 $subDaMua[$truyenId]['truyen'] = $chuong->truyen;
                 $subDaMua[$truyenId]['sub'][] = $chuong;
-                $subDaMua[$truyenId]['total'] = $subDaMua[$truyenId]['total']?$row->gia:$subDaMua[$truyenId]['total']+$row->gia;
+                $subDaMua[$truyenId]['total'] = ($subDaMua[$truyenId]['total'] ?? 0) + $row->gia;
         }
             $user->id=NguoiDung::giaiMa($user->id);
             return Inertia::render('User/TaiKhoan',[
@@ -230,12 +231,35 @@ class User_Controller extends Controller
             $yeuThich=false;
         $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
         $soLuong = $truyen->Chuongs()->count();
-        $chuongs = $truyen->Chuongs()->where('trangThai', 1)->get();
+        $chuongs = $truyen->Chuongs()->where('trangThai', 1)->select('id','ten','soChuong','gia','ngayTao')->get();
         $truyenDaHoanThanhs = Truyen::where('trangThai', 1)
             ->whereNotNull('ngayKetThuc')
             ->orderByDesc('ngayKetThuc')
             ->take(14)
             ->get();
+        if($user){
+            if ($truyen->id_NguoiDung === $user->id || $user->vaiTro < 3) {
+                $chuongChuaMua = collect(); // Trống
+            } else {
+                // Lấy ID các chương mà user đã mua
+                $chuongIds = $truyen->chuongs->pluck('id');
+
+                $chuongDaMuaIds = DaMua::where('id_NguoiDung', $user->id)
+                    ->whereIn('id_Chuong', $chuongIds)
+                    ->pluck('id_Chuong');
+
+                // Lấy các chương có phí và chưa mua
+                $chuongChuaMua = $truyen->chuongs()
+                    ->where('gia', '>', 0)
+                    ->whereNotIn('id', $chuongDaMuaIds)
+                    ->select('id','ten','soChuong','gia','ngayTao')
+                    ->get();
+            }
+        }else{
+            $chuongChuaMua = $truyen->chuongs()
+                    ->where('gia', '>', 0)
+                    ->get();
+        }
         return Inertia::render('User/Stories',[
             'favorite'=>$yeuThich?true:false,
             'truyen'=>$truyen,
@@ -243,15 +267,13 @@ class User_Controller extends Controller
             'login'=>$user,
             'soLuong'=>$soLuong,
             'truyenDaHoanThanhs'=>$truyenDaHoanThanhs,
+            'chuongChuaMua'=>$chuongChuaMua,
         ]);
     }
     public function detailStory(Request $request, $id){
         $chuong = Chuong::where('id', $id)
             ->where('trangThai', 1)
             ->first();
-        // if(!$chuong){
-        //     return;
-        // }
         if(!$request->attributes->get('bought')){
             return redirect('/truyen/'. $chuong->id_Truyen);
         }
@@ -260,15 +282,42 @@ class User_Controller extends Controller
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
         $chuongSau=$truyen->Chuongs()->where('soChuong',$chuong->soChuong + 1)->first();
-        if($user)
+        $chuongs = $truyen->Chuongs()->where('trangThai', 1)->select('id','ten','soChuong','gia','ngayTao')->get();
+
+
+        if($user){
             $user->premium = $user->vaiTro < 3?true:($user->premium > now() ? true : false);
+            if ($truyen->id_NguoiDung === $user->id || $user->vaiTro < 3) {
+                $chuongChuaMua = collect(); // Trống
+            } else {
+                // Lấy ID các chương mà user đã mua
+                $chuongIds = $truyen->chuongs->pluck('id');
+
+                $chuongDaMuaIds = DaMua::where('id_NguoiDung', $user->id)
+                    ->whereIn('id_Chuong', $chuongIds)
+                    ->pluck('id_Chuong');
+
+                // Lấy các chương có phí và chưa mua
+                $chuongChuaMua = $truyen->chuongs()
+                    ->where('gia', '>', 0)
+                    ->whereNotIn('id', $chuongDaMuaIds)
+                    ->select('id','ten','soChuong','gia','ngayTao')
+                    ->get();
+            }
+        }else{
+            $chuongChuaMua = $truyen->chuongs()
+                ->where('gia', '>', 0)
+                ->get();
+        }
         return Inertia::render('User/DetailStory',[
             'chuong'=>$chuong,
             'truyen'=>$chuong->Truyen,
             'chuongCuoi'=>$chuongCuoi->id==$chuong->id?true:false,
             'idChuongTruoc'=>$chuongTruoc?->id??null,
             'idChuongSau'=>$chuongSau?->id??null,
-            'user'=> $user
+            'user'=> $user,
+            'chuongChuaMua'=>$chuongChuaMua,
+            'chuongs'=>$chuongs,
             // ?false
             // :[
             //     'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
@@ -483,5 +532,121 @@ class User_Controller extends Controller
             'user'=> $user,
             'dieuKhoanDichVu'=> $dkdv->giaTri
         ]);
+    }
+    public function apiMuaChuong(Request $request){
+        try{
+        $user = $request->attributes->get('user');
+        if (!$user) {
+            return response()->json(['message'=> 'Chưa đăng nhập!'],401);
+        }
+        $nguoiDung = NguoiDung::find($user->id);
+        $chuongMuas = $request->input('chuongMuas');
+        if (!is_array($chuongMuas) || empty($chuongMuas)) {
+            return response()->json(['message' => 'Danh sách chương mua không hợp lệ'], 400);
+        }
+        $chuongIds = collect($chuongMuas)->pluck('id')->toArray();
+
+        $chuongs = Chuong::whereIn('id', $chuongIds)->get()->keyBy('id');
+        $daMuaIds = DaMua::where('id_NguoiDung', $user->id)->pluck('id_Chuong')->toArray();
+
+        $truyen = $chuongs->first()->Truyen;
+        $chuongCuoi = $truyen->chuongs->where('trangThai', 1)->sortByDesc('soChuong')->first();
+
+        $giamGia = false;
+        $tongGia = 0;
+
+        foreach ($chuongMuas as $item) {
+            $id = $item['id'];
+            if (in_array($id, $daMuaIds)) {
+                return response()->json(['message' => "Bạn đã mua chương '{$item['soChuong']}' trước đó."], 400);
+            }
+            if ($id == $chuongCuoi->id) {
+                $giamGia = true;
+            }
+            $tongGia += $chuongs[$id]->gia;
+        }
+
+        $tongGiaG = $giamGia ? ceil($tongGia * 0.9) : $tongGia;
+
+        if ($nguoiDung->soDu < $tongGiaG) {
+            return response()->json(['soDu' => 'Không đủ xu trong tài khoản!'], 400);
+        }
+
+        // Trừ tiền
+        $nguoiDung->soDu -= $tongGiaG;
+        $nguoiDung->save();
+
+        // Lưu lịch sử
+        $lichSuMua = LichSuMua::create([
+            'id_NguoiDung' => $user->id,
+            'thoiGian' => now(),
+            'gia' => $tongGiaG
+        ]);
+
+        // Lưu đã mua
+        foreach ($chuongs as $chuong) {
+            DaMua::create([
+                'id_NguoiDung' => $user->id,
+                'id_LichSuMua' => $lichSuMua->id,
+                'id_Chuong' => $chuong->id,
+                'gia' => $chuong->gia
+            ]);
+        }
+
+        // Trả tiền tác giả
+        $tacGia = NguoiDung::find($truyen->id_NguoiDung);
+        $tacGia->soDu += floor($tongGia * 0.7);
+        $tacGia->save();
+
+        return response()->json([
+            'message' => 'Mua thành công!',
+            'soDuConLai' => $nguoiDung->soDu,
+            'chuongDaMua' => $chuongIds
+        ], 200);
+        }catch(Exception $e){
+            return response()->json(['message'=>$e->getMessage()], 400);
+        }
+    }
+    public function apiCheckPass(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['taiKhoan'=> 'Chưa đăng nhập!'],401);
+        $pass = $request->input('pass');
+        if($user->matKhau != NguoiDung::maHoa($pass))
+            return response()->json(['matKhau'=> 'Mật khẩu không chính xác!'],401);
+        return response()->json(['message'=> 'Xác thực thành công!'],200);
+    }
+
+    public function apiGetTomTat(Request $request,$id){
+        $daMua = $request->attributes->get('bought');
+        if(!$daMua) return response()->json(['message'=> 'Chỉ có thể xem tóm tắt những chương đã mua!'],200);
+        $chuong = Chuong::find($id);
+        return response()->json(['message'=> $chuong->tomTat],200);
+    }
+
+    public function apiLichSuDoc(Request $request,$id){
+        try{
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=> 'Chưa đăng nhâp!'],401);
+        $chuong = Chuong::find($id);
+        if(!$chuong) return response()->json(['message'=> 'Chương không hợp lệ!'],401);
+        $lichSuDoc = LichSuDoc::where('id_NguoiDung',$user->id)->where('id_Chuong',$id)->first();
+        if(!$lichSuDoc){
+            $lichSuDoc = new LichSuDoc();
+            $lichSuDoc->id_NguoiDung = $user->id;
+            $lichSuDoc->id_Chuong = $id;
+            $lichSuDoc->thoiGian = now();
+            $lichSuDoc->save();
+            $chuong->luotXem+=1;
+            $chuong->save();
+            Log::info('Thêm lịch sử đọc');
+            return response()->json(['message'=> 'Thêm lịch sử đọc thành công!'],200);
+        }
+        $lichSuDoc->thoiGian = now();
+        $lichSuDoc->save();
+        Log::info('Cập nhật lịch sử đọc');
+        return response()->json(['message'=> 'Cập nhật lịch sử đọc thành công!'],200);
+        }catch(Exception $e){
+            Log::error($e->getMessage());
+        }
     }
 }

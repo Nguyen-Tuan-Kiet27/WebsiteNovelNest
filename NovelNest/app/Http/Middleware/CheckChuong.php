@@ -12,29 +12,33 @@ class CheckChuong
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $jwtService = app(JwtService::class);
-        $token = $request->cookie('auth_token');
-        $parsed = false;
+        $user = $request->attributes->get("user");
         $chuong = Chuong::find($request->route('id'));
+        //Chương không tồn tại
         if (!$chuong || $chuong->trangThai == 0) {
             abort(404,'Chương này không tồn tại!');
         }
-        if($chuong->gia == 0) {
-            $request->attributes->set('bought',true);
+        //Chưa đăng nhập
+        if (!$user) {
+            // miễn phí
+            if ($chuong->gia == 0) {
+                $request->attributes->set('bought', true);
+            } else {
+                $request->attributes->set('bought', false);
+            }
             return $next($request);
         }
-        if ($token) $parsed = $jwtService->parseToken($token);
-        if (!$token || !$parsed) {
-            $request->attributes->set('bought',false);
+
+        // Nếu là tác giả hoặc miễn phí hoặc admin
+        if ($chuong->gia == 0 || $chuong->truyen->id_NguoiDung == $user->id || $user->vaiTro < 3) {
+            $request->attributes->set('bought', true);
             return $next($request);
         }
-        $uid = $parsed->claims()->get('uid');
-        $daMua = DaMua::where('id_NguoiDung',$uid)->where('id_Chuong',$chuong->id)->first();
-        if (!$daMua) {
-            $request->attributes->set('bought',false);
-            return $next($request);
-        }
-        $request->attributes->set('bought',true);
+        //Nếu đã mua
+        $daMua = DaMua::where('id_NguoiDung',$user->id)
+            ->where('id_Chuong',$chuong->id)
+            ->exists();
+        $request->attributes->set('bought',$daMua);
         return $next($request);
     }
 }

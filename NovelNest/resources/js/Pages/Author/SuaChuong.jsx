@@ -19,7 +19,7 @@ export default function SuaChuong({user, truyen, chuong}){
     const textareaRef = useRef(null);
     const [end,setEnd] = useState(false);
     const refCheckBox = useRef(null);
-
+    const [rawXu, setRawXu] = useState(100);
     useEffect(() => {
         if (tenLabelRef.current) {
             const el = tenLabelRef.current;
@@ -34,6 +34,7 @@ export default function SuaChuong({user, truyen, chuong}){
         setTomTat(chuong.tomTat)
         if(chuong.gia > 0){
             setXu(chuong.gia)
+            setRawXu(chuong.gia)
             setPhi(true)
         }
     }, []);
@@ -46,15 +47,21 @@ export default function SuaChuong({user, truyen, chuong}){
         setPhi(e.target.checked);
         if(e.target.checked==false)
             setXu(0)
+        else{
+            setXu(100);
+            setRawXu(100);
+        }
     }
     const handleChangeXu = (e)=>{
-        const raw = e.target.value;
-        const num = parseInt(raw, 10);
-        if (isNaN(num) || num < 0) {
-            setXu(0);
+        setRawXu(e.target.value);
+    }
+    const handleBlurXu = ()=>{
+            const num = parseInt(rawXu, 10);
+        if (isNaN(num) || num < 100) {
+            setXu(100);
+            setRawXu("100");
         } else {
             setXu(num);
-            e.target.value = num;
         }
     }
     const handleTomTat = async ()=>{

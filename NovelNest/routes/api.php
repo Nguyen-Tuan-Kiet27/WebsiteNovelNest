@@ -18,7 +18,7 @@ Route::get('/user', function (Request $request) {
 Route::get('/logout',[User_Controller::class,'logout']);
 Route::post('/favorite/{id}',[User_Controller::class,'changeYeuThich'])->middleware(['web','CheckLogin']);
 Route::get('/audio/{id}/{speakerId}',[TextToSpeech_Controller::class,'get']);
-Route::get('/damua/{id}',[User_Controller::class,'checkDaMua'])->middleware(['web','CheckChuong'] );
+Route::get('/damua/{id}',[User_Controller::class,'checkDaMua'])->middleware(['web','CheckLogin','CheckChuong'] );
 Route::get('/checkrole',[User_Controller::class,'apiCheckRole'])->middleware(['web','CheckLogin'] );
 Route::post('/send-otp', [User_Controller::class, 'sendOtpEmail'])->middleware(['web','CheckLogin']);
 Route::post('/verify-otp', [User_Controller::class, 'verifyOtp'])->middleware(['web','CheckLogin']);
@@ -26,6 +26,10 @@ Route::post('/vnpay/create-payment', [Payment_Controller::class, 'vnpayPayment']
 Route::post('/momo/create-payment', [Payment_Controller::class, 'momoPayment'])->middleware(['web','CheckLogin']);
 Route::get('/checkep',[User_Controller::class,'apiCheckEP'])->middleware(['web','CheckLogin']);
 Route::put('/signupauthor',[User_Controller::class,'apiSignupAuthor'])->middleware(['web','CheckLogin:4']);
+Route::post('/muachuong',[User_Controller::class,'apiMuaChuong'])->middleware(['web','CheckLogin']);
+Route::post('/checkpass',[User_Controller::class,'apiCheckPass'])->middleware(['web','CheckLogin']);
+Route::get('/tomtat/{id}',[User_Controller::class,'apiGetTomTat'])->middleware(['web','CheckLogin','CheckChuong'] );
+Route::post('/lichsudoc/{id}',[User_Controller::class,'apiLichSuDoc'])->middleware(['web','CheckLogin']) ;
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);
