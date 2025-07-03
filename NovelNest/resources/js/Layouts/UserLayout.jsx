@@ -9,6 +9,9 @@ import EmailAndPassword from '../Components/EmailAndPassword';
 export default function Userlayout({children,title,login,page}){
     /////test
     /////////
+    const {url} = usePage();
+    const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
+    const query = Object.fromEntries(new URLSearchParams(queryString));
     const headRef = useRef();
     const [mrtMain, setMrtMain] = useState(0)
     const {flash} = usePage().props;
@@ -16,10 +19,14 @@ export default function Userlayout({children,title,login,page}){
     const [modalEP,setModalEP] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [show, setShow] = useState(false);
+    const [searchText,setSearchText] = useState('');
     useEffect(() => {
+        if(flash.loginf)
+            window.location.reload();
         if (window.location.hash === '#_=_') {
             window.history.replaceState(null, null, window.location.pathname + window.location.search);
         }
+        setSearchText(query.searchText || "")
         setMrtMain(headRef.current.offsetHeight+20)
     }, []);
     const handleClickLogin = ()=>{
@@ -59,6 +66,10 @@ export default function Userlayout({children,title,login,page}){
     const handleMouseMove = (e) => {
         setPosition({ x: e.pageX, y: e.pageY% headRef.current.offsetHeight });
     };
+    const handleSearch = ()=>{
+        if(searchText.trim()!=query.searchText)
+            router.visit(`/search?searchText=${searchText.trim()}`)
+    }
     return(
         <>
             <UserLogin userLoginIsVisible={userLoginIsVisible} setUserLoginIsVisible={setUserLoginIsVisible} ></UserLogin>
@@ -122,7 +133,14 @@ export default function Userlayout({children,title,login,page}){
                             </button>
                             
                             <div className='searchHeader'>
-                                <input className='inputSearchHeader' type="text"
+                                <input className='inputSearchHeader' 
+                                        type="text" value={searchText}
+                                        onChange={e=>setSearchText(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                            handleSearch();
+                                            }
+                                        }}
                                 />
                                <img src="/img/search.svg" alt="" />
                             </div>

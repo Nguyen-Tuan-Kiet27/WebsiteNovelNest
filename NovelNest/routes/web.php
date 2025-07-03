@@ -22,6 +22,8 @@ Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middlewar
 Route::get('/signupauthor', [User_Controller::class,'signupAuthor'])->middleware('CheckLogin');
 Route::get('/dieukhoandichvu',[User_Controller::class,'dieuKhoanDichVu'])->middleware('CheckLogin');
 Route::get('/datlaimatkhau', [User_Controller::class,'datLaiMatKhau'])->middleware('CheckLogin');
+Route::get('/search', [User_Controller::class,'timKiem'])->middleware('CheckLogin');
+
 
 
 

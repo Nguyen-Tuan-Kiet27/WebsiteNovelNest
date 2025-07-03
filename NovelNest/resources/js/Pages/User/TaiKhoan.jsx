@@ -1,50 +1,203 @@
 import Userlayout from '@/Layouts/UserLayout';
 import { Inertia } from '@inertiajs/inertia';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './TaiKhoan.scss';
 import { router } from '@inertiajs/react';
+import { TiPen } from "react-icons/ti";
+import axios from 'axios';
+import { FaRegHeart, FaHeart  } from 'react-icons/fa';
+import VerifyPass from '../../Components/VerifyPass';
 
-export default function TaiKhoan({user,daMua}){
-    console.log(daMua)
+
+export default function TaiKhoan({user}){
+    const [showTab,setShowTab] = useState(1);
+    const hinh='https://www.westminstercollection.com/media/52253261/dn-change-checker-2022-canadian-mint-honouring-queen-elizabeth-ii-2-coin-product-images-2-1.jpg?height=450&bgcolor=fff'
+    //đã mua
+    const [daMuas,setDaMuas] = useState({});
+    const [sDaMua,setSDaMua] = useState(1);
+    const [hasMoreDaMua,setHasMoreDaMua] = useState(true);
+    const [loadDaMua,setLoadDaMua] = useState(false);
     const [expandedId, setExpandedId] = useState(null);
 
-    const handleToggle = (id) => {
+
+    const handleGetDaMuas = async ()=>{
+      try {
+          setLoadDaMua(true);
+          const response = await axios.get(`/api/getdamua/${sDaMua}`);
+
+          setDaMuas(prev => ({
+            ...prev,
+            ...response.data.daMuas
+          }));
+          
+          setHasMoreDaMua(response.data.hasMore);
+          setSDaMua(prev => prev + 1);
+        } catch (error) {
+          console.error(error?.response?.data?.message || error.message);
+        } finally {
+          setLoadDaMua(false);
+        }
+    }
+    const handleToggle = (id,e) => {
+        e.stopPropagation();
         setExpandedId(prev => (prev === id ? null : id));
     };
-    
+    //yêu thích
+    const [yeuThichs,setYeuThichs] = useState({});
+    const [sYeuThich,setSYeuThich] = useState(1);
+    const [hasMoreYeuThich,setHasMoreYeuThich] = useState(true);
+    const [loadYeuThich,setLoadYeuThich] = useState(false);
+    const [timState, setTimState] = useState({});
+
+    const handleGetYeuThichs = async () => {
+        try {
+          setLoadYeuThich(true);
+          const response = await axios.get(`/api/getyeuthich/${sYeuThich}`);
+
+          setYeuThichs(prev => ({
+            ...prev,
+            ...response.data.yeuThichs
+          }));
+          
+          setHasMoreYeuThich(response.data.hasMore);
+          setSYeuThich(prev => prev + 1);
+        } catch (error) {
+          console.error(error?.response?.data?.message || error.message);
+        } finally {
+          setLoadYeuThich(false);
+        }
+      };
+    const toggleTim = async (id, e) => {
+      e.stopPropagation();
+      try {
+        const response = await axios.post(
+          `/api/favorite/${id}`
+        )
+        setTimState(prev => ({
+          ...prev,
+          [id]: !prev[id]
+        }));
+      } catch (error) {
+        console.log(error.response.data.message)
+      }
+    };
+    //lịch sử
+    const [lichSus,setLichSus] = useState([]);
+    const [sLichSu,setSLichSu] = useState(null);
+    const [hasMoreLichSu,setHasMoreLichSu] = useState(true);
+    const [loadLichSu,setLoadLichSu] = useState(false);
+    const [expandedIdL, setExpandedIdL] = useState(null);
+
+
+    const handleGetLichSus = async () => {
+        try {
+          setLoadLichSu(true);
+          const response = await axios.get(`/api/getlichsu/`,{
+            params: {
+              lastTime: sLichSu,
+            }
+          });
+
+          setLichSus(prev => ([
+            ...prev,
+            ...response.data.lichSus
+          ]));
+          
+          setHasMoreLichSu(response.data.hasMore);
+          setSLichSu(response.data.minTime);
+        } catch (error) {
+          console.error(error?.response?.data?.message || error.message);
+        } finally {
+          setLoadLichSu(false);
+        }
+    };
+    const handleToggleL = (id,e) => {
+        e.stopPropagation();
+        setExpandedIdL(prev => (prev === id ? null : id));
+    };
+
+    //Đổi tên:
+    const [ten,setTen] = useState('')
+    const [eTen,setETen] = useState('');
+    const [showDoiTen,setShowDoiTen] = useState(false);
+    const [showPass,setShowPass] = useState(false);
+    const handleDoiTen = ()=>{
+      if(ten.trim().length < 8){
+        setETen('Tên phải dài từ 8 ký tự!');
+        return;
+      }
+      setShowPass(true);
+    }
+    const handleDoiTenS = async ()=>{
+      const formData = new FormData();
+      formData.append('ten',ten);
+      formData.append('_method','PUT');
+      try {
+        const response = await axios.post('/api/user/doiten',formData);
+        alert('Đổi tên thành công');
+        window.location.reload();
+      } catch (error) {
+        alert(error.response.data.message)
+      }
+    }
+    //////
+    useEffect( ()=>{
+      handleGetDaMuas();
+      handleGetYeuThichs()
+      handleGetLichSus()
+    },[]);
+
   return (
-    <div className="tai-khoan-page">
-      <div className="tai-khoan-container">
-        <div className="logout-btn">
-          <button onClick={() => window.location.href = '/api/logout'}>Đăng xuất</button>
-        </div>
-
-        <div className="profile-section">
-          <div className="profile-avatar">
-            <div className="avatar-img"><img src={user.anhDaiDien}/></div>
-            <button className="edit-avatar">Sửa</button>
+    <Userlayout login={user} title='Tài khoản' page='4'>
+      <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleDoiTenS}/>
+      {showDoiTen&& (
+          <div className='popupDoiTen' onClick={()=>setShowDoiTen(false)}>
+            <div className='mainDoiTen' onClick={(e)=>{e.stopPropagation()}}>
+              <h5>ĐỔI TÊN</h5>
+              <label className='error'>{eTen}</label>
+              <input type="text" placeholder='Nhập tên mới' value={ten} onChange={(e)=>setTen(e.target.value)}/>
+              <button onClick={handleDoiTen}>Xác nhận</button>
+            </div>
           </div>
-          <div className="profile-info">
-            <p className="user-id">{user.id}</p>
-            <p className="user-title">{user.vaiTro==4?'Độc giả':user.vaiTro==3?'Tác giả':'Admin'}</p>
-          </div>
-          <div className="balance-section">
-            <p>Số lượng xu: {user.soDu}</p>
-            <button className="recharge-btn" onClick={()=>router.visit('/muaxu')}>Nạp xu</button>
-          </div>
-        </div>
-
-        <div className="tab-section">
-          <div className="tabs">
-            <div className="tab active">Đã mua</div>
-            <div className="tab">Yêu thích</div>
-            <div className="tab">Lịch sử</div>
+        )
+      }
+      <div className="tai-khoan-page">
+        <div className="tai-khoan-container">
+          <div className="logout-btn">
+            <button onClick={() => window.location.href = '/api/logout'}>Đăng xuất</button>
           </div>
 
-            <div className="list-items">
-                {Object.values(daMua).map(item => (
-                <div key={item.truyen.id}>
-                    <div className="item">
+          <div className="profile-section">
+            <div className="profile-avatar">
+              <div className="avatar-img"><img src={user.anhDaiDien}/></div>
+              <button className="edit-avatar">Đổi Ảnh</button>
+            </div>
+            <div className='uName'>
+              <p>Tên:&ensp;{user.ten}</p>
+              <button onClick={()=>setShowDoiTen(true)}><TiPen /></button>
+            </div>
+            <div className="profile-info">
+              <p className="user-id">ID:&ensp;{user.id}</p>
+              <p className="user-title">{user.vaiTro==4?'Độc giả':user.vaiTro==3?'Tác giả':'Admin'}</p>
+            </div>
+            <div className="balance-section">
+              <p>Số lượng xu: {user.soDu}</p>
+              <button className="recharge-btn" onClick={()=>router.visit('/muaxu')}>Nạp xu</button>
+            </div>
+          </div>
+
+          <div className="tab-section">
+            <div className="tabs">
+              <div className={showTab==1?'tab active':'tab'} onClick={()=>setShowTab(1)}>Đã mua</div>
+              <div className={showTab==2?'tab active':'tab'} onClick={()=>setShowTab(2)}>Yêu thích</div>
+              <div className={showTab==3?'tab active':'tab'} onClick={()=>setShowTab(3)}>Lịch sử</div>
+            </div>
+
+              <div className="list-items">
+                  {/*Đã mua*/}
+                  {showTab==1 && Object.values(daMuas).map(item => (
+                    <div key={item.truyen.id}>
+                      <div className="item" onClick={()=>router.visit(`/truyen/${item.truyen.id}`)} style={{cursor:'pointer'}}>
                         <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.truyen.hinhAnh}`} alt="" /></div>
                         <div className="item-info">
                             <p><strong>{item.truyen.ten}</strong></p>
@@ -52,29 +205,106 @@ export default function TaiKhoan({user,daMua}){
                             <p>Số lượng: {item.truyen.soLuong}</p>
                             <p>Tổng tiền: {item.total} xu</p>
                         </div>
-                        <div className="item-arrow" onClick={() => handleToggle(item.truyen.id)}>
+                        <div className="item-arrow" onClick={(e) => handleToggle(item.truyen.id,e)}>
                             {expandedId !== item.truyen.id ? '▲' : '▼'}
                         </div>
-                    </div>
+                      </div>
 
-                    {expandedId === item.truyen.id && (
+                      {expandedId === item.truyen.id && (
                         <div className="item-details">
-                            {item.sub.map((chuong, idx) => (
-                                <div className="chapter" key={chuong.id}>
-                                    <span className="chapter-title">{chuong.ten}</span>
-                                    {/* <span className="chapter-price">{chuong.gia} xu</span> */}
-                                </div>
-                            ))}
+                          {item.sub.map((chuong, idx) => (
+                            <div className="chapter" key={chuong.id}>
+                              <span className="chapter-title" onClick={()=>router.visit(`/chuong/${chuong.id}`)} style={{cursor:'pointer'}}>{`CHƯƠNG ${chuong.soChuong} : `+chuong.ten}</span>
+                            </div>
+                          ))}
                         </div>
-                    )}
-                </div>
-            ))}
+                      )}       
+                    </div>
+                  ))}
+                  {/*Yêu thích*/}
+                  {showTab==2 && Object.values(yeuThichs).map(item => (
+                    <div key={item.id} onClick={()=>router.visit(`/truyen/${item.id}`)} style={{cursor:'pointer'}}>
+                      <div className="item">
+                        <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.hinhAnh}`} alt="" /></div>
+                        <div className="item-info">
+                            <p>&emsp;</p>
+                            <p><strong>{item.ten}</strong></p>
+                            <p>Thể loại: {item.the_loai.ten}</p>
+                            <p>&emsp;</p>
+                        </div>
+                        <div className="item-arrow" onClick={(e) => toggleTim(item.id, e)}>
+                            {!timState[item.id] ?<FaHeart style={{marginRight:'50px', color:'red'}}/>:<FaRegHeart style={{marginRight:'50px'}}/>}
+                        </div>
+                      </div> 
+                    </div>
+                  ))}
+                  {/*Lịch sử: 3Mua*/}
+                  {showTab==3 && lichSus.map(item => (
+                    /*Mua*/
+                    item.loai == 3 && (
+                      <div key={item.thoiGian}>
+                        <div className="item" onClick={()=>router.visit(`/truyen/${item.truyen.id}`)} style={{cursor:'pointer'}}>
+                          <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.truyen.hinhAnh}`} alt="" /></div>
+                          <div className="item-info">
+                              <p>Đã Mua: <strong>{item.truyen.ten}</strong></p>
+                              <p>Thời gian: {item.thoiGian}</p>
+                              <p>Số lượng: {item.soLuong}</p>
+                              <p>Tổng tiền: {item.lichSu.gia} xu</p>
+                          </div>
+                          <div className="item-arrow" onClick={(e) => handleToggleL(item.thoiGian,e)}>
+                              {expandedIdL !== item.truyen.id ? '▲' : '▼'}
+                          </div>
+                        </div>
 
-            <div className="load-more">Xem thêm</div>
+                        {expandedIdL === item.thoiGian && (
+                          <div className="item-details">
+                            {item.sub.map((chuong, idx) => (
+                              <div className="chapter" key={chuong.id}>
+                                <span className="chapter-title" onClick={()=>router.visit(`/chuong/${chuong.id}`)} style={{cursor:'pointer'}}>{`CHƯƠNG ${chuong.soChuong} : `+chuong.ten}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}       
+                      </div>
+                    ) ||
+                    /*Nap*/
+                    item.loai == 2 && (
+                      <div key={item.thoiGian}>
+                        <div className="item" onClick={()=>router.visit(`/muaxu`)} style={{cursor:'pointer'}}>
+                          <div className="item-image"><img src='/img/XuNovelNest.png' alt="" /></div>
+                          <div className="item-info">
+                              <p><strong>Nạp xu:</strong></p>
+                              <p>Số lượng xu: {item.lichSu.soLuongXu}</p>
+                              <p>Tổng tiền: {item.lichSu.menhGia}₫</p>
+                              <p>Thời gian: {item.thoiGian}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) ||
+                    /*Đọc*/
+                    item.loai == 1 && (
+                      <div key={item.thoiGian}>
+                        <div className="item" onClick={()=>router.visit(`/chuong/${item.lichSu.id_Chuong}`)} style={{cursor:'pointer'}}>
+                          <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.truyen.hinhAnh}`} alt="" /></div>
+                          <div className="item-info">
+                              <p><strong>Đã đọc:</strong></p>
+                              <p>Truyện: <strong>{item.truyen.ten}</strong></p>
+                              <p>Chương {item.soChuong}: <strong>{item.tenChuong}</strong></p>
+                              <p>Thời gian: {item.thoiGian}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  ))}
+                  {/*/////////////////////////////////////////////*/}
+              {showTab==1&&<div onClick={()=>{if(hasMoreDaMua && !loadDaMua)handleGetDaMuas()}} className="load-more">{hasMoreDaMua?'Xem thêm':'Không còn dữ liệu!'}</div>}
+              {showTab==2&&<div onClick={()=>{if(hasMoreYeuThich && !loadYeuThich)handleGetYeuThichs()}} className="load-more">{hasMoreYeuThich?'Xem thêm':'Không còn dữ liệu!'}</div>}
+              {showTab==3&&<div onClick={()=>{if(hasMoreLichSu && !loadLichSu)handleGetLichSus()}} className="load-more">{hasMoreLichSu?'Xem thêm':'Không còn dữ liệu!'}</div>}
+
+            </div>
           </div>
         </div>
       </div>
-    </div>
-       
-    )
+    </Userlayout>
+  )
 }

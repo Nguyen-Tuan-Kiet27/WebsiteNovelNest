@@ -12,27 +12,57 @@ import { GoDotFill } from "react-icons/go";
 import BuyChapter from '../../Components/BuyChappter';
 import UserLogin from '@/Components/UserLogin';
 import EmailAndPassword from '@/Components/EmailAndPassword';
+import VerifyPass from '../../Components/VerifyPass';
 
-export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau,chuongChuaMua,chuongs}) {
+export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau,chuongChuaMua,chuongs,daBaoCao}) {
   const [premium,setPremium] = useState(false);
   const [hiden,setHiden] = useState(false);
   const [devTool,setDevTool] = useState(false);
   const [content,setContent] = useState(chuong.noiDung);
   const [scrollY,setScrollY] = useState(0);
   const [reScrool,setReScrool] = useState(true);
+  const [showBaoCao,setShowBaoCao] = useState(false);
+  const [showLogin,setShowLogin] = useState(false);
+  const [showTT,setShowTT] = useState(false);
+  const [showModalChapter,setShowModalChapter] = useState(false)
+
+
+
+
   //Lượt xem:
   const [count, setCount] = useState(0); // bộ đếm
   const [paused, setPaused] = useState(false); // điều kiện tạm dừng
   const intervalRef = useRef(null);
   const idleTimerRef = useRef(null);
-  const resetIdleTimer = () => {
-    clearTimeout(idleTimerRef.current);
-    if(!devTool && !hiden)
-      setPaused(false)
 
-    idleTimerRef.current = setTimeout(() => {
-      setPaused(true)
-    }, 15000); // 15 giây
+  const devToolRef = useRef(devTool);
+  const hidenRef = useRef(hiden);
+  const showBaoCaoRef = useRef(showBaoCao);
+  const showLoginRef = useRef(showLogin);
+  const showTTRef = useRef(showTT);
+  const showModalChapterRef = useRef(showModalChapter);
+  useEffect(() => { devToolRef.current = devTool }, [devTool]);
+  useEffect(() => { hidenRef.current = hiden }, [hiden]);
+  useEffect(() => { showBaoCaoRef.current = showBaoCao }, [showBaoCao]);
+  useEffect(() => { showLoginRef.current = showLogin }, [showLogin]);
+  useEffect(() => { showTTRef.current = showTT }, [showTT]);
+  useEffect(() => { showModalChapterRef.current = showModalChapter }, [showModalChapter]);
+
+  const resetIdleTimer = () => {
+    if (
+    !devToolRef.current &&
+    !hidenRef.current &&
+    !showBaoCaoRef.current &&
+    !showLoginRef.current &&
+    !showTTRef.current &&
+    !showModalChapterRef.current
+    ){
+      clearTimeout(idleTimerRef.current);
+      setPaused(false)
+      idleTimerRef.current = setTimeout(() => {
+        setPaused(true)
+      }, 15000); // 15 giây
+    }
   };
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,7 +70,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
         setCount(prev => {
           const next = prev + 1;
           console.log(next)
-          if (next === 30) {
+          if (next === 45) {
             clearInterval(interval); // dừng interval tại đây
             axios.post(`/api/lichsudoc/${chuong.id}`);
           }
@@ -60,13 +90,12 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
       }
       setContent('<h1>DevTool đang mở, hãy tắt DevTool để tải lại nội dung!</h1>');
       setDevTool(true);
-      setPaused(true)
     },
     ()=>{
       setDevTool(false);
-      if(!hiden)
+      if(!hiden){
         setContent(chuong.noiDung);
-      setPaused(false);
+      }
     }
   );
 
@@ -79,14 +108,12 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
           setReScrool(false);
         }
         setContent('<h1>Bạn đang không focus page, hãy quay lại nội dung sẽ được cập nhật!</h1>');
-        setPaused(true);
       }
     },
     ()=>{
       setHiden(false);
       if(!devTool){
         setContent(chuong.noiDung);
-        setPaused(false);
       }
     }
   )
@@ -102,9 +129,6 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
         ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'c', 'j'].includes(e.key.toLowerCase())) ||
         ((e.ctrlKey || e.metaKey) && ['u', 's', 'p'].includes(e.key.toLowerCase()))
       ) {
-        e.preventDefault();
-      }
-      if (key === 'printscreen') {
         e.preventDefault();
       }
     };
@@ -180,7 +204,6 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
     setShowVoice(!showVoice)
   }
 
-  const [showTT,setShowTT] = useState(false);
   const [tomTat,setTomTat] = useState('');
   const handleTomTat = async ()=>{
     const response = await axios.get(`/api/tomtat/${idChuongTruoc}`);
@@ -188,9 +211,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
     setShowTT(true);
   }
 
-  const [showModalChapter,setShowModalChapter] = useState(false)
   const chuongChuaMuaIds = new Set(chuongChuaMua.map(c => c.id));
-  const [showLogin,setShowLogin] = useState(false);
   const [modalEP,setModalEP] = useState(false);
   const [showDate,setShowDate] = useState(false)
   const [date,setDate] = useState('')
@@ -223,12 +244,64 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
         setSelect(chapter);
     }
   }
+  ///Báo cáo chương
+  const [eBaoCao,setEBaoCao] = useState('');
+  const [baoCao,setBaoCao] = useState('');
+  const [showPass,setShowPass] = useState(false);
+  const handleShowBaoCao = ()=>{
+    if(!user){
+      setShowLogin(true)
+      return;
+    }
+    setShowBaoCao(true);
+  }
+  const handleBaoCao = ()=>{
+    if(baoCao.trim().length < 20){
+      setEBaoCao('Nội dung quá ngắn');
+      return;
+    }
+    setShowPass(true);
+  }
+  const handleBaoCaoS = async ()=>{
+    const formData = new FormData();
+    formData.append('noiDung',baoCao);
+    try {
+      const response = await axios.post(`/api/user/baocaochuong/${chuong.id}`,formData);
+      alert(response.data.message);
+      window.location.reload();
+    } catch (error) {
+      setEBaoCao(error.response.data.message)
+    }
+  }
+
+  /////////
+  useEffect(() => {
+    if (!devTool && !hiden && !showBaoCao && !showLogin && !showTT && !showModalChapter) {
+      setPaused(false);
+    } else {
+      setPaused(true);
+    }
+  }, [showBaoCao, showLogin, showTT, showModalChapter, devTool, hiden]);
+  
+  
+
 
   return (
     <Userlayout login={user} title={`${truyen.ten} - Chương ${chuong.soChuong}: ${chuong.ten}`}>
       <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
       <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
       <BuyChapter isShow={showModal} changeShow={setShowModal} select={select} chuongChuaMua={chuongChuaMua}/>
+      <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleBaoCaoS}/>
+      {showBaoCao &&(
+        <div className='BaoCao' onClick={()=>setShowBaoCao(false)}>
+          <div className='mainBaoCao' onClick={e=>e.stopPropagation()}>
+              <h4>Báo cáo truyện</h4>
+              <label className='error'>{eBaoCao}</label>
+              <textarea value={baoCao} onChange={(e)=>{setBaoCao(e.target.value);setEBaoCao('')}} type="text" placeholder='Nhập lý do - vấn đề.'/>
+              <button onClick={handleBaoCao}>Gửi</button>
+          </div>
+        </div>
+      )}
       {(showTT)&&(
         <div className='tomTat'
               onClick={()=>setShowTT(false)}
@@ -362,7 +435,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
             </div>
           </div>
           <div className="doc-report">
-            <button className="report-btn">Báo cáo vi phạm</button>
+            <button disabled={daBaoCao} className="report-btn" onClick={handleShowBaoCao}>{daBaoCao?'Đã báo cáo':'Báo cáo vi phạm'}</button>
             <ul>
               <li>- Vi phạm pháp luật.</li>
               <li>- Ảnh hưởng đến quyền lợi Việt Nam.</li>

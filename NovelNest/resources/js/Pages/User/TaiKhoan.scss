@@ -69,7 +69,7 @@
 
         p {
           display: inline-block;
-          margin-right: 1rem;
+          margin-right: 20rem;
         }
 
         .recharge-btn {
@@ -115,7 +115,7 @@
           .item-image {
             width: 60px;
             height: 60px;
-            background: #ddd;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -148,4 +148,49 @@
       }
     }
   }
+}
+
+.uName{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  >p{
+    margin: 0;
+  }
+  >button{
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+.chapter-title{
+  &:hover{
+    color: rgb(131, 196, 35);
+  }
+}
+.popupDoiTen{
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 70vh;
+  z-index: 1001;
+  >.mainDoiTen{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: #d9d9d9;
+    box-shadow: 3px 3px 5px 3px rgba(0, 0, 0, 0.3);
+    >button{
+      margin-top: 10px;
+    }
+  }
+}
+.error{
+  color: red;
+  font-size: 14;
 }

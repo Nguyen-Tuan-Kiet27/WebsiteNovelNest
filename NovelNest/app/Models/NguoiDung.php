@@ -25,6 +25,9 @@ class NguoiDung extends Model
     public function YeuThichs(){
         return $this->hasMany(YeuThich::class,"id_NguoiDung");
     }
+    public function BaoCaos(){
+        return $this->hasMany(BaoCao::class,"id_NguoiDung");
+    }
     public function Truyens(){
         return $this->hasMany(Truyen::class,"id_NguoiDung");
     } 
@@ -39,6 +42,9 @@ class NguoiDung extends Model
     }
     public function LichSuNaps(){
         return $this->hasMany(LichSuNap::class,"id_NguoiDung");
+    }
+    public function yeuThichTruyens() {
+        return $this->belongsToMany(Truyen::class, 'yeuthich', 'id_NguoiDung', 'id_Truyen')->with('theLoai');
     }
     static function maHoa($plaintext) {
         $key = env('CUSTOM_ENCRYPT_KEY');
