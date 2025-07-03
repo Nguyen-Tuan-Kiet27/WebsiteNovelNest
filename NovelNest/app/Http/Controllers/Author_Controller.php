@@ -36,6 +36,7 @@ class Author_Controller extends Controller
             ->orderByDesc('doanhThu')
             ->limit(3)
             ->get();
+        $top3Truyens = $top3Truyens->isEmpty() ? collect([]) : $top3Truyens;
         //Tuyện đang hoạt động
         $truyenDangHoatDong = Truyen::where('id_NguoiDung',$user->id)->where('trangThai',1)->count();
         //Doanh thu tuần này
@@ -48,6 +49,7 @@ class Author_Controller extends Controller
             ->whereBetween('lichsumua.thoiGian', [$startOfWeek, $endOfWeek])
             ->selectRaw('FLOOR(SUM(damua.gia * 0.7)) as tongDoanhThu')
             ->value('tongDoanhThu');
+        $doanhThuTuan = $doanhThuTuan ?? 0;
         //Chart doanh tháng này
         $startOfMonth = Carbon::now()->startOfMonth(); 
         $endOfMonth = Carbon::now()->endOfMonth();     
@@ -67,7 +69,9 @@ class Author_Controller extends Controller
             ->map(function ($day) use ($startOfMonth) {
                 return $startOfMonth->copy()->day($day)->toDateString();
             });
-        $doanhThuMap = $doanhThuTrongThang->pluck('tongDoanhThu', 'ngay');
+        $doanhThuMap = $doanhThuTrongThang->isEmpty()
+                        ? collect()
+                        : $doanhThuTrongThang->pluck('tongDoanhThu', 'ngay');
         $finalDataThang = $ngayTrongThang->map(function ($ngay) use ($doanhThuMap) {
             return [
                 'mocThoiGian' => $ngay,
@@ -133,7 +137,14 @@ class Author_Controller extends Controller
             )
             ->groupBy(DB::raw("YEAR(lichsumua.thoiGian)"))
             ->get();
-        $cacNam = collect(range($namBatDau = $doanhThuAll->first()->nam, $doanhThuAll->last()->nam));
+        // $cacNam = collect(range($namBatDau = $doanhThuAll->first()->nam, $doanhThuAll->last()->nam));
+        if ($doanhThuAll->isNotEmpty()) {
+            $namBatDau = $doanhThuAll->first()->nam;
+            $namKetThuc = $doanhThuAll->last()->nam;
+            $cacNam = collect(range($namBatDau, $namKetThuc));
+        } else {
+            $cacNam = collect(range($year,$year)); // Trống, không có năm nào
+        }
         $doanhThuMap = $doanhThuAll->pluck('tongDoanhThu','nam');
         $finalDataAll = $cacNam->map(function ($nam) use ($doanhThuMap){
             return[
