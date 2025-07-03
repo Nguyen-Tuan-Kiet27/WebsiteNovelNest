@@ -61,16 +61,17 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
             setSelect(chapter);
         }
     }
-  const handleFavorite= async ()=>{
-    try {
-      const response = await axios.post(
-        `/api/favorite/${truyen.id}`
-      )
-      setLove(response.data.flag);
-    } catch (error) {
-      console.log(error.response.data.message)
+    const handleFavorite= async ()=>{
+      try {
+        const response = await axios.post(
+          `/api/favorite/${truyen.id}`
+        )
+        setLove(response.data.flag);
+      } catch (error) {
+        console.log(error.response.data.message)
+      }
     }
-  }
+    
 return(
 <Userlayout title="Stories" login={login} >
     <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
@@ -128,7 +129,7 @@ return(
                 </div>
             </div>
         </div>
-        <div style={{maxHeight: traiHeight, minHeight:traiHeight}}>
+        <div style={{maxHeight: traiHeight, minHeight:traiHeight}} className='chapterInStory'>
             <div className='storyChapter' style={{maxHeight: traiHeight2}}> 
             
                 <button onClick={()=>router.visit(`/chuong/${chuongs[0].id}`)}>

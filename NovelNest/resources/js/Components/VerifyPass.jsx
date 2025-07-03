@@ -14,6 +14,7 @@ export default function({isShow,setIsShow,onOk}){
         }
         try {
             const response = await axios.post('/api/checkpass',{'pass':pass})
+            setPass('');
             onOk();
         } catch (error) {
             if(error.response.data.matKhau)

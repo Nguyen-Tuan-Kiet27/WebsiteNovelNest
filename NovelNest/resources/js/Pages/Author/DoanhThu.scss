@@ -1,0 +1,118 @@
+.DoanhThu{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    >.mainDoanhThu{
+        width: 95%;
+        >.bodyDT{
+            width: 100%;
+            >.thongKe{
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                >.top3{
+                    width: 30%;
+                    background-color: white;
+                    border: 1px solid;
+                    border-radius: 10px;
+                    padding: 10px;
+                    >.subTop3{
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+                >.truyenHoatDong{
+                    width: 30%;
+                    background-color: white;
+                    border: 1px solid;
+                    border-radius: 10px;
+                    padding: 10px;
+                    >p{
+                        font-size: 30px;
+                        margin-top: 20px;
+                    }
+                }
+                >.tuanNayAndRut{
+                    width: 30%;
+                    >.tuanNay{
+                        width: 100%;
+                        background-color: white;
+                        border: 1px solid;
+                        border-radius: 10px;
+                        padding: 10px;
+                        >div{
+                            display: flex;
+                            justify-content: space-around;
+                            align-items: center;
+                        }
+                    }
+                    >.rut{
+                        width: 100%;
+                        display: flex;
+                        justify-content: end;
+                        margin-top: 20px;
+                        >button{
+                            width: 30%;
+                            aspect-ratio: 6/2;
+                            background-color: #D0F0C0;
+                            color: #556B2F;
+                            border: 1px solid;
+                            &:hover{
+                                background-color: #90e666;
+                                color: #D0F0C0;
+                            }
+                        }
+                    }
+                }
+            }
+            >.chartDT{
+                >.khac{
+                    display: flex;
+                    justify-content: space-between;
+                    >div{
+                        width: 33%;
+                    }
+                    >.tong{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                }
+            }
+            >.tableDT{
+                margin-bottom: 30px;
+                >table{
+                    width: 100%;
+                    background-color: #d9d9d9;
+                    border: 1px solid;
+                    border-top: none ;
+                    thead{
+                        background-color: white;
+                    }
+                    .tenT{
+                        width: 60%;
+                        padding: 10px;
+                        border-top: 1px solid ;
+                    }
+                    .doanhThuT{
+                        width: 20%;
+                        border-top: 1px solid ;
+                    }
+                    .luotBanT{
+                        width: 20%;
+                        border-top: 1px solid ;
+                    }
+                }
+            }
+        }
+    }
+}
+main{
+    background-color: #F3F2EC !important;
+    min-height: 100vh;
+}
+.so{
+    font-size: 25px;
+}

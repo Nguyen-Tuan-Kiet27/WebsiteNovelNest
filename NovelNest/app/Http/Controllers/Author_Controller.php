@@ -11,8 +11,14 @@ use Illuminate\Support\Facades\Http;
 use App\Models\TheLoai;
 use App\Models\Truyen;
 use App\Models\Chuong;
+use App\Models\LichSuMua;
+use App\Models\DaMua;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+
 
 class Author_Controller extends Controller
 {
@@ -21,12 +27,149 @@ class Author_Controller extends Controller
         if(!$user){
             return redirect("/");
         }
+        //Top 3 doanh thu cao nhất
+        $top3Truyens = Truyen::join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
+            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->select('truyen.id', 'truyen.ten', DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu'))
+            ->groupBy('truyen.id', 'truyen.ten')
+            ->orderByDesc('doanhThu')
+            ->limit(3)
+            ->get();
+        //Tuyện đang hoạt động
+        $truyenDangHoatDong = Truyen::where('id_NguoiDung',$user->id)->where('trangThai',1)->count();
+        //Doanh thu tuần này
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = Carbon::now();
+        $doanhThuTuan = Damua::join('chuong', 'damua.id_Chuong', '=', 'chuong.id')
+            ->join('truyen', 'chuong.id_Truyen', '=', 'truyen.id')
+            ->join('lichsumua','damua.id_LichSuMua','=','lichsumua.id')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->whereBetween('lichsumua.thoiGian', [$startOfWeek, $endOfWeek])
+            ->selectRaw('FLOOR(SUM(damua.gia * 0.7)) as tongDoanhThu')
+            ->value('tongDoanhThu');
+        //Chart doanh tháng này
+        $startOfMonth = Carbon::now()->startOfMonth(); 
+        $endOfMonth = Carbon::now()->endOfMonth();     
+
+        $doanhThuTrongThang = Damua::join('chuong', 'damua.id_Chuong', '=', 'chuong.id')
+            ->join('truyen', 'chuong.id_Truyen', '=', 'truyen.id')
+            ->join('lichsumua', 'damua.id_LichSuMua', '=', 'lichsumua.id')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->whereBetween('lichsumua.thoiGian', [$startOfMonth, $endOfMonth])
+            ->select(
+                DB::raw("DATE(lichsumua.thoiGian) as ngay"),
+                DB::raw("FLOOR(SUM(damua.gia) * 0.7) as tongDoanhThu")
+            )
+            ->groupBy(DB::raw("DATE(lichsumua.thoiGian)"))
+            ->get();
+        $ngayTrongThang = collect(range(1, $startOfMonth->daysInMonth))
+            ->map(function ($day) use ($startOfMonth) {
+                return $startOfMonth->copy()->day($day)->toDateString();
+            });
+        $doanhThuMap = $doanhThuTrongThang->pluck('tongDoanhThu', 'ngay');
+        $finalDataThang = $ngayTrongThang->map(function ($ngay) use ($doanhThuMap) {
+            return [
+                'mocThoiGian' => $ngay,
+                'tongDoanhThu' => $doanhThuMap->get($ngay, 0)
+            ];
+        });
+
+        $top10Thang = Truyen::join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
+            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->join('lichsumua', 'damua.id_LichSuMua', '=', 'lichsumua.id')
+            ->whereBetween('lichsumua.thoiGian', [$startOfMonth, $endOfMonth])
+            ->select('truyen.id', 'truyen.ten', DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu'),DB::raw('COUNT(damua.gia) as luotBan'))
+            ->groupBy('truyen.id', 'truyen.ten')
+            ->orderByDesc('doanhThu')
+            ->limit(10)
+            ->get();
+
+        //Doanh thu năm nay
+        $startOfYear = Carbon::now()->startOfYear();
+        $endOfYear = Carbon::now()->endOfYear();
+        $year =  $startOfYear->year;
+
+        $doanhThuTrongNam = Damua::join('chuong', 'damua.id_Chuong', '=', 'chuong.id')
+            ->join('truyen', 'chuong.id_Truyen', '=', 'truyen.id')
+            ->join('lichsumua', 'damua.id_LichSuMua', '=', 'lichsumua.id')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->whereBetween('lichsumua.thoiGian', [$startOfYear, $endOfYear])
+            ->select(
+                DB::raw("MONTH(lichsumua.thoiGian) as thang"),
+                DB::raw("FLOOR(SUM(damua.gia) * 0.7) as tongDoanhThu")
+            )
+            ->groupBy(DB::raw("MONTH(lichsumua.thoiGian)"))
+            ->get();
+        
+        $thangTrongNam = collect(range(1, 12));
+        $doanhThuMap = $doanhThuTrongNam->pluck('tongDoanhThu', 'thang');
+        $finalDataNam = $thangTrongNam->map(function ($thang) use ($doanhThuMap,$year) {
+            return [
+                'mocThoiGian' => "$year-$thang",
+                'tongDoanhThu' => $doanhThuMap->get($thang, 0)
+            ];
+        });
+
+        $top10Nam = Truyen::join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
+            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->join('lichsumua', 'damua.id_LichSuMua', '=', 'lichsumua.id')
+            ->whereBetween('lichsumua.thoiGian', [$startOfYear, $endOfYear])
+            ->select('truyen.id', 'truyen.ten', DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu'),DB::raw('COUNT(damua.gia) as luotBan'))
+            ->groupBy('truyen.id', 'truyen.ten')
+            ->orderByDesc('doanhThu')
+            ->limit(10)
+            ->get();
+        //Chart doanh thu all
+        $doanhThuAll = DaMua::join('chuong','damua.id_Chuong','=','chuong.id')
+            ->join('truyen','chuong.id_Truyen','=','truyen.id')
+            ->join('lichsumua','damua.id_LichSuMua','=','lichsumua.id')
+            ->where('truyen.id_NguoiDung',$user->id)
+            ->select(
+                DB::raw("YEAR(lichsumua.thoiGian) as nam"),
+                DB::raw("FLOOR(SUM(damua.gia) * 0.7) as tongDoanhThu")
+            )
+            ->groupBy(DB::raw("YEAR(lichsumua.thoiGian)"))
+            ->get();
+        $cacNam = collect(range($namBatDau = $doanhThuAll->first()->nam, $doanhThuAll->last()->nam));
+        $doanhThuMap = $doanhThuAll->pluck('tongDoanhThu','nam');
+        $finalDataAll = $cacNam->map(function ($nam) use ($doanhThuMap){
+            return[
+                'mocThoiGian'=>$nam,
+                'tongDoanhThu'=>$doanhThuMap->get($nam,0)
+            ];
+        });
+
+        $top10All = Truyen::join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
+            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
+            ->where('truyen.id_NguoiDung', $user->id)
+            ->join('lichsumua', 'damua.id_LichSuMua', '=', 'lichsumua.id')
+            ->select('truyen.id', 'truyen.ten', DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu'),DB::raw('COUNT(damua.gia) as luotBan'))
+            ->groupBy('truyen.id', 'truyen.ten')
+            ->orderByDesc('doanhThu')
+            ->limit(10)
+            ->get();
+        /////////////////////////
+        
+
+        /////////////////////////
         return Inertia::render("Author/DoanhThu", [
-            "user"=> [
-                'ten'=>$user->ten,
-                'anhDaiDien' =>$user->anhDaiDien,
-            ]
+            "user"=> $user,
+            "top3Truyens"=>$top3Truyens,
+            "truyenDangHoatDong"=>$truyenDangHoatDong,
+            "doanhThuTuan"=>$doanhThuTuan,
+            "chartThang"=>$finalDataThang,
+            "chartNam"=>$finalDataNam,
+            "chartAll"=>$finalDataAll,
+            "top10Thang"=>$top10Thang,
+            "top10Nam"=>$top10Nam,
+            "top10All"=>$top10All,
+
         ]);
+
+
     }
 
     public function truyen(Request $request){
@@ -214,6 +357,7 @@ class Author_Controller extends Controller
         $soChuong = $request->input('soChuong');
         $tomTat = $request->input('tomTat');
         $end = $request->input('end');
+        $end = filter_var($end, FILTER_VALIDATE_BOOLEAN);
         $truyen = Truyen::find($id);
         if (!$truyen) {
             return response()->json(['errorTruyen' => 'Truyện không tồn tại!'], 404);
@@ -243,6 +387,7 @@ class Author_Controller extends Controller
             $chuong->ngayTao = now();
             $chuong->save();
             $truyen->updatePhanLoai();
+
             if($end){
                 $truyen->ngayKetThuc = $end?now():null;
                 $truyen->save();

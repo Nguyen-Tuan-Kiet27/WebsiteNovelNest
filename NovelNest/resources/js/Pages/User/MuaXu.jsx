@@ -4,7 +4,6 @@ import './MuaXu.scss'
 import EmailAndPassword from "../../Components/EmailAndPassword";
 import axios from "axios";
 export default function({user,pay}){
-    const hinh='https://www.westminstercollection.com/media/52253261/dn-change-checker-2022-canadian-mint-honouring-queen-elizabeth-ii-2-coin-product-images-2-1.jpg?height=450&bgcolor=fff'
     const [passModal,setPassModal] = useState(false);
     const [xu,setXu] = useState(0);
     const [gia,setGia] = useState(0);
@@ -59,7 +58,7 @@ export default function({user,pay}){
         }
     },[])
     return(
-        <Userlayout login={user?true:false} title='Mua xu' page='4'>
+        <Userlayout login={user} title='Mua xu' page='4'>
             <div className="modalThanhToan" style={{display:modalThanhToan?'flex':'none'}} onClick={()=>setModalThanhToan(false)}>
                 <div onClick={e=>e.stopPropagation()}>
                     <h3>Chọn phương thức thanh toán:</h3>
@@ -85,19 +84,19 @@ export default function({user,pay}){
                     </div>
                     <div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua10.png' alt="" />
                             <p>Số lượng xu: 10.000</p>
                             <p>Giá: 10.000₫</p>
                             <button onClick={()=>handleClickMua(10000,10000)}>Mua</button>
                         </div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua20.png' alt="" />
                             <p>Số lượng xu: 20.000</p>
                             <p>Giá: 20.000₫</p>
                             <button onClick={()=>handleClickMua(20000,20000)}>Mua</button>
                         </div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua50.png' alt="" />
                             <p>Số lượng xu: 50.000</p>
                             <p>Giá: 50.000₫</p>
                             <button onClick={()=>handleClickMua(50000,50000)}>Mua</button>
@@ -105,19 +104,19 @@ export default function({user,pay}){
                     </div>
                     <div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua100.png' alt="" />
                             <p>Số lượng xu: 100.000</p>
                             <p>Giá: 98.000₫</p>
                             <button onClick={()=>handleClickMua(98000,100000)}>Mua</button>
                         </div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua200.png' alt="" />
                             <p>Số lượng xu: 200.000</p>
                             <p>Giá: 192.000₫</p>
                             <button onClick={()=>handleClickMua(192000,200000)}>Mua</button>
                         </div>
                         <div className="option">
-                            <img src={hinh} alt="" />
+                            <img src='/img/Mua500.png' alt="" />
                             <p>Số lượng xu: 500.000</p>
                             <p>Giá: 480.000₫</p>
                             <button onClick={()=>handleClickMua(480000,500.000)}>Mua</button>

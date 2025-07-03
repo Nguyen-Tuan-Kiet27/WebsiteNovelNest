@@ -50,7 +50,6 @@ export default function Truyen({user, truyen}){
             setXu(num);
         }
     }
-    useEffect(()=>{console.log(xu)},[xu])
     const handleTomTat = async ()=>{
         setLoading(true);
         try {

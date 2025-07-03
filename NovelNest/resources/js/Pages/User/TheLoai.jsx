@@ -48,7 +48,7 @@ export default function TheLoai({ user,theLoais,login}) {
     <Userlayout title="TheLoai" login={login} page={2}>
       <div className="category-page">
           <div className="header-category">
-            <button className="back-arrow" onClick={() => router.visit('/')}>←</button>
+            <button className="back-arrow" onClick={() => window.history.back()}>←</button>
             <h2>Danh sách thể loại truyện</h2>
           </div>
           
