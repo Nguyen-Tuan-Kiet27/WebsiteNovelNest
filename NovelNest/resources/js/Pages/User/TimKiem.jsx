@@ -3,12 +3,12 @@ import { router, usePage  } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import './DetailCategory.scss';
 import Userlayout from '@/Layouts/UserLayout';
-import { useSearchParams, useLocation } from 'react-router-dom';
 
-export default function DetailCategory({user,truyens,theLoai,pageCount}) {
+export default function DetailCategory({user,truyens,pageCount}) {
   console.log(truyens);
   const truyens1 = truyens.slice(0, 10);          // 10 cái đầu
-  const truyens2 = truyens.slice(10);    
+  const truyens2 = truyens.slice(10,20);
+  const truyens3 = truyens.slice(10,20);    
   const {url} = usePage();
   const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
   const query = Object.fromEntries(new URLSearchParams(queryString));
@@ -17,6 +17,7 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
   const [chapterRange, setChapterRange] = useState('all');
   const [sortBy, setSortBy] = useState('new');
   const [page,setPage] = useState(1);
+  const [searchText,setSearchText] = useState("");
 
   const [showSort, setShowSort] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -29,6 +30,7 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
     setChapterRange(query.chapterRange || 'all');
     setSortBy(query.sortBy || 'new');
     setPage(query.page||1);
+    setSearchText(query.searchText||"");
   },[])
 
   useEffect(()=>{
@@ -36,14 +38,14 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
   },[page])
 
   const handleApply = () => {
-    router.visit(`/theloai/${theLoai.id}?status=${status}&chapterRange=${chapterRange}&sortBy=${sortBy}&page=${page}`);
+    router.visit(`/search?status=${status}&chapterRange=${chapterRange}&sortBy=${sortBy}&page=${page}&searchText=${searchText}`);
     setShowFilter(false);
     setShowSort(false);
   };
 
   const handleChangePage = (i) => {
     if(i!=page)
-      router.visit(`/theloai/${theLoai.id}?status=${status}&chapterRange=${chapterRange}&sortBy=${sortBy}&page=${i}`);
+      router.visit(`/search?status=${status}&chapterRange=${chapterRange}&sortBy=${sortBy}&page=${i}&searchText=${searchText}`);
     setShowFilter(false);
     setShowSort(false);
   };
@@ -69,13 +71,13 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
     { label: 'Xem nhiều', value: 'view' },
   ];
   return (
-    <Userlayout title="Đọc truyện" login={user} page={2}>
+    <Userlayout title="Tìm Kiếm" login={user}>
       <div className="detail-category-page">
         <div className="detail-header">
           <button className="back-arrow" onClick={() => router.visit('/theloai')}>
             ←
           </button>
-          <h2>Danh sách truyện của thể loại {theLoai.ten}</h2>
+          <h2>Tìm kiếm: {searchText}</h2>
         </div>
         <div className="top-buttons">
               <button className="toggle-btn" onClick={toggleSort}>
@@ -152,6 +154,22 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
         </div>
         <div className="detail-grid">
           {truyens2.map((story) => (
+            <div
+              key={story.id}
+              className="detail-card"
+              onClick={() => router.visit(`/truyen/${story.id}`)}
+              title={story.ten}
+            > 
+              <img src={`/img/truyen/hinhAnh/${story.hinhAnh}`} alt={story.ten} />
+              <div className="info">
+                <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
+                <div className="count">{story.luotXem} lượt xem</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="detail-grid">
+          {truyens3.map((story) => (
             <div
               key={story.id}
               className="detail-card"

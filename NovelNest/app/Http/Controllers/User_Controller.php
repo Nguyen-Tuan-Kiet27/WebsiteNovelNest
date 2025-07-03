@@ -22,6 +22,8 @@ use App\Models\ThongTin;
 use App\Models\LichSuMua;
 use Illuminate\Support\Facades\Log;
 use App\Models\LichSuDoc;
+use App\Models\BaoCao;
+use Illuminate\Support\Facades\DB;
 class User_Controller extends Controller
 {
     
@@ -204,21 +206,47 @@ class User_Controller extends Controller
 
     public function danhSachTruyenTheLoai(Request $request, $id){
         $user = $request->attributes->get('user');
+        $xep = $request->query('sortBy','new');
+        $trangThai = $request->query('status','all');
+        $soChuong = $request->query('chapterRange','all');
+        $page = $request->query('page',1);
+        $limit = 20;
         $theLoai = TheLoai::find($id);
-        $truyens = $theLoai->Truyens()
+        $query = $theLoai->Truyens()
             ->where('trangThai', 1)
-            ->with(['Chuongs' => function ($query) {
-                $query->where('trangThai', 1);
-            }])
-            ->get()
+            ->with(['Chuongs' => fn($q) => $q->where('trangThai', 1)])
+            ->withCount([
+                'Chuongs as soLuong' => fn($q) => $q->where('trangThai', 1)
+            ])
+            ->when($trangThai === 'done', fn($q) => $q->whereNotNull('ngayKetThuc'))
+            ->when($trangThai === 'writing', fn($q) => $q->whereNull('ngayKetThuc'));
+
+        $truyens = $query->get()
             ->map(function ($truyen) {
                 $truyen->luotXem = $truyen->Chuongs->sum('luotXem');
                 return $truyen;
-            });
+            })
+            ->when($soChuong === 'lt50', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong <= 50)->values())
+            ->when($soChuong === '50-100', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 50 && $truyen->soLuong <= 100)->values())
+            ->when($soChuong === '100-200', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 100 && $truyen->soLuong <= 200)->values())
+            ->when($soChuong === '200-500', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 200 && $truyen->soLuong <= 500)->values())
+            ->when($soChuong === '500-1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 500 && $truyen->soLuong <= 1000)->values())
+            ->when($soChuong === 'mr1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 1000)->values());
+        if($xep == 'new'){
+            $truyens = $truyens->sortByDesc('ngayTao')->values();
+        }else{
+            $truyens = $truyens->sortByDesc( 'luotXem')->values();
+        }
+        //Phân trang
+        $total = $truyens->count();
+        $truyens = $truyens->forPage($page, $limit)->values();
+        $pageCount = ceil($total / $limit);
+        
         return Inertia::render('User/DetailCategory',[
             'truyens'=>$truyens,
             'theLoai'=>$theLoai,
-            'user'=> $user
+            'user'=> $user,
+            'pageCount' => $pageCount,
         ]);
     }
 
@@ -284,8 +312,9 @@ class User_Controller extends Controller
         $chuongSau=$truyen->Chuongs()->where('soChuong',$chuong->soChuong + 1)->first();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->select('id','ten','soChuong','gia','ngayTao')->get();
 
-
+        $daBaoCao = false;
         if($user){
+            $daBaoCao = BaoCao::where('id_NguoiDung',$user->id)->where('id_Chuong',$id)->first();
             $user->premium = $user->vaiTro < 3?true:($user->premium > now() ? true : false);
             if ($truyen->id_NguoiDung === $user->id || $user->vaiTro < 3) {
                 $chuongChuaMua = collect(); // Trống
@@ -318,6 +347,7 @@ class User_Controller extends Controller
             'user'=> $user,
             'chuongChuaMua'=>$chuongChuaMua,
             'chuongs'=>$chuongs,
+            'daBaoCao'=>$daBaoCao?true:false,
             // ?false
             // :[
             //     'premium'=>$user->vaiTro < 3?true:($user->premium > now() ? true : false),
@@ -657,6 +687,212 @@ class User_Controller extends Controller
         $user->email = NguoiDung::giaiMa($user->email);
         return Inertia::render('User/DatLaiMatKhau', [
             'user'=> $user,
+        ]);
+    }
+    public function apiGetDaMuas(Request $request,$page){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        $limit = 10;
+        $hasMore = true;
+        $offset = ($page - 1) * $limit;
+        $daMuas = $user->daMuas()
+                ->with('chuong.truyen')
+                ->get()
+                ->filter(fn($row) => $row->chuong && $row->chuong->truyen) // loại bỏ null
+                ->sortBy(fn($row) => $row->chuong->soChuong) // sắp xếp theo số chương
+                ->slice($offset, $limit) // phân trang thủ công
+                ->values();
+        if($daMuas->count() < $limit)
+            $hasMore = false;
+        $subDaMuas = [];
+        foreach($daMuas as $row){
+            $chuong = $row->chuong;
+            if (!$chuong || !$chuong->truyen) continue;
+                $truyenId = $chuong->truyen->id;
+                $subDaMuas[$truyenId]['truyen'] = $chuong->truyen;
+                $subDaMuas[$truyenId]['sub'][] = $chuong;
+                $subDaMuas[$truyenId]['total'] = ($subDaMuas[$truyenId]['total'] ?? 0) + $row->gia;
+        }
+        return response()->json([
+            'daMuas' => $subDaMuas,
+            'hasMore' => $hasMore
+        ],200);
+    }
+
+    public function apiGetYeuThichs(Request $request, $page){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $query = $user->yeuThichTruyens()->orderBy('ten');
+        $total = $query->count();
+        $truyens = $query->skip($offset)->take($limit)->get();
+        return response()->json([
+            'yeuThichs' => $truyens,
+            'hasMore' => ($offset + $limit) < $total,
+        ],200);
+    }
+
+    public function apiGetLichSus(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        $lastTime = $request->query('lastTime');
+        $limit = 10;
+        $queryBuilder = function ($model, array $with = []) use ($user, $lastTime, $limit) {
+            return $model::with($with)
+                ->where('id_NguoiDung', $user->id)
+                ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
+                ->orderByDesc('thoiGian')
+                ->take($limit)
+                ->get();
+        };
+
+        $doc = $queryBuilder(LichSuDoc::class, ['chuong.truyen'])
+            ->map(fn($r) => [
+                'loai' => 1,
+                'thoiGian' => $r->thoiGian,
+                'lichSu' => $r,
+                'tenChuong' => $r->chuong?->ten,
+                'soChuong' => $r->chuong?->soChuong,
+                'truyen' => $r->chuong?->truyen
+            ]);
+
+        $nap = $queryBuilder(LichSuNap::class)->map(fn($r) => [
+            'loai' => 2,
+            'thoiGian' => $r->thoiGian,
+            'lichSu' => $r
+        ]);
+
+        // $mua = LichSuMua::with('daMuas.chuong.truyen')
+        // ->where('id_NguoiDung', $user->id)
+        // ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
+        // ->orderByDesc('thoiGian')
+        // ->take($limit)
+        // ->get()
+        // ->map(fn($r) => [
+        //     'loai' => 3,
+        //     'thoiGian' => $r->thoiGian,
+        //     'lichSu' => $r,
+        //     'sub' => $r->daMuas
+        //         ->map(fn($dm) => $dm->chuong)
+        //         ->filter()
+        //         ->sortBy('soChuong') // Sắp xếp theo số chương tăng dần
+        //         ->values(),
+        //     'truyen' => $r->daMuas
+        //                 ->map(fn($dm) => $dm->chuong?->truyen)
+        //                 ->filter()
+        //                 ->first(),
+        // ]);
+        $mua = LichSuMua::with('daMuas.chuong.truyen')
+        ->where('id_NguoiDung', $user->id)
+        ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
+        ->orderByDesc('thoiGian')
+        ->take($limit)
+        ->get()
+        ->map(fn($r) => [
+            'loai' => 3,
+            'thoiGian' => $r->thoiGian,
+            'lichSu' => $r,
+            'sub' => $r->daMuas->map(fn($dm) => $dm->chuong)->filter()->values(),
+            'soLuong' => $r->daMuas->count(),
+            'truyen' => $r->daMuas
+                        ->map(fn($dm) => $dm->chuong?->truyen)
+                        ->filter()
+                        ->first(),
+            'tacGia' => optional($r->daMuas
+                        ->map(fn($dm) => $dm->chuong?->truyen?->nguoiDung)
+                        ->filter()
+                        ->first())->ten,
+        ]);
+
+        // Gộp, sắp xếp lại
+        $all = $doc->concat($nap)->concat($mua)
+            ->sortByDesc('thoiGian')
+            ->values();
+
+        // Cắt lại đúng limit nếu nhiều hơn
+        $result = $all->take($limit);
+        $minTime = $result->last()['thoiGian'] ?? null;
+
+        return response()->json([
+            'lichSus' => $result,
+            'hasMore' => $all->count() > $limit,
+            'minTime' => $minTime
+        ]);
+
+    }
+    public function apiDoiTen(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        $ten = $request->ten;
+        $user->ten=$ten;
+        $user->save();
+        return response()->json(['message'=>'Đổi tên thành công!'],200);
+    }
+    public function apiBaoCaoChuong(Request $request, $id){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+
+        $chuong = Chuong::find($id);
+        if(!$chuong) return response()->json(['message'=>'Không tìm thấy chương muốn báo cáo!'],401);
+
+        $lichSuDoc = LichSuDoc::where('id_NguoiDung',$user->id)->where('id_Chuong',$chuong->id)->first();
+        if(!$lichSuDoc) return response()->json(['message'=>'Nghi vẫn bạn chưa đọc kỹ chương này!'],401);
+
+        $baoCao = BaoCao::where('id_NguoiDung',$user->id)->where('id_Chuong',$chuong->id)->first();
+        if($baoCao) return response()->json(['message'=>'Bạn đã từng báo cáo chương này!'],401);
+        $noiDung = $request->noiDung;
+        $baoCao = new BaoCao();
+        $baoCao->id_NguoiDung = $user->id;
+        $baoCao->id_Chuong = $id;
+        $baoCao->trangThai = 1;
+        $baoCao->noiDung = $noiDung;
+        $baoCao->save();
+        return response()->json(['message'=>'Báo cáo thành công!'],200);
+    }
+    public function timKiem(Request $request){
+        $user = $request->attributes->get('user');
+        $xep = $request->query('sortBy','new');
+        $searchText = $request->query('searchText', "");
+        $trangThai = $request->query('status','all');
+        $soChuong = $request->query('chapterRange','all');
+        $page = $request->query('page',1);
+        $limit = 30;
+        $query = Truyen::where(DB::raw('LOWER(ten)'), 'LIKE', '%' . strtolower($searchText) . '%')
+            ->where('trangThai', 1)
+            ->with('theLoai:id,ten')
+            ->with(['Chuongs' => fn($q) => $q->where('trangThai', 1)])
+            ->withCount([
+                'Chuongs as soLuong' => fn($q) => $q->where('trangThai', 1)
+            ])
+            ->when($trangThai === 'done', fn($q) => $q->whereNotNull('ngayKetThuc'))
+            ->when($trangThai === 'writing', fn($q) => $q->whereNull('ngayKetThuc'));
+
+        $truyens = $query->get()
+            ->map(function ($truyen) {
+                $truyen->luotXem = $truyen->Chuongs->sum('luotXem');
+                return $truyen;
+            })
+            ->when($soChuong === 'lt50', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong <= 50)->values())
+            ->when($soChuong === '50-100', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 50 && $truyen->soLuong <= 100)->values())
+            ->when($soChuong === '100-200', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 100 && $truyen->soLuong <= 200)->values())
+            ->when($soChuong === '200-500', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 200 && $truyen->soLuong <= 500)->values())
+            ->when($soChuong === '500-1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 500 && $truyen->soLuong <= 1000)->values())
+            ->when($soChuong === 'mr1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 1000)->values());
+        if($xep == 'new'){
+            $truyens = $truyens->sortByDesc('ngayTao')->values();
+        }else{
+            $truyens = $truyens->sortByDesc( 'luotXem')->values();
+        }
+        //Phân trang
+        $total = $truyens->count();
+        $truyens = $truyens->forPage($page, $limit)->values();
+        $pageCount = ceil($total / $limit);
+        
+        return Inertia::render('User/TimKiem',[
+            'truyens'=>$truyens,
+            'user'=> $user,
+            'pageCount' => $pageCount,
         ]);
     }
 }

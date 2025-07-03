@@ -100,7 +100,7 @@ img:hover{
     }
     
 }
-.storyChapter{
+.chapterInStory .storyChapter{
     background-color: #F3F2EC;
     width: 100%;
     // border: 1px solid;
@@ -198,7 +198,7 @@ img:hover{
     padding: 20px 10px 10px 10px;
 }
 .back-arrow {
-      position: absolute;
+    //   position: absolute;
       width: 100px;
       left: 0;
       font-size: 24px;

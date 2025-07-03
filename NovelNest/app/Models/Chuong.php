@@ -16,6 +16,9 @@ class Chuong extends Model
     public function DaMuas(){
         return $this->hasMany(DaMua::class,"id_Chuong");
     }
+    public function BaoCaos(){
+        return $this->hasMany(BaoCao::class,"id_Chuong");
+    }
     public function Truyen(){
         return $this->belongsTo(Truyen::class,"id_Truyen");
     }

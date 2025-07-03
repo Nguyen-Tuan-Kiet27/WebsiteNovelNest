@@ -30,6 +30,14 @@ Route::post('/muachuong',[User_Controller::class,'apiMuaChuong'])->middleware(['
 Route::post('/checkpass',[User_Controller::class,'apiCheckPass'])->middleware(['web','CheckLogin']);
 Route::get('/tomtat/{id}',[User_Controller::class,'apiGetTomTat'])->middleware(['web','CheckLogin','CheckChuong'] );
 Route::post('/lichsudoc/{id}',[User_Controller::class,'apiLichSuDoc'])->middleware(['web','CheckLogin']) ;
+Route::get('/getdamua/{page}',[User_Controller::class,'apiGetDaMuas'])->middleware(['web','CheckLogin']);
+Route::get('/getyeuthich/{page}',[User_Controller::class,'apiGetYeuThichs'])->middleware(['web','CheckLogin']);
+Route::get('/getlichsu',[User_Controller::class,'apiGetLichSus'])->middleware(['web','CheckLogin']);
+Route::put('/user/doiten',[User_Controller::class,'apiDoiTen'])->middleware(['web','CheckLogin']);
+Route::post('/user/baocaochuong/{id}',[User_Controller::class,'apiBaoCaoChuong'])->middleware(['web','CheckLogin']);
+
+
+
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);

@@ -2,6 +2,7 @@ import AuthorLayout from "../../Layouts/AuthorLayout";
 import './TruyenChuong.scss'
 import { router } from "@inertiajs/react";
 export default function TruyenChuong({user, truyen, chuongs}){
+    console.log(truyen.ngayKetThuc)
     return(
         <AuthorLayout page='2' user={user} title={`Quản lý chương truyện ${truyen.ten}`}>
             <div className="TruyenChuong">
@@ -23,8 +24,8 @@ export default function TruyenChuong({user, truyen, chuongs}){
                         <div>
                             <button
                                 onClick={()=>router.visit(`/author/themchuong/${truyen.id}`)}
-                                disable={truyen.ngayketThuc?true:false}
-                            >{truyen.ngayketThuc?'Đã kết thúc':'+ Chương mới'}</button>
+                                disabled={truyen.ngayKetThuc ? true : false}
+                            >{truyen.ngayKetThuc?'Đã kết thúc':'+ Chương mới'}</button>
                         </div>
                     </div>
                 </div>
