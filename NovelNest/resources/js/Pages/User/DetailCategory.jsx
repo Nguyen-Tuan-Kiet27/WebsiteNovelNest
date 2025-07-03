@@ -3,7 +3,6 @@ import { router, usePage  } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import './DetailCategory.scss';
 import Userlayout from '@/Layouts/UserLayout';
-import { useSearchParams, useLocation } from 'react-router-dom';
 
 export default function DetailCategory({user,truyens,theLoai,pageCount}) {
   console.log(truyens);
