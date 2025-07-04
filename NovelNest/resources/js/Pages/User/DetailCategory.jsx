@@ -146,7 +146,8 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
               <img src={`/img/truyen/hinhAnh/${story.hinhAnh}`} alt={story.ten} />
               <div className="info">
                 <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
-                <div className="count">{story.luotXem} lượt xem</div>
+                <div className="count"><strong>{story.luotXem}</strong> lượt xem</div>
+                <div className="count"><strong>Tác giả:</strong> {story.nguoidung.ten} </div>
               </div>
             </div>
           ))}
@@ -163,6 +164,7 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
               <div className="info">
                 <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
                 <div className="count">{story.luotXem} lượt xem</div>
+
               </div>
             </div>
           ))}
