@@ -2,7 +2,7 @@ import './ThemTheLoai.scss';
 import AdminLayout from '../../Layouts/AdminLayout';
 import { useRef, useState } from 'react';
 import axios from 'axios';
-export default function ThemTheLoai({user}){
+export default function ThemTheLoai({user,theLoais}){
 
     const [name,setName] = useState('');
     const [preview,setPreview] = useState(null);
@@ -10,6 +10,12 @@ export default function ThemTheLoai({user}){
     const inputIMG = useRef();
     const [fileError,setFileError] = useState(null);
     const [nameError,setNameError] = useState(null); 
+    const [loading,setLoading] = useState(false);
+    const [idTheLoai,setIDTheLoai] = useState(null);
+    
+
+    const [sua,setSua] = useState(false);
+    const [nameTerm, setNameTerm] = useState('');
 
     const handleFileChange = (e)=>{
         const sfile = e.target.files[0];
@@ -41,13 +47,22 @@ export default function ThemTheLoai({user}){
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        if(loading)
+            return;
+        setLoading(true)
+        if(sua && file==null && name==nameTerm){
+            alert('Không có gì để cập nhật!');
+            setLoading(false)
+            return;
+        }
         let b = false;
-        if(!file){
+        if(!file && !sua){
             setFileError("Chưa chọn hình ảnh!")
             b=true;
         }
-        if(!name){
+        if(!name.trim()){
             setNameError("Chưa nhập tên thể loại!")
+            setName('')
             b=true;
         }
         if(b){
@@ -56,38 +71,73 @@ export default function ThemTheLoai({user}){
         const formData = new FormData();
         formData.append('ten',name);
         formData.append('hinhAnh',file);
+        if(sua)
+            formData.append('_method','PUT')
         try {
-            const response = await axios.post(
-                '/api/admin/themtheloai',
-                formData,
-                {
-                     headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
+            let response;
+            if(!sua){
+                response = await axios.post(
+                    '/api/admin/themtheloai',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+            }else{
+                response = await axios.post(
+                    `/api/admin/suatheloai/${idTheLoai}`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+            }
             alert(response.data.message);
             setFile(null);
             setName('');
             setPreview(null);
+            window.location.reload();
         } catch (error) {
             console.log(error.response.data.message)
             setNameError(error.response.data.message)
+        } finally{
+            setLoading(false)
         }
     }
 
+    const handleSua=(i)=>{
+        setSua(true);
+        setIDTheLoai(i.id)
+        setPreview(`/img/theLoai/${i.hinhAnh}`)
+        setFile(null)
+        setName(i.ten)
+        setNameTerm(i.ten)
+    }
+    const handleHuy=()=>{
+        setSua(false);
+        setIDTheLoai(null)
+        setPreview(null)
+        setFile(null)
+        setName('')
+        setNameTerm('')
+    }
+
     return(
-        <AdminLayout page='4' user={user}>
+        <AdminLayout page='4' user={user} title='Quản lý thể loại'>
             <div className="themTheLoai">
                 <div>
-                    <h1>Thêm thể loại</h1>
+                    <h1>Quản lý thể loại</h1>
                 </div>
                 <div>
                     <div>
-                        <div>
+                        <div className='form'>
                             <form onSubmit={handleSubmit}>
                                 <div className='inputHinhAnh'>
-                                    <label>Chọn hình ảnh: </label>
+                                    <label>Chọn hình ảnh (1:1): </label>
                                     <div>
                                         <img src={preview} />
                                         <input ref={inputIMG} type="file" accept="image/*" onChange={handleFileChange} style={{display:'none'}}/>
@@ -108,13 +158,47 @@ export default function ThemTheLoai({user}){
                                     <label>{nameError}</label>
                                 </div>
                                 <div className='buttonSubmit'>
-                                    <button type='submit'>Thêm</button>
+                                    <button disabled={loading} type='button' onClick={handleHuy} style={sua?{marginRight:'20%'}:{display:'none'}}>Hủy</button>
+                                    <button disabled={loading} type='submit'>{sua?'Lưu':'Thêm'}</button>
                                 </div>
 
                             </form>
                         </div>
-                        <div>
-                            Danh sách thể loại.
+                        <div className='danhSach'>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th className='id'>
+                                            ID
+                                        </th>
+                                        <th className='ten'>
+                                            Tên
+                                        </th>
+                                        <th className='ten'>
+                                            Hành động
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div>
+                                <table>
+                                    <tbody>
+                                        {theLoais.map((i) => (
+                                            <tr key={i.id}>
+                                                <td className='id'>
+                                                    {i.id}
+                                                </td>
+                                                <td className='ten'>
+                                                    {i.ten}
+                                                </td>
+                                                <td className='hanhDong'>
+                                                    <button onClick={()=>handleSua(i)}>Sửa</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

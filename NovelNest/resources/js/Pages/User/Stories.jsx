@@ -1,10 +1,10 @@
 import React from 'react';
 import Userlayout from '@/Layouts/UserLayout';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo  } from 'react';
 import { router } from '@inertiajs/react';
 import './Stories.scss';
 import CardStories from '../../Components/CardStories';
-import { FaRegHeart, FaShareSquare, FaHeart  } from 'react-icons/fa';
+import { FaRegHeart, FaShareSquare, FaHeart, FaArrowLeft  } from 'react-icons/fa';
 import axios from 'axios';
 import { TbLockDollar } from "react-icons/tb";
 import { GoDotFill } from "react-icons/go";
@@ -12,7 +12,100 @@ import BuyChapter from '../../Components/BuyChappter';
 import UserLogin from '@/Components/UserLogin';
 import EmailAndPassword from '@/Components/EmailAndPassword';
 
-export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDaHoanThanhs,chuongChuaMua}) {
+const rawComments = [
+  { id: 1, id_NguoiDung: 101, id_BinhLuan: null, noiDung: "Bình luận gốc", thoiGian: "2025-07-04" },
+  { id: 2, id_NguoiDung: 102, id_BinhLuan: 1, noiDung: "Trả lời 1", thoiGian: "2025-07-04" },
+  { id: 3, id_NguoiDung: 103, id_BinhLuan: 2, noiDung: "Trả lời 1.1", thoiGian: "2025-07-04" },
+  { id: 4, id_NguoiDung: 104, id_BinhLuan: 1, noiDung: "Trả lời 2", thoiGian: "2025-07-04" }
+];
+function buildCommentTree(comments) {
+  const map = {};
+  const roots = [];
+
+  comments.forEach(comment => {
+    map[comment.id] = { ...comment, replies: [] };
+  });
+
+  comments.forEach(comment => {
+    if (comment.id_BinhLuan !== null) {
+      map[comment.id_BinhLuan]?.replies.push(map[comment.id]);
+    } else {
+      roots.push(map[comment.id]);
+    }
+  });
+
+  return roots;
+}
+
+function Comment({ comment, onReply }) {
+  const [showReply, setShowReply] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [showChildren, setShowChildren] = useState(false); // 👈 kiểm soát ẩn/hiện phản hồi
+
+  const handleSubmit = () => {
+    if (!replyContent.trim()) return;
+    onReply(comment.id, replyContent);
+    setReplyContent('');
+    setShowReply(false);
+    setShowChildren(true); // tự động mở replies sau khi gửi
+  };
+
+  return (
+    <div style={{
+      marginLeft: comment.id_BinhLuan ? 20 : 0,
+      borderLeft: comment.id_BinhLuan ? '1px solid #ccc' : 'none',
+      paddingLeft: 10,
+      marginBottom: 10
+    }}>
+      <p className='rowBinhLuan'><b>{comment.nguoidung.ten}</b>: {comment.noiDung}</p>
+      <small className='thoiGian'>{comment.ngayTao}</small>
+      <br />
+
+      <div style={{ marginTop: 4 }}>
+        <button className='btnc' onClick={() => setShowReply(!showReply)} style={{ fontSize: '12px', marginRight: 10 }}>
+          {showReply ? 'Hủy' : 'Trả lời'}
+        </button>
+
+        {/* Nút ẩn/hiện phản hồi nếu có replies */}
+        {comment.replies.length > 0 && (
+          <button className='btnc' onClick={() => setShowChildren(!showChildren)} style={{ fontSize: '12px' }}>
+            {showChildren ? `Ẩn ${comment.replies.length} phản hồi` : `Hiện ${comment.replies.length} phản hồi`}
+          </button>
+        )}
+      </div>
+
+      {showReply && (
+        <div style={{ marginTop: 6 }}>
+          <textarea
+            rows={2}
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            placeholder="Nhập phản hồi..."
+            style={{ width: '100%' }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSubmit();
+              }}
+            }
+          />
+          <button className='btnc' onClick={handleSubmit} style={{ fontSize: '12px', marginTop: 4 }}>Gửi</button>
+        </div>
+      )}
+
+      {/* Hiển thị replies nếu đang mở */}
+      {showChildren && comment.replies.length > 0 && (
+        <div>
+          {comment.replies.map(reply => (
+            <Comment key={reply.id} comment={reply} onReply={onReply} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDaHoanThanhs,chuongChuaMua,binhLuans}) {
+    console.log(truyenDaHoanThanhs)
     const traiRef = useRef();
     const [traiHeight, setTraiHeight] = useState(0);
     const [traiHeight2, setTraiHeight2] = useState(0);
@@ -29,11 +122,21 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
     };
 
     useEffect(() => {
+        const observer = new ResizeObserver(() => {
+          if (traiRef.current) {
+              const height = traiRef.current.offsetHeight;
+              setTraiHeight(height);
+              setTraiHeight2(height - 2);
+          }
+        });
+
         if (traiRef.current) {
-            setTraiHeight(traiRef.current.offsetHeight);
-            setTraiHeight2(traiRef.current.offsetHeight-2);
+            observer.observe(traiRef.current);
         }
+
+        return () => observer.disconnect();
     }, []);
+    
 
     const [showModal, setShowModal] = useState(false);
     const [select,setSelect] = useState(null);
@@ -71,7 +174,64 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
         console.log(error.response.data.message)
       }
     }
-    
+  //////////////
+  const [comments, setComments] = useState(binhLuans);
+  const [noiDung,setNoiDung] = useState('');
+  const [loadingComment,setLoadingComment] = useState(false);
+  const handleReply = async (parentId, content)=>{
+    setLoadingComment(true);
+    if(!login){
+      setShowLogin(true);
+      setLoadingComment(false);
+      return;
+    }
+    if(content.trim().length == 0){
+      alert('Chưa viết bình luận!')
+      setLoadingComment(false);
+      return;
+    }
+    try {
+      const response = await axios.post(`/api/binhluan/${truyen.id}`,{
+        noiDung: content,
+        idBinhLuan: parentId
+      })
+      setNoiDung('');
+      setComments(prev => [response.data.binhLuan, ...prev]);
+      console.log(response.data.binhLuan);
+    } catch (error) {
+      alert(error.response.data.message);
+    }finally{
+      setLoadingComment(false);
+    }
+  };
+
+  console.log(binhLuans)
+  const handleComment = async ()=>{
+    setLoadingComment(true);
+    if(!login){
+      setShowLogin(true);
+      setLoadingComment(false);
+      return;
+    }
+    if(noiDung.trim().length == 0){
+      alert('Chưa viết bình luận!')
+      setLoadingComment(false);
+      return;
+    }
+    try {
+      const response = await axios.post(`/api/binhluan/${truyen.id}`,{
+        noiDung: noiDung
+      })
+      setNoiDung('');
+      setComments(prev => [response.data.binhLuan, ...prev]);
+      console.log(response.data.binhLuan);
+    } catch (error) {
+      alert(error.response.data.message);
+    }finally{
+      setLoadingComment(false);
+    }
+  }
+  const commentTree = useMemo(() => buildCommentTree(comments), [comments]);
 return(
 <Userlayout title="Stories" login={login} >
     <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
@@ -88,8 +248,8 @@ return(
             {`Ngày đăng: `+date}
         </div>
     )}
-    <div className='container' >
-      <button className="back-arrow" onClick={() => window.history.back()}>←</button>
+    <div className='container1' >
+      <button className="back-arrow" onClick={() => window.history.back()}><FaArrowLeft size={24} /></button>
         <div ref={traiRef}>
             <div>
               
@@ -186,12 +346,29 @@ return(
             </div>
         </div>
     </div>
+    <div className='binhLuan'>
+      <h3>Bình luận</h3>
+      <div className='tBinhLuanDiv'>
+        <textarea spellCheck={false} value={noiDung} onChange={(e)=>{setNoiDung(e.target.value)}}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              handleComment();
+            }}
+          }
+        />
+        <button disabled={loadingComment} onClick={handleComment}>Bình luận</button>
+      </div>
+      {commentTree.map(comment => (
+        <Comment key={comment.id} comment={comment} onReply={handleReply} />
+      ))}
+    </div>
     <div className='d-flex justify-content-center mt-4 h-100'>
         <div className="hot-stories-wrapper">
             <h3 className="hot-title">Đã hoàn thành</h3>
             <div className="hot-stories-container">
-            {truyenDaHoanThanhs.map((story, id) => (
-                <CardStories key={story.id} ten={story.ten} hinhAnh={story.hinhAnh} />
+            {truyenDaHoanThanhs.map((story) => (
+                <CardStories key={story.id} truyen={story} />
             ))}
             </div>
         </div>

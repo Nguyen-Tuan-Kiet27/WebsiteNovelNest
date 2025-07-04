@@ -2,6 +2,8 @@ import React from 'react';
 import { router, usePage  } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import './DetailCategory.scss';
+import {FaArrowLeft} from 'react-icons/fa'
+
 import Userlayout from '@/Layouts/UserLayout';
 
 export default function DetailCategory({user,truyens,theLoai,pageCount}) {
@@ -71,8 +73,8 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
     <Userlayout title="Đọc truyện" login={user} page={2}>
       <div className="detail-category-page">
         <div className="detail-header">
-          <button className="back-arrow" onClick={() => router.visit('/theloai')}>
-            ←
+          <button className="back-arrow" onClick={() => window.history.back()}>
+            <FaArrowLeft size={24}/>
           </button>
           <h2>Danh sách truyện của thể loại {theLoai.ten}</h2>
         </div>

@@ -110,7 +110,7 @@ export default function Truyen({user, truyen}){
             if(error.response.data.errorSoChuong)
                 alert(error.response.data.errorSoChuong);
             if(error.response.data.message)
-                alert(error.response.data.message, ' :', error.response.data.error)
+                alert(error.response.data.message);
         }
     }
     useEffect(()=>{

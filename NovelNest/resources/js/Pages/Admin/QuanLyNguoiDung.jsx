@@ -1,28 +1,29 @@
 import AdminLayout from "../../Layouts/AdminLayout";
-import './QuanLyTruyen.scss'
+import './QuanLyNguoiDung.scss'
 import { useEffect, useState } from "react";
 import { router,usePage } from "@inertiajs/react";
 import VerifyPass from "../../Components/VerifyPass"
 import axios from "axios";
-export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
-    console.log(truyens)
+export default function QuanLyTruyen({user,nguoiDungs}){
+    console.log(nguoiDungs)
     const {url} = usePage();
     const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
     const query = Object.fromEntries(new URLSearchParams(queryString));
     const [popupTheLoai,setPupopTheLoai] = useState(false);
-    const [theLoai,setTheLoai] = useState('all');
+    const [sort,setsort] = useState('macdinh');
     const [searchText,setSearchText] = useState('');
 
     const [showPass,setShowPass] = useState(false);
     const [idAction,setIdAction] = useState(null);
 
     useEffect(()=>{
-       setTheLoai(query.theLoai || 'all')
+       setsort(query.sort || 'macdinh')
        setSearchText(query.searchText || '')
     },[]);
+
     const handleSearch = ()=>{
         if(searchText.trim()!=query.searchText)
-            router.visit(`/admin/quanlytruyen?theLoai=${theLoai}&searchText=${searchText.trim()}`)
+            router.visit(`/admin/quanlynguoidung?sort=${sort}&searchText=${searchText.trim()}`)
     }
     const handleAction=(id,e)=>{
         e.stopPropagation();
@@ -31,7 +32,7 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
     }
     const handleOkPass = async ()=>{
         try {
-            const response = await axios.put(`/api/admin/changetruyen/${idAction}`);
+            const response = await axios.put(`/api/admin/changenguoidung/${idAction}`);
             alert(response.data.message);
         } catch (error) {
             alert(error.response.data.message)
@@ -40,41 +41,38 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
         }
     }
     return(
-        <AdminLayout page='4' user={user} title='Quản lý truyện'>
+        <AdminLayout page='2' user={user} title='Quản lý truyện'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <div className="quanLyTruyen">
                 <div>
-                    <h1>Truyện</h1>
+                    <h1>Quản lý người dùng</h1>
                     <div>
                         <div
                             onClick={()=>setPupopTheLoai(!popupTheLoai)}
-                        >{tenTheLoai}
+                        >{sort=='dutang'?'Số dư tăng':sort=='dugiam'?'Số dư giảm':'Mặc định'}
                             <div 
                                 style={popupTheLoai?{display:'flex'}:{display:'none'}}
                                 onClick={(e)=>{ e.stopPropagation();}}
                             >
                                 <button
-                                    onClick={()=>{router.visit('/admin/themtheloai')}}
+                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}`)}}
+                                    style={sort=='macdinh'?{backgroundColor:'greenyellow'}:{}}
                                 >
-                                    Quản lý thể loại
+                                    Mặc định
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?searchText=${query.searchText || ''}`)}}
-                                    style={theLoai=='all'?{backgroundColor:'greenyellow'}:{}}
+                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}&sort=dutang`)}}
+                                    style={sort=='dutang'?{backgroundColor:'greenyellow'}:{}}
                                 >
-                                    Tất cả thể loại
+                                    Số dư tăng
                                 </button>
-                                {
-                                    theLoais.map((i)=>(
-                                        <button
-                                            key={i.id}
-                                            onClick={()=>{if(theLoai != i.id)router.visit(`/admin/quanlytruyen?theLoai=${i.id}&searchText=${query.searchText || ''}`)}}
-                                            style={theLoai==i.id?{backgroundColor:'greenyellow'}:{}}
-                                        >
-                                            {i.ten}
-                                        </button>
-                                    ))
-                                }
+                                <button
+                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}&sort=dugiam`)}}
+                                    style={sort=='dugiam'?{backgroundColor:'greenyellow'}:{}}
+                                >
+                                    Số dư giảm
+                                </button>
+
                             </div>
                         </div>
                         <input placeholder="Tìm kiếm" 
@@ -95,17 +93,11 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                 <th className="ten">
                                     Tên
                                 </th>
-                                <th className="tao">
-                                    Ngày tạo
+                                <th className="email">
+                                    Emai
                                 </th>
-                                <th className="loai">
-                                    Thể loại
-                                </th>
-                                <th className="trangThai">
-                                    Trạng thái
-                                </th>
-                                <th className="tacGia">
-                                    Tác giả
+                                <th className="soDu">
+                                    Số dư
                                 </th>
                                 <th className="hanhDong">
                                     Hành động
@@ -113,25 +105,19 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                             </tr>
                         </thead>
                         <tbody>
-                            {truyens.map((i)=>(
+                            {nguoiDungs.map((i)=>(
                                 <tr key={i.id}
                                     style={i.trangThai==0?{backgroundColor:'red'}:i.trangThai==2?{backgroundColor:'yellow'}:{}}
-                                    onClick={()=>router.visit('/admin/quanlychuong/'+i.id)}
+                                    onClick={()=>router.visit('/admin/quanlylichsu/'+i.id)}
                                 >
                                     <td className="ten">
                                         {i.ten}
                                     </td>
-                                    <td className="tao">
-                                        {i.ngayBatDau}
-                                    </td>
-                                    <td className="loai">
-                                        {i.theloai.ten}
-                                    </td>
-                                    <td className="trangThai">
-                                        {i.trangThai==1?'Hoạt động':i.trangThai==2?'Đã khóa':'Bị cấm'}
+                                    <td className="email">
+                                        {i.email}
                                     </td>
                                     <td className="tacGia">
-                                        {i.nguoidung.ten}
+                                        {i.soDu}
                                     </td>
                                     <td className="hanhDong">
                                         <button

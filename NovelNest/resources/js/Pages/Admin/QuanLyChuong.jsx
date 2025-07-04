@@ -4,25 +4,21 @@ import { useEffect, useState } from "react";
 import { router,usePage } from "@inertiajs/react";
 import VerifyPass from "../../Components/VerifyPass"
 import axios from "axios";
-export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
-    console.log(truyens)
+export default function QuanLyTruyen({user,truyen,chuongs}){
     const {url} = usePage();
     const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
     const query = Object.fromEntries(new URLSearchParams(queryString));
-    const [popupTheLoai,setPupopTheLoai] = useState(false);
-    const [theLoai,setTheLoai] = useState('all');
     const [searchText,setSearchText] = useState('');
 
     const [showPass,setShowPass] = useState(false);
     const [idAction,setIdAction] = useState(null);
 
     useEffect(()=>{
-       setTheLoai(query.theLoai || 'all')
        setSearchText(query.searchText || '')
     },[]);
     const handleSearch = ()=>{
         if(searchText.trim()!=query.searchText)
-            router.visit(`/admin/quanlytruyen?theLoai=${theLoai}&searchText=${searchText.trim()}`)
+            router.visit(`/admin/quanlychuong/${truyen.id}?searchText=${searchText.trim()}`)
     }
     const handleAction=(id,e)=>{
         e.stopPropagation();
@@ -31,7 +27,7 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
     }
     const handleOkPass = async ()=>{
         try {
-            const response = await axios.put(`/api/admin/changetruyen/${idAction}`);
+            const response = await axios.put(`/api/admin/changechuong/${idAction}`);
             alert(response.data.message);
         } catch (error) {
             alert(error.response.data.message)
@@ -44,39 +40,8 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <div className="quanLyTruyen">
                 <div>
-                    <h1>Truyện</h1>
+                    <h1>Chương của truyện: {truyen.ten}</h1>
                     <div>
-                        <div
-                            onClick={()=>setPupopTheLoai(!popupTheLoai)}
-                        >{tenTheLoai}
-                            <div 
-                                style={popupTheLoai?{display:'flex'}:{display:'none'}}
-                                onClick={(e)=>{ e.stopPropagation();}}
-                            >
-                                <button
-                                    onClick={()=>{router.visit('/admin/themtheloai')}}
-                                >
-                                    Quản lý thể loại
-                                </button>
-                                <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?searchText=${query.searchText || ''}`)}}
-                                    style={theLoai=='all'?{backgroundColor:'greenyellow'}:{}}
-                                >
-                                    Tất cả thể loại
-                                </button>
-                                {
-                                    theLoais.map((i)=>(
-                                        <button
-                                            key={i.id}
-                                            onClick={()=>{if(theLoai != i.id)router.visit(`/admin/quanlytruyen?theLoai=${i.id}&searchText=${query.searchText || ''}`)}}
-                                            style={theLoai==i.id?{backgroundColor:'greenyellow'}:{}}
-                                        >
-                                            {i.ten}
-                                        </button>
-                                    ))
-                                }
-                            </div>
-                        </div>
                         <input placeholder="Tìm kiếm" 
                                 value={searchText} 
                                 onChange={(e)=>setSearchText(e.target.value)} 
@@ -99,13 +64,13 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                     Ngày tạo
                                 </th>
                                 <th className="loai">
-                                    Thể loại
+                                    Giá
                                 </th>
                                 <th className="trangThai">
                                     Trạng thái
                                 </th>
                                 <th className="tacGia">
-                                    Tác giả
+                                    Lượt xem
                                 </th>
                                 <th className="hanhDong">
                                     Hành động
@@ -113,30 +78,30 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                             </tr>
                         </thead>
                         <tbody>
-                            {truyens.map((i)=>(
+                            {chuongs.map((i)=>(
                                 <tr key={i.id}
                                     style={i.trangThai==0?{backgroundColor:'red'}:i.trangThai==2?{backgroundColor:'yellow'}:{}}
-                                    onClick={()=>router.visit('/admin/quanlychuong/'+i.id)}
+                                    onClick={() => window.open(`/chuong/${i.id}`, '_blank')}
                                 >
                                     <td className="ten">
-                                        {i.ten}
+                                        Chương {i.soChuong}: {i.ten}
                                     </td>
                                     <td className="tao">
-                                        {i.ngayBatDau}
+                                        {i.ngayTao}
                                     </td>
                                     <td className="loai">
-                                        {i.theloai.ten}
+                                        {i.gia}
                                     </td>
                                     <td className="trangThai">
-                                        {i.trangThai==1?'Hoạt động':i.trangThai==2?'Đã khóa':'Bị cấm'}
+                                        {i.trangThai==1?'Hoạt động':i.trangThai==2?'Đang duyệt':'Bị cấm'}
                                     </td>
                                     <td className="tacGia">
-                                        {i.nguoidung.ten}
+                                        {i.luotXem}
                                     </td>
                                     <td className="hanhDong">
                                         <button
                                             onClick={(e)=>handleAction(i.id,e)}
-                                        >{i.trangThai==1?'Khóa':'Khôi phục'}</button>
+                                        >{!i.trangThai==0?'Khóa':'Khôi phục'}</button>
                                     </td>
                                 </tr>
                             ))}

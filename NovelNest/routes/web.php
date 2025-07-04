@@ -21,7 +21,7 @@ Route::get('/vnpay_return', [Payment_Controller::class, 'vnpayReturn'])->middlew
 Route::get('/momo_return', [Payment_Controller::class, 'momoReturn'])->middleware('CheckLogin');
 Route::get('/signupauthor', [User_Controller::class,'signupAuthor'])->middleware('CheckLogin');
 Route::get('/dieukhoandichvu',[User_Controller::class,'dieuKhoanDichVu'])->middleware('CheckLogin');
-Route::get('/datlaimatkhau', [User_Controller::class,'datLaiMatKhau'])->middleware('CheckLogin');
+Route::get('/datlaimatkhau', [User_Controller::class,'datLaiMatKhau'])->middleware('CheckLogin:3,4');
 Route::get('/search', [User_Controller::class,'timKiem'])->middleware('CheckLogin');
 
 
@@ -46,8 +46,11 @@ Route::get('/author/suachuong/{id}', [Author_Controller::class,'suaChuong'])->mi
 //Admin
 Route::get('/admin/dangnhap', [Admin_Controller::class,"login"])->middleware('CheckLogin');
 Route::get('/admin', [Admin_Controller::class,'dashboard'])->middleware('CheckLogin:1,2');
-Route::get('/admin/quanlytruyen', [Admin_Controller::class,'quanlytruyen'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlytruyen', [Admin_Controller::class,'quanLyTruyen'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlychuong/{id}', [Admin_Controller::class,'quanLyChuong'])->middleware('CheckLogin:1,2');
 Route::get('/admin/themtheloai', [Admin_Controller::class,'themTheLoai'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlynguoidung', [Admin_Controller::class,'quanLyNguoiDung'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlylichsu/{id}', [Admin_Controller::class,'quanLyLichSu'])->middleware('CheckLogin:1,2');
 //////////////Chuyển token từ ngrok về localhost
 Route::get('/auth/callback', [User_Controller::class,'authCallback']);
 

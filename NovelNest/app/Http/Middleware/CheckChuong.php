@@ -15,7 +15,7 @@ class CheckChuong
         $user = $request->attributes->get("user");
         $chuong = Chuong::find($request->route('id'));
         //Chương không tồn tại
-        if (!$chuong || $chuong->trangThai == 0) {
+        if (!$chuong || ($chuong->trangThai == 0 && ($user->vaiTro > 2 || $chuong->truyen->id_NguoiDung != $user->id))) {
             abort(404,'Chương này không tồn tại!');
         }
         //Chưa đăng nhập

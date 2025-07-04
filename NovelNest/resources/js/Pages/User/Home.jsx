@@ -6,6 +6,7 @@ import ListStories from '../../Components/ListStories';
 import { router } from '@inertiajs/react';
 
 export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanThanhs}) {
+  console.log(truyenDaHoanThanhs)
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   useEffect(() => {

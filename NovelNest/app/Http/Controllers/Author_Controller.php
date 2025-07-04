@@ -220,7 +220,7 @@ class Author_Controller extends Controller
             return redirect("/");
         }
         $truyen = Truyen::find($id);
-        if(!$truyen || $truyen->id_NguoiDung != $user->id){
+        if(!$truyen || $truyen->id_NguoiDung != $user->id || $truyen->trangThai == 0){
             return redirect('/author/truyen');
         }
         return Inertia::render("Author/SuaTruyen", [

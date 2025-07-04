@@ -32,7 +32,7 @@ export default function({isShow,setIsShow,onOk}){
             <div className="mainVP"
                 onClick={e=>e.stopPropagation()}
             >
-                <label>Nhập mật khẩu thanh toán</label>
+                <label>Nhập mật khẩu xác nhận</label>
                 <div>
                     <input value={pass}
                         onChange={(e)=>{setEPass('');
