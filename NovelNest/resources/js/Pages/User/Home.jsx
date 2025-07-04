@@ -6,6 +6,7 @@ import ListStories from '../../Components/ListStories';
 import { router } from '@inertiajs/react';
 
 export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanThanhs}) {
+  console.log(truyenDaHoanThanhs)
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
             <h3 className="hot-title">Đã hoàn thành</h3>
             <div className="hot-stories-container">
               {truyenDaHoanThanhs.map((story) => (
-                <CardStories key={story.id} ten={story.ten} hinhAnh={story.hinhAnh} />
+                <CardStories key={story.id} truyen={story} />
               ))}
             </div>
           </div>

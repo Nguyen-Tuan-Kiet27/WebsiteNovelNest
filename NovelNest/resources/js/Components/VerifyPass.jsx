@@ -32,7 +32,7 @@ export default function({isShow,setIsShow,onOk}){
             <div className="mainVP"
                 onClick={e=>e.stopPropagation()}
             >
-                <label>Nhập mật khẩu thanh toán</label>
+                <label>Nhập mật khẩu xác nhận</label>
                 <div>
                     <input value={pass}
                         onChange={(e)=>{setEPass('');
@@ -42,7 +42,7 @@ export default function({isShow,setIsShow,onOk}){
                     <button onClick={()=>setEyePass(!eyePass)}>{eyePass?<FaEye/>:<FaEyeSlash/>}</button>
                 </div>
                 <label className='error'>{ePass}</label>
-                <a href="">Quên Mật khẩu?</a>
+                <a href="/datlaimatkhau">Quên Mật khẩu?</a>
                 <button onClick={handleSubmit}>Xác nhận</button>
             </div>
         </div>

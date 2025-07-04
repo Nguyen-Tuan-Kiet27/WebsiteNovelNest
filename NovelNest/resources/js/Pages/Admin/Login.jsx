@@ -23,6 +23,7 @@ export default function Login(){
 
     return(
         <div className='adminLogin'>
+            <Head title={`NovelNest - Admin_Đăng nhập`} />
             <div>
                 <h1>TRANG QUẢN TRỊ NOVELNEST</h1>
                 <form onSubmit={handleSubmit}>

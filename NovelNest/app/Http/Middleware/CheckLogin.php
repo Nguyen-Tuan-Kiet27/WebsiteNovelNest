@@ -17,10 +17,13 @@ class CheckLogin
         if (!$token || !$parsed) {
             $request->attributes->set('user',false);
             return $next($request);
-        }
-        
+        }  
         $user = NguoiDung::find(NguoiDung::maHoa($parsed->claims()->get('uid')));
-        if(!$user || (!empty($roles) && !in_array($user->vaiTro, $roles))){
+        if(!$user){
+            $request->attributes->set('user',false);
+            return $next($request);
+        }
+        if((!empty($roles) && !in_array($user->vaiTro, $roles))){
             if(max($roles) < 3){
                 return redirect('/admin/dangnhap');
             }

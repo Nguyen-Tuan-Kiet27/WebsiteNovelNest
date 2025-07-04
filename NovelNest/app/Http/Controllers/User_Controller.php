@@ -23,6 +23,7 @@ use App\Models\LichSuMua;
 use Illuminate\Support\Facades\Log;
 use App\Models\LichSuDoc;
 use App\Models\BaoCao;
+use App\Models\BinhLuan;
 use Illuminate\Support\Facades\DB;
 class User_Controller extends Controller
 {
@@ -174,7 +175,7 @@ class User_Controller extends Controller
             ->values();
         $truyenMois = Truyen::where('trangThai', 1)
             ->orderByDesc('ngayBatDau')
-            ->take(10)
+            ->take(14)
             ->get();
         $truyenDaHoanThanhs = Truyen::where('trangThai', 1)
             ->whereNotNull('ngayKetThuc')
@@ -288,6 +289,7 @@ class User_Controller extends Controller
                     ->where('gia', '>', 0)
                     ->get();
         }
+        $binhLuans = BinhLuan::where('id_Truyen',$id)->with('nguoidung:id,ten')->orderByDesc('ngayTao')->get();
         return Inertia::render('User/Stories',[
             'favorite'=>$yeuThich?true:false,
             'truyen'=>$truyen,
@@ -296,16 +298,19 @@ class User_Controller extends Controller
             'soLuong'=>$soLuong,
             'truyenDaHoanThanhs'=>$truyenDaHoanThanhs,
             'chuongChuaMua'=>$chuongChuaMua,
+            'binhLuans'=>$binhLuans
         ]);
     }
     public function detailStory(Request $request, $id){
+        $user=$request->attributes->get('user');
         $chuong = Chuong::where('id', $id)
-            ->where('trangThai', 1)
+            ->when($user->vaitro > 2, function($q){
+                $q->where('trangThai', 1);
+            })
             ->first();
         if(!$request->attributes->get('bought')){
             return redirect('/truyen/'. $chuong->id_Truyen);
         }
-        $user=$request->attributes->get('user');
         $truyen = $chuong->Truyen;
         $chuongCuoi = $truyen->Chuongs()->orderByDesc('ngayTao')->first();
         $chuongTruoc=$truyen->Chuongs()->where('soChuong',$chuong->soChuong - 1)->first();
@@ -894,5 +899,33 @@ class User_Controller extends Controller
             'user'=> $user,
             'pageCount' => $pageCount,
         ]);
+    }
+
+    public function apiBinhLuan(Request $request, $id){
+        $user = $request->attributes->get('user');
+        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        $truyen = Truyen::find($id);
+        if(!$truyen) return response()->json(['message'=>'Truyện không tồn tại!'],401);
+        try{
+            $noiDung = $request->noiDung;
+            $idBinhLuan = $request->idBinhLuan;
+            $binhLuan=new BinhLuan();
+            $binhLuan->id_NguoiDung = $user->id;
+            $binhLuan->id_Truyen = $id;
+            $binhLuan->ngayTao = now();
+            $binhLuan->id_BinhLuan = null;
+            if($idBinhLuan){
+                $binhLuan->id_BinhLuan = $idBinhLuan;
+            }
+            $binhLuan->noiDung = $noiDung;
+            $binhLuan->save();
+            $binhLuan = BinhLuan::where('id',$binhLuan->id)->with('nguoidung:id,ten')->first();
+            return response()->json([
+                'message'=>'Bình luận thành công',
+                'binhLuan' => $binhLuan,
+            ],200);
+        }catch(Exception $e){
+            return response()->json(['message'=>$e->getMessage()],500);
+        }
     }
 }

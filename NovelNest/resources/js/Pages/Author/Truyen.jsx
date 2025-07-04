@@ -42,10 +42,12 @@ export default function Truyen({user, truyens}){
                         </thead>
                         <tbody>
                             {truyens.map((truyen) => (
-                            <tr key={truyen.id} onClick={()=>{router.visit(`/author/truyen/${truyen.id}`)}} className="rowTruyen">
+                            <tr key={truyen.id} onClick={()=>{router.visit(`/author/truyen/${truyen.id}`)}} className="rowTruyen"
+                                style={truyen.trangThai==0?{backgroundColor:'red'}:truyen.trangThai==2?{backgroundColor:'yellow'}:{}}
+                            >
                                 <td>{truyen.ten}</td>
                                 <td>{truyen.the_loai.ten}</td>
-                                <td style={truyen.trangThai==0?{backgroundColor:red}:{}}>
+                                <td>
                                 {truyen.trangThai == 1 ? 'Hoạt động' : (truyen.trangThai == 2?'Đã khóa':'Bị cấm')}
                                 </td>
                                 <td>{truyen.luotXem ?? 0}</td>

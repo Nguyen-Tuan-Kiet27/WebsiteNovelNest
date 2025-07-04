@@ -2,7 +2,6 @@ import { router } from '@inertiajs/react';
 import './CardStories.scss';
 export default function Home({truyen}) {
     if(!truyen)return null;
-    console.log('truyen:',truyen)
     const tenCut = truyen.ten.length > 20 ? truyen.ten.slice(0,20) + "..." : truyen.ten;
     return (
         <div className="story-card" title={truyen.ten}

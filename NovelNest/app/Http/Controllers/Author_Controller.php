@@ -220,7 +220,7 @@ class Author_Controller extends Controller
             return redirect("/");
         }
         $truyen = Truyen::find($id);
-        if(!$truyen || $truyen->id_NguoiDung != $user->id){
+        if(!$truyen || $truyen->id_NguoiDung != $user->id || $truyen->trangThai == 0){
             return redirect('/author/truyen');
         }
         return Inertia::render("Author/SuaTruyen", [
@@ -452,7 +452,7 @@ class Author_Controller extends Controller
             ],401);
         }
         if($ten != $chuong->ten){
-            if($chuong->truyen()->chuongs()->where('ten', $ten)->exists()){
+            if($chuong->truyen->chuongs()->where('ten', $ten)->exists()){
                 $response['errorTen'] = 'Tên chương đã tồn tại!';
                 return response()->json($response,409);
             }

@@ -35,19 +35,22 @@ Route::get('/getyeuthich/{page}',[User_Controller::class,'apiGetYeuThichs'])->mi
 Route::get('/getlichsu',[User_Controller::class,'apiGetLichSus'])->middleware(['web','CheckLogin']);
 Route::put('/user/doiten',[User_Controller::class,'apiDoiTen'])->middleware(['web','CheckLogin']);
 Route::post('/user/baocaochuong/{id}',[User_Controller::class,'apiBaoCaoChuong'])->middleware(['web','CheckLogin']);
-
-
-
+Route::post('/binhluan/{id}',[User_Controller::class,'apiBinhLuan'])->middleware(['web','CheckLogin','CheckContent']);
 
 //Author
-Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3']);
-Route::post('/author/themchuong/{id}', [Author_Controller::class,'apiThemChuong'])->middleware(['web','CheckLogin:1,2,3']);
+Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
+Route::post('/author/themchuong/{id}', [Author_Controller::class,'apiThemChuong'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
 Route::post('/tomtat', [Summary_Controller::class,'summarize'])->middleware(['web','CheckLogin:1,2,3']);
-Route::put('/author/suatruyen/{id}', [Author_Controller::class,'apiSuaTruyen'])->middleware(['web','CheckLogin:1,2,3']);
-Route::put('/author/suachuong/{id}', [Author_Controller::class,'apiSuaChuong'])->middleware(['web','CheckLogin:1,2,3']);
+Route::put('/author/suatruyen/{id}', [Author_Controller::class,'apiSuaTruyen'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
+Route::put('/author/suachuong/{id}', [Author_Controller::class,'apiSuaChuong'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
 
 //Admin
 Route::post('/admin/login', [Admin_Controller::class,'authLogin'])->middleware(['web']);
 
 Route::post('/admin/themtheloai', [Admin_Controller::class,'apiThemTheLoai'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/suatheloai/{id}', [Admin_Controller::class,'apiSuaTheLoai'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/changetruyen/{id}',[Admin_Controller::class,'apiChangeTruyen'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/changechuong/{id}',[Admin_Controller::class,'apiChangeChuong'])->middleware(['web','CheckLogin:1,2']);
+
+
 
