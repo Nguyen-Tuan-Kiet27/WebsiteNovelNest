@@ -214,6 +214,7 @@ class User_Controller extends Controller
         $theLoai = TheLoai::find($id);
         $query = $theLoai->Truyens()
             ->where('trangThai', 1)
+            ->with('nguoidung:id,ten')
             ->with(['Chuongs' => fn($q) => $q->where('trangThai', 1)])
             ->withCount([
                 'Chuongs as soLuong' => fn($q) => $q->where('trangThai', 1)
@@ -233,7 +234,7 @@ class User_Controller extends Controller
             ->when($soChuong === '500-1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 500 && $truyen->soLuong <= 1000)->values())
             ->when($soChuong === 'mr1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 1000)->values());
         if($xep == 'new'){
-            $truyens = $truyens->sortByDesc('ngayTao')->values();
+            $truyens = $truyens->sortByDesc('ngayBatDau')->values();
         }else{
             $truyens = $truyens->sortByDesc( 'luotXem')->values();
         }
@@ -880,7 +881,7 @@ class User_Controller extends Controller
             ->when($soChuong === '500-1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 500 && $truyen->soLuong <= 1000)->values())
             ->when($soChuong === 'mr1000', fn($collection) => $collection->filter(fn($truyen) => $truyen->soLuong >= 1000)->values());
         if($xep == 'new'){
-            $truyens = $truyens->sortByDesc('ngayTao')->values();
+            $truyens = $truyens->sortByDesc('ngayBatDau')->values();
         }else{
             $truyens = $truyens->sortByDesc( 'luotXem')->values();
         }

@@ -51,7 +51,7 @@ export default function Truyen({user, truyens}){
                                 <td>{truyen.luotXem ?? 0}</td>
                                 <td>
                                     <button
-                                        onClick={(e)=>{e.stopPropagation(); router.visit(`/author/suatruyen/${truyen.id}`);}}
+                                        className='hanhDong' onClick={(e)=>{e.stopPropagation(); router.visit(`/author/suatruyen/${truyen.id}`);}}
                                     >Sửa</button>
                                 </td>
                             </tr>

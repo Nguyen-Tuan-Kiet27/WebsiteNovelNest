@@ -452,7 +452,7 @@ class Author_Controller extends Controller
             ],401);
         }
         if($ten != $chuong->ten){
-            if($chuong->truyen()->chuongs()->where('ten', $ten)->exists()){
+            if($chuong->truyen->chuongs()->where('ten', $ten)->exists()){
                 $response['errorTen'] = 'Tên chương đã tồn tại!';
                 return response()->json($response,409);
             }

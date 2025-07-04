@@ -109,7 +109,8 @@ return(
                         <div className='information'>
                             <h4>Tên truyện: {truyen.ten}</h4>
                             <h4>Thể loại: {truyen.the_loai.ten}</h4>
-                            <h4>Trạng thái: {truyen.ngayKetThuc?'Chưa hoàn thành':'Đã hoàn thành'}</h4>
+                            <h4>Trạng thái: {!truyen.ngayKetThuc?'Chưa hoàn thành':'Đã hoàn thành'}</h4>
+                            {console.log(truyen.ngayKetThuc)}
                             <h4>Chương: {soLuong}</h4>  
                         </div>
                     </div>
