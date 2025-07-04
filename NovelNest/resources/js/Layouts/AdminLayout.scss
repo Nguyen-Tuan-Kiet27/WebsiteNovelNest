@@ -12,6 +12,8 @@ body{
         width: 15%;
         aspect-ratio: 1/15;
         border: 1px solid black;
+        background-color: #1E2A38;
+        
         > div{
             display: flex;
             align-items: center;
@@ -22,11 +24,15 @@ body{
                 border: 1px solid black;
                 margin-right: 10px;
             }
+            >p{
+                color: white;
+            }
         }
         > button{
             width: 100%;
             aspect-ratio: 199/38;
-            background-color: #D0F0C0;
+            background-color: #1E2A38;
+            color: white;
             &:hover{
                 color: #378C0C;
             }

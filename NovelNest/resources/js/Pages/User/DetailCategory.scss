@@ -142,13 +142,15 @@ button.active {
   display: flex;
   justify-content: center;
   >div{
-    max-width: 70%;
+    max-width: 100%;
     display: flex;
     overflow-x: auto;
     white-space: nowrap;
     margin-top: 50px;
     >button{
-      margin-right: 5px;
+     border: none;
+     padding:0 15px 0 15px;
+     border-radius: 15px;
     }
     >.atc{
       background-color: greenyellow;

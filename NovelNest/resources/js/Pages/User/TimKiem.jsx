@@ -5,10 +5,9 @@ import './DetailCategory.scss';
 import Userlayout from '@/Layouts/UserLayout';
 
 export default function DetailCategory({user,truyens,pageCount}) {
-  console.log(truyens);
   const truyens1 = truyens.slice(0, 10);          // 10 cái đầu
   const truyens2 = truyens.slice(10,20);
-  const truyens3 = truyens.slice(10,20);    
+  const truyens3 = truyens.slice(20,30);    
   const {url} = usePage();
   const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
   const query = Object.fromEntries(new URLSearchParams(queryString));
@@ -33,9 +32,6 @@ export default function DetailCategory({user,truyens,pageCount}) {
     setSearchText(query.searchText||"");
   },[])
 
-  useEffect(()=>{
-    console.log('page:',page)
-  },[page])
 
   const handleApply = () => {
     router.visit(`/search?status=${status}&chapterRange=${chapterRange}&sortBy=${sortBy}&page=${page}&searchText=${searchText}`);
@@ -147,7 +143,8 @@ export default function DetailCategory({user,truyens,pageCount}) {
               <img src={`/img/truyen/hinhAnh/${story.hinhAnh}`} alt={story.ten} />
               <div className="info">
                 <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
-                <div className="count">{story.luotXem} lượt xem</div>
+                <div className="count"><strong>{story.luotXem}</strong> lượt xem</div>
+                <div className="count"><strong>Thể loại: </strong>{story.the_loai.ten}</div>
               </div>
             </div>
           ))}
@@ -163,7 +160,8 @@ export default function DetailCategory({user,truyens,pageCount}) {
               <img src={`/img/truyen/hinhAnh/${story.hinhAnh}`} alt={story.ten} />
               <div className="info">
                 <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
-                <div className="count">{story.luotXem} lượt xem</div>
+                <div className="count"><strong>{story.luotXem}</strong> lượt xem</div>
+                <div className="count"><strong>Thể loại: </strong>{story.the_loai.ten}</div>
               </div>
             </div>
           ))}
@@ -179,7 +177,8 @@ export default function DetailCategory({user,truyens,pageCount}) {
               <img src={`/img/truyen/hinhAnh/${story.hinhAnh}`} alt={story.ten} />
               <div className="info">
                 <div className="title"> {story.ten.length > 30 ? story.ten.slice(0, 30) + '...' : story.ten}</div>
-                <div className="count">{story.luotXem} lượt xem</div>
+                <div className="count"><strong>{story.luotXem}</strong> lượt xem</div>
+                <div className="count"><strong>Thể loại: </strong>{story.the_loai.ten}</div>
               </div>
             </div>
           ))}

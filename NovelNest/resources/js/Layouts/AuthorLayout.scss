@@ -10,13 +10,16 @@
     display: flex;
     justify-content: end;
     > header{
-        background-color: #D9D9D9;
+        background-color: #1E2A38 ;
         position: fixed;
         top: 0;
         left: 0;
         width: 15%;
         aspect-ratio: 1/15;
         border: 1px solid black;
+        p{
+            color: white !important;
+        }
         > div{
             display: flex;
             align-items: center;
@@ -31,7 +34,8 @@
         > button{
             width: 100%;
             aspect-ratio: 199/38;
-            background-color: #D0F0C0;
+            background-color: #1E2A38;
+            color: white;
             &:hover{
                 color: #378C0C;
             }
