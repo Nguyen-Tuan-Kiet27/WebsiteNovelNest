@@ -49,6 +49,8 @@ Route::get('/admin', [Admin_Controller::class,'dashboard'])->middleware('CheckLo
 Route::get('/admin/quanlytruyen', [Admin_Controller::class,'quanLyTruyen'])->middleware('CheckLogin:1,2');
 Route::get('/admin/quanlychuong/{id}', [Admin_Controller::class,'quanLyChuong'])->middleware('CheckLogin:1,2');
 Route::get('/admin/themtheloai', [Admin_Controller::class,'themTheLoai'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlynguoidung', [Admin_Controller::class,'quanLyNguoiDung'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlylichsu/{id}', [Admin_Controller::class,'quanLyLichSu'])->middleware('CheckLogin:1,2');
 //////////////Chuyển token từ ngrok về localhost
 Route::get('/auth/callback', [User_Controller::class,'authCallback']);
 

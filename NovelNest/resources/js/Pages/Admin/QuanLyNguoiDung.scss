@@ -1,0 +1,62 @@
+.quanLyTruyen{
+    >div:first-of-type{
+        display: flex;
+        background-color: white;
+        justify-content: space-between;
+        align-items: center;
+        padding: 30px;
+        >div{
+            display: flex;
+            
+            >div{
+                margin-right: 70px;
+                position: relative;
+                border: 2px solid;
+                padding: 0 10px;
+                cursor: pointer;
+                background-color: #D9D9D9;
+                >div{
+                    display: flex;
+                    flex-direction: column;
+                    position: absolute;
+                    max-height: 30vh;
+                    overflow: auto;
+                    width: 9.5rem;
+                    top: calc(100% + 2px);
+                    left: 10px;
+                    :hover{
+                        background-color: greenyellow;
+                    }
+                }
+            }
+        }
+    }
+    >.table{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        >table{
+            width: 95%;
+            >thead{
+                >tr{
+                    background-color: #D9D9D9;
+                }
+            }
+            .ten{
+                width: 30%;
+                padding: 10px 0;
+                padding-left: 10px;
+            }
+            .email{
+                width: 40%;
+            }
+            .soDu{
+                width: 20%;
+            }
+            .hanhDong{
+                width: 10%;
+            }
+            
+        }
+    }
+}

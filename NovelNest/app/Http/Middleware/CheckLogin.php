@@ -18,7 +18,8 @@ class CheckLogin
             $request->attributes->set('user',false);
             return $next($request);
         }  
-        $user = NguoiDung::find(NguoiDung::maHoa($parsed->claims()->get('uid')));
+        $user = NguoiDung::where('id',NguoiDung::maHoa($parsed->claims()->get('uid')))
+                ->where('trangThai',1)->first();
         if(!$user){
             $request->attributes->set('user',false);
             return $next($request);

@@ -304,7 +304,7 @@ class User_Controller extends Controller
     public function detailStory(Request $request, $id){
         $user=$request->attributes->get('user');
         $chuong = Chuong::where('id', $id)
-            ->when($user->vaitro > 2, function($q){
+            ->when(!$user || $user->vaitro > 2, function($q){
                 $q->where('trangThai', 1);
             })
             ->first();

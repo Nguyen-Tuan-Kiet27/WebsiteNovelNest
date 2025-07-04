@@ -51,6 +51,8 @@ Route::post('/admin/themtheloai', [Admin_Controller::class,'apiThemTheLoai'])->m
 Route::put('/admin/suatheloai/{id}', [Admin_Controller::class,'apiSuaTheLoai'])->middleware(['web','CheckLogin:1,2']);
 Route::put('/admin/changetruyen/{id}',[Admin_Controller::class,'apiChangeTruyen'])->middleware(['web','CheckLogin:1,2']);
 Route::put('/admin/changechuong/{id}',[Admin_Controller::class,'apiChangeChuong'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/changenguoidung/{id}',[Admin_Controller::class,'apiChangeNguoiDung'])->middleware(['web','CheckLogin:1,2']);
+
 
 
 

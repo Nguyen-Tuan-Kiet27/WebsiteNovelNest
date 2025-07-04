@@ -21,6 +21,7 @@ export default function AdminLayout({children,page,user,title}){
                 </button>
                 <button
                     style={page == 2 ? { color: '#378C0C', fontWeight: '700' } : {}}
+                    onClick={()=>router.visit('/admin/quanlynguoidung')}
                 >
                     Người dùng
                 </button>

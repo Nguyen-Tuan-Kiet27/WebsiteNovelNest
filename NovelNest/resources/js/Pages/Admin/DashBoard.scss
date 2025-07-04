@@ -1,0 +1,82 @@
+.ThongKeAdmin{
+    width: 100%;
+    padding: 0 30px;
+    >h1{
+        padding: 10px 20px 20px 1.5%;
+    }
+    >.thongKeDoiTuong{
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        >div{
+            width: 30%;
+            background-color: white;
+            border: 1px solid;
+            padding: 10px;
+            border-radius: 10px;
+            p{
+                font-size: 25px
+            }
+            >div{
+                margin-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                
+            };
+        }
+        >.soLuongTacGia{
+            padding: 0;
+            border: none;
+            background-color: rgba(0, 0, 0, 0);
+            >div:first-of-type{
+                margin: 0;
+                padding: 10px;
+                height: 50%;
+                border-radius: 10px;
+                border: 1px solid;
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    }
+    >.thongKeDoanhThu{
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-top: 30px;
+        >div{
+            width: 30%;
+            background-color: white;
+            border: 1px solid;
+            padding: 10px;
+            border-radius: 10px;
+            >div{
+                margin-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                >p{
+                    font-size: 25px
+                }
+            };
+        }
+    }
+    >.optison{
+        display: flex;
+        padding: 30px 2.5% 0 2.5%;
+        align-items: center;
+        >p{
+            margin: 0;
+        }
+    }
+    >.bieuDo{
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        >.chart{
+            background-color:  white;
+        }
+    }
+    
+}
