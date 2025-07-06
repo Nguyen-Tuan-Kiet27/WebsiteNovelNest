@@ -967,4 +967,34 @@ class User_Controller extends Controller
             ],500);
         }
     }
+    public function apiDoiAvatar(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return response()->json([
+                'message'=>'Không tìm thấy người dùng!'
+            ],401);
+        }
+        try{
+            if($request->hasFile('anhDaiDien')){
+                if ($user->anhDaiDien && file_exists(public_path('img/nguoiDung/' . $user->anhDaiDien))) {
+                    unlink(public_path('img/nguoiDung/' . $user->anhDaiDien));
+                }
+                $hinhAnh = $request->file('anhDaiDien');
+                $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+                $hinhAnh->move(public_path('img/nguoiDung/'), $nameHinhAnh);
+                $user->anhDaiDien = $nameHinhAnh;
+                $user->save();
+                return response()->json(['message'=>'Đổi ảnh đại diện thành công!'],200);
+            }else{
+                return response()->json([
+                    'message'=>'Không nhận được ảnh!'
+                ],401);
+            }
+        }catch(Exception $e){
+            return response()->json([
+                'message'=>'Có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage()
+            ],500);
+        }
+    }
 }

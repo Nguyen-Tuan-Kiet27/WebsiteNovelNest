@@ -37,6 +37,9 @@ Route::put('/user/doiten',[User_Controller::class,'apiDoiTen'])->middleware(['we
 Route::post('/user/baocaochuong/{id}',[User_Controller::class,'apiBaoCaoChuong'])->middleware(['web','CheckLogin']);
 Route::post('/binhluan/{id}',[User_Controller::class,'apiBinhLuan'])->middleware(['web','CheckLogin','CheckContent']);
 Route::put('/muapremium',[User_Controller::class,'apiMuaPremium'])->middleware(['web','CheckLogin:3,4']);
+Route::put('/doiavartar',[User_Controller::class,'apiDoiAvatar'])->middleware(['web','CheckLogin']);
+
+
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);

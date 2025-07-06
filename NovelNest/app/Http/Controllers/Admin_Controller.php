@@ -519,9 +519,9 @@ class Admin_Controller extends Controller
 
         $sort = $request->query('sort','macdinh');
 
-       $tacGias = NguoiDung::join('truyen', 'nguoidung.id', '=', 'truyen.id_NguoiDung')
-            ->join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
-            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
+       $tacGias = NguoiDung::leftjoin('truyen', 'nguoidung.id', '=', 'truyen.id_NguoiDung')
+            ->leftjoin('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
+            ->leftjoin('damua', 'chuong.id', '=', 'damua.id_Chuong')
             ->select(
                 'nguoidung.id',
                 'nguoidung.ten',
@@ -530,6 +530,7 @@ class Admin_Controller extends Controller
                 'nguoidung.vaiTro',
                 DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu')
             )
+            ->where('nguoidung.vaiTro','<','4')
             // ->where(DB::raw('LOWER(nguoidung.ten)'), 'LIKE', '%' . strtolower($searchText) . '%')
             ->where(function ($query) use ($searchText) {
                 $query->where(DB::raw('LOWER(nguoidung.ten)'), 'LIKE', '%' . strtolower($searchText) . '%')
@@ -755,7 +756,7 @@ class Admin_Controller extends Controller
             $admin->matKhau = NguoiDung::maHoa($matKhau);
             $admin->ten = $tenHienThi;
             $admin->vaiTro = 2;
-            $admin->anhDaiDien = 'macDinh.png';
+            $admin->anhDaiDien = 'admin.png';
             $admin->ngayTao = now();
             $admin->save();
             Log::channel('customlog')->info('Tạo admin: ', [

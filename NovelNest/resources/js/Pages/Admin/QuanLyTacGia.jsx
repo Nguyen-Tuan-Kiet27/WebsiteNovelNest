@@ -137,7 +137,7 @@ export default function QuanLyTruyen({user,tacGias}){
                                         {i.email}
                                     </td>
                                     <td className="tacGia">
-                                        {i.doanhThu}
+                                        {i.doanhThu || 0}
                                     </td>
                                     <td className="hanhDong">
                                         {/* <button

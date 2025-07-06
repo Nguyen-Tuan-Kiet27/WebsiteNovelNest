@@ -141,6 +141,65 @@ export default function TaiKhoan({user}){
         alert(error.response.data.message)
       }
     }
+    //Đổi ảnh đại diện
+    const [showChangeAvatar,setShowChangeAvatar] = useState(false);
+    const avatar = new useRef();
+    const [errorAV,setErrorAV] = useState('');
+    const [fileAV,setFileAV] = useState(null);
+    const [previewAV,setPreviewAV] = useState(null);
+    const [showPassAV,setShowPassAV] = useState(false);
+
+    const handleAVChange=(e)=>{
+      const sfile = e.target.files[0];
+        if(sfile){
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onloadend = event=>{
+                img.onload = ()=>{
+                    const {width, height} = img;
+                    if(width/height != 1){
+                        setErrorAV("Vui lòng chọn hình ảnh (1:1)!")
+                        setPreviewAV(null)
+                        setFileAV(null)
+                    }else{
+                        setFileAV(sfile)
+                        setErrorAV(null)
+                        setPreviewAV(event.target.result)
+                    }
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(sfile)
+        }else{
+            setPreviewAV(null);
+            setFileAV(null);
+        }
+        e.target.value = null;
+    }
+    const handleCheckAV=()=>{
+      if(!fileAV){
+        setErrorAV('Chưa chọn ảnh!')
+        return;
+      }
+      setShowPassAV(true);
+    }
+    const handleSubmitAV = async ()=>{
+      try {
+        const formData = new FormData();
+        formData.append('anhDaiDien',fileAV);
+        formData.append('_method','PUT');
+        const response = await axios.post('/api/doiavartar',formData,{
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+        })
+        alert(response.data.message);
+        window.location.reload();
+      } catch (error) {
+        alert(error.response.data.message);
+        console.log(error.response.data.error);
+      }
+    }
     //////
     useEffect( ()=>{
       handleGetDaMuas();
@@ -151,6 +210,7 @@ export default function TaiKhoan({user}){
   return (
     <Userlayout login={user} title='Tài khoản' page='4'>
       <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleDoiTenS}/>
+      <VerifyPass isShow={showPassAV} setIsShow={setShowPassAV} onOk={handleSubmitAV}/>
       <BuyPremium isShow={showPremium} setShow={setShowPremium}/>
       {showDoiTen&& (
           <div className='popupDoiTen' onClick={()=>setShowDoiTen(false)}>
@@ -163,6 +223,19 @@ export default function TaiKhoan({user}){
           </div>
         )
       }
+      {showChangeAvatar && (
+        <div className='ChangeAvatar' onClick={()=>setShowChangeAvatar(false)}>
+            <div className='main' onClick={e=>e.stopPropagation()}>
+              <div className="inputAV">
+                  <label>Ảnh đại diện size(1:1)</label>
+                  <input ref={avatar} type="file" accept="image/*" style={{display:'none'}} onChange={handleAVChange}/>
+                  <img src={previewAV || '/img/nguoiDung/d1_1.png'} onClick={()=>avatar.current.click()}/>
+                  <label className="error">{errorAV}</label>
+              </div>
+              <button onClick={handleCheckAV}>Lưu</button>
+            </div>
+        </div>
+      )}
       <div className="tai-khoan-page">
         <div className="tai-khoan-container">
           <div className="logout-btn">
@@ -172,11 +245,11 @@ export default function TaiKhoan({user}){
           <div className="profile-section">
             <div className="profile-avatar">
               <div className="avatar-img">
-                <img src={user.anhDaiDien}/>
+                <img src={user.anhDaiDien.startsWith('http')?user.anhDaiDien:`/img/nguoiDung/${user.anhDaiDien}`}/>
                 <button onClick={()=>setShowPremium(user.vaiTro>2)} className={user.premium?'gold-button':'silver-button'} ><label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label></button>
                 {console.log(user)}
               </div>
-              <button className="edit-avatar">Đổi Ảnh</button>
+              <button className="edit-avatar" onClick={()=>setShowChangeAvatar(true)}>Đổi Ảnh</button>
             </div>
             <div className='uName'>
               <p>Tên:&ensp;{user.ten}</p>
