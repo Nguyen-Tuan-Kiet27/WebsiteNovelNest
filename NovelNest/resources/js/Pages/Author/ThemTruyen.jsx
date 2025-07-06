@@ -147,7 +147,7 @@ export default function ThemTruyen({user,theLoais}){
                                 {'Ảnh bìa size(2:3)'}
                             </label>
                             <input ref={anhBia} type="file" accept="image/*" style={{display:'none'}} onChange={handleABChange}/>
-                            <img src={previewAB} onClick={()=>anhBia.current.click()}/>
+                            <img src={previewAB || '/img/truyen/hinhAnh/d2_3.png'} onClick={()=>anhBia.current.click()}/>
                             <label className="error">{errorAB}</label>
                         </div>
                         <div className="inputTen">
@@ -179,7 +179,7 @@ export default function ThemTruyen({user,theLoais}){
                             <div className="inputAN">
                                 <label>Ảnh nền size(16:9)</label>
                                 <input ref={anhNen} type="file" accept="image/*" style={{display:'none'}} onChange={handleANChange}/>
-                                <img src={previewAN} onClick={()=>anhNen.current.click()}/>
+                                <img src={previewAN || '/img/truyen/hinhNen/d16_9.png'} onClick={()=>anhNen.current.click()}/>
                                 <label className="error">{errorAN}</label>
                             </div>
                         </div>

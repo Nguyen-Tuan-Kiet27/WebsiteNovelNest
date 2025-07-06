@@ -12,6 +12,7 @@ use App\Models\TheLoai;
 use App\Models\Truyen;
 use App\Models\Chuong;
 use App\Models\LichSuMua;
+use App\Models\BaiViet;
 use App\Models\DaMua;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -185,10 +186,10 @@ class Author_Controller extends Controller
 
     public function truyen(Request $request){
         $user = $request->attributes->get("user");
-        $truyens = $user->Truyens()->orderBy('ngayBatDau', 'desc')->with('TheLoai:id,ten')->withSum('Chuongs as luotXem', 'luotXem')->get();
         if(!$user){ 
             return redirect("/");
         }
+        $truyens = $user->Truyens()->orderBy('ngayBatDau', 'desc')->with('TheLoai:id,ten')->withSum('Chuongs as luotXem', 'luotXem')->get();
         return Inertia::render("Author/Truyen", [
             "user"=> [
                 'ten'=>$user->ten,
@@ -200,10 +201,10 @@ class Author_Controller extends Controller
 
     public function themTruyen(Request $request){
         $user = $request->attributes->get("user");
-        $theLoais = TheLoai::where("trangThai", 1)->get();
         if(!$user){ 
             return redirect("/");
         }
+        $theLoais = TheLoai::where("trangThai", 1)->get();
         return Inertia::render("Author/ThemTruyen", [
             "user"=> [
                 'ten'=>$user->ten,
@@ -215,10 +216,10 @@ class Author_Controller extends Controller
 
     public function suaTruyen(Request $request,$id){
         $user = $request->attributes->get("user");
-        $theLoais = TheLoai::where("trangThai", 1)->get();
         if(!$user){ 
             return redirect("/");
         }
+        $theLoais = TheLoai::where("trangThai", 1)->get();
         $truyen = Truyen::find($id);
         if(!$truyen || $truyen->id_NguoiDung != $user->id || $truyen->trangThai == 0){
             return redirect('/author/truyen');
@@ -280,7 +281,6 @@ class Author_Controller extends Controller
                 ],401);
             }
             try{
-                Log::info($request->input('ten'));
                 $truyen->ten = $request->input('ten');
                 $truyen->id_TheLoai = $request->input('id_TheLoai') ?? $truyen->id_TheLoai;
                 $truyen->gioiThieu = $request->input('gioiThieu');
@@ -471,7 +471,6 @@ class Author_Controller extends Controller
                         $fullPath = $folder . DIRECTORY_SEPARATOR . $file;
                         if (file_exists($fullPath)) {
                             unlink($fullPath);
-                            Log::info("Đã xóa file: " . $file);
                         }
                     });
             }
@@ -487,4 +486,113 @@ class Author_Controller extends Controller
             ], 500);
         }
     }
+    public function blog(Request $request){
+        $user = $request->attributes->get("user");
+        if(!$user){ 
+            return redirect("/");
+        }
+        $baiVies = $user->baiViets()->orderByDesc('ngayTao')->get();
+        return Inertia::render("Author/Blog", [
+            "user"=> [
+                'ten'=>$user->ten,
+                'anhDaiDien' =>$user->anhDaiDien,
+            ],
+            "baiViets"=>$baiVies,
+        ]);
+    }
+
+    public function themBlog(Request $request){
+        $user = $request->attributes->get("user");
+        if(!$user){ 
+            return redirect("/");
+        }
+        return Inertia::render("Author/ThemBlog", [
+            "user"=> [
+                'ten'=>$user->ten,
+                'anhDaiDien' =>$user->anhDaiDien,
+            ],
+        ]);
+    }
+    public function apiThemBlog(Request $request){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        if($request->hasFile('hinhAnh')){
+            $hinhAnh = $request->file('hinhAnh');
+            $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+        }else{
+            return response()->json([
+                'message'=> 'Chưa chọn hình ảnh!'
+            ],401);
+        }
+        try{
+            $blog = new BaiViet();
+            $blog->tieuDe = $request->tieuDe;
+            $blog->hinhAnh = $nameHinhAnh;
+            $blog->noiDung = $request->noiDung;
+            $blog->ngayTao = now();
+            $blog->id_NguoiDung = $user->id;
+            $blog->save();
+            $hinhAnh->move(public_path('img/blog/'), $nameHinhAnh);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Tạo blog mới thành công!'
+        ],201);
+    }
+    public function suaBlog(Request $request,$id){
+        $user = $request->attributes->get("user");
+        if(!$user){ 
+            return redirect("/");
+        }
+        $blog = BaiViet::find($id);
+        if(!$blog){
+            return redirect('/author/blog');
+        }
+        return Inertia::render("Author/SuaBlog", [
+            "user"=> [
+                'ten'=>$user->ten,
+                'anhDaiDien' =>$user->anhDaiDien,
+            ],
+            'blog'=>$blog
+        ]);
+    }
+    public function apiSuaBlog(Request $request,$id){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        $blog = BaiViet::find($id);
+        if(!$blog){
+            return response()->json([
+                'message'=> 'Không tìm thấy blog này!'
+            ],401);
+        }
+        try{
+            $blog->tieuDe = $request->tieuDe;
+            if($request->hasFile('hinhAnh')){
+                if ($blog->hinhAnh && file_exists(public_path('img/blog/' . $blog->hinhAnh))) {
+                    unlink(public_path('img/blog/' . $blog->hinhAnh));
+                }
+                $hinhAnh = $request->file('hinhAnh');
+                $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+                $hinhAnh->move(public_path('img/blog/'), $nameHinhAnh);
+                $blog->hinhAnh = $nameHinhAnh;
+            }
+            $blog->noiDung = $request->noiDung;
+            $blog->save();
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Sửa blog thành công!'
+        ],201);
+    }
+
 }

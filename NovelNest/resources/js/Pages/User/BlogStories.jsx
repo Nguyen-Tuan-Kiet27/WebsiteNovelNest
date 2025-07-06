@@ -17,7 +17,7 @@ export default function blogStories({blogTruyen,login}){
                     {blogs.slice(0, visibleCount).map(blog => (
                         <div key={blog.id} className="blog-item" onClick={() => router.visit(`/blogtruyen/${blog.id}`)}>
                             <div className="image-wrapper">
-                                <img src={blog.hinhAnh} alt="Ảnh" />
+                                <img src={'/img/blog/'+blog.hinhAnh} alt="Ảnh" />
                             </div>
                             <div className="blog-info">
                                 <h5>{blog.tieuDe}</h5>

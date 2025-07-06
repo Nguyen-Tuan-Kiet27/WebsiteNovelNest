@@ -43,6 +43,9 @@ Route::post('/author/themchuong/{id}', [Author_Controller::class,'apiThemChuong'
 Route::post('/tomtat', [Summary_Controller::class,'summarize'])->middleware(['web','CheckLogin:1,2,3']);
 Route::put('/author/suatruyen/{id}', [Author_Controller::class,'apiSuaTruyen'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
 Route::put('/author/suachuong/{id}', [Author_Controller::class,'apiSuaChuong'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
+Route::post('/author/themblog', [Author_Controller::class,'apiThemBlog'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
+Route::post('/author/suablog/{id}', [Author_Controller::class,'apiSuaBlog'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
+
 
 //Admin
 Route::post('/admin/login', [Admin_Controller::class,'authLogin'])->middleware(['web']);
@@ -52,6 +55,10 @@ Route::put('/admin/suatheloai/{id}', [Admin_Controller::class,'apiSuaTheLoai'])-
 Route::put('/admin/changetruyen/{id}',[Admin_Controller::class,'apiChangeTruyen'])->middleware(['web','CheckLogin:1,2']);
 Route::put('/admin/changechuong/{id}',[Admin_Controller::class,'apiChangeChuong'])->middleware(['web','CheckLogin:1,2']);
 Route::put('/admin/changenguoidung/{id}',[Admin_Controller::class,'apiChangeNguoiDung'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/boquabaocao/{id}',[Admin_Controller::class,'boQuaBaoCao'])->middleware(['web','CheckLogin:1,2']);
+Route::post('/superadmin/themadmin',[Admin_Controller::class,'apiThemAdmin'])->middleware(['web','CheckLogin:1']);
+Route::put('/superadmin/suaadmin/{id}',[Admin_Controller::class,'apiSuaAdmin'])->middleware(['web','CheckLogin:1']);
+
 
 
 

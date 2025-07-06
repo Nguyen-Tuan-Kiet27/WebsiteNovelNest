@@ -10,8 +10,6 @@ import axios from 'axios';
 import { TbLockDollar } from "react-icons/tb";
 import { GoDotFill } from "react-icons/go";
 import BuyChapter from '../../Components/BuyChappter';
-import UserLogin from '@/Components/UserLogin';
-import EmailAndPassword from '@/Components/EmailAndPassword';
 import VerifyPass from '../../Components/VerifyPass';
 
 export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,idChuongSau,chuongChuaMua,chuongs,daBaoCao}) {
@@ -212,7 +210,6 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   }
 
   const chuongChuaMuaIds = new Set(chuongChuaMua.map(c => c.id));
-  const [modalEP,setModalEP] = useState(false);
   const [showDate,setShowDate] = useState(false)
   const [date,setDate] = useState('')
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -223,22 +220,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   const handleCheckChuong = async (e,chapter)=>{
     if(user.vaiTro<3) return;
     if (chuongChuaMuaIds.has(chapter.id)) {
-        e.preventDefault();
-        //chưa đăng nhập
-        if(!user){
-          setShowLogin(true)
-          return;
-        }
-        try {
-            const response = await axios.get('/api/checkep');
-            if(!response.data.value){
-                setModalEP(true);
-                return;
-            }
-        } catch (error) {
-            setShowLogin(true);
-            return;
-        }
+        e.preventDefault();      
         //hiển thị modal mua chương và truyền set chương đã chọn 
         setShowModal(true);
         setSelect(chapter);
@@ -288,8 +270,6 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
 
   return (
     <Userlayout login={user} title={`${truyen.ten} - Chương ${chuong.soChuong}: ${chuong.ten}`}>
-      <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
-      <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
       <BuyChapter isShow={showModal} changeShow={setShowModal} select={select} chuongChuaMua={chuongChuaMua}/>
       <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleBaoCaoS}/>
       {showBaoCao &&(

@@ -24,7 +24,7 @@ export default function DashBoard({user,top3Truyen,top3TacGia,soLuongTacGia,doan
                 <h1>Dash Board</h1>
                 <div className='thongKeDoiTuong'>
                     <div className='top3Truyen'>
-                        <h4>Top 3 truyện doanh thu cao nhất</h4>
+                        <h4>Top 3 truyện có doanh thu tác giả cao nhất</h4>
                         {
                             top3Truyen.map((i)=>(
                                 <div key={i.id}>
@@ -33,9 +33,10 @@ export default function DashBoard({user,top3Truyen,top3TacGia,soLuongTacGia,doan
                                 </div>
                             ))
                         }
+                        <a href='/admin/quanlytruyen?sort=thugiam'>xem thêm</a>
                     </div>
                     <div className='top3TacGia'>
-                        <h4>Top3 tác giả doanh thu cao nhất</h4>
+                        <h4>Top 3 tác giả có doanh thu cao nhất</h4>
                         {
                             top3TacGia.map((i)=>(
                                 <div key={i.id}>
@@ -44,6 +45,7 @@ export default function DashBoard({user,top3Truyen,top3TacGia,soLuongTacGia,doan
                                 </div>
                             ))
                         }
+                        <a href='/admin/quanlytacgia?&sort=thugiam'>xem thêm</a>
                     </div>
                     <div className='soLuongTacGia'>
                         <div>

@@ -2,6 +2,7 @@ import './ThemTheLoai.scss';
 import AdminLayout from '../../Layouts/AdminLayout';
 import { useRef, useState } from 'react';
 import axios from 'axios';
+import VerifyPass from "../../Components/VerifyPass"
 export default function ThemTheLoai({user,theLoais}){
 
     const [name,setName] = useState('');
@@ -12,7 +13,8 @@ export default function ThemTheLoai({user,theLoais}){
     const [nameError,setNameError] = useState(null); 
     const [loading,setLoading] = useState(false);
     const [idTheLoai,setIDTheLoai] = useState(null);
-    
+
+    const [showPass,setShowPass] = useState(false)
 
     const [sua,setSua] = useState(false);
     const [nameTerm, setNameTerm] = useState('');
@@ -45,8 +47,7 @@ export default function ThemTheLoai({user,theLoais}){
         e.target.value = null;
     }
 
-    const handleSubmit = async (e)=>{
-        e.preventDefault();
+    const handleSubmit = async ()=>{
         if(loading)
             return;
         setLoading(true)
@@ -128,6 +129,7 @@ export default function ThemTheLoai({user,theLoais}){
 
     return(
         <AdminLayout page='4' user={user} title='Quản lý thể loại'>
+            <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleSubmit}/>
             <div className="themTheLoai">
                 <div>
                     <h1>Quản lý thể loại</h1>
@@ -135,7 +137,7 @@ export default function ThemTheLoai({user,theLoais}){
                 <div>
                     <div>
                         <div className='form'>
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={(e)=>{e.preventDefault();setShowPass(true);}}>
                                 <div className='inputHinhAnh'>
                                     <label>Chọn hình ảnh (1:1): </label>
                                     <div>

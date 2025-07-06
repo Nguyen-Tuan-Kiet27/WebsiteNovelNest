@@ -41,6 +41,10 @@ Route::get('/author/truyen/{id}', [Author_Controller::class,'truyenChuong'])->mi
 Route::get('/author/themchuong/{id}', [Author_Controller::class,'themChuong'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/suatruyen/{id}', [Author_Controller::class,'suaTruyen'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/suachuong/{id}', [Author_Controller::class,'suaChuong'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/blog',[Author_Controller::class,'blog'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/themblog',[Author_Controller::class,'themBlog'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/suablog/{id}',[Author_Controller::class,'suaBlog'])->middleware('CheckLogin:1,2,3');
+
 
 
 //Admin
@@ -51,6 +55,14 @@ Route::get('/admin/quanlychuong/{id}', [Admin_Controller::class,'quanLyChuong'])
 Route::get('/admin/themtheloai', [Admin_Controller::class,'themTheLoai'])->middleware('CheckLogin:1,2');
 Route::get('/admin/quanlynguoidung', [Admin_Controller::class,'quanLyNguoiDung'])->middleware('CheckLogin:1,2');
 Route::get('/admin/quanlylichsu/{id}', [Admin_Controller::class,'quanLyLichSu'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlytacgia', [Admin_Controller::class,'quanLyTacGia'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlytruyentacgia/{id}', [Admin_Controller::class,'quanLyTruyenTacGia'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlytruyenbaocao', [Admin_Controller::class,'quanLyTruyenBaoCao'])->middleware('CheckLogin:1,2');
+Route::get('/admin/quanlychuongbaocao/{id}', [Admin_Controller::class,'quanLyChuongBaoCao'])->middleware('CheckLogin:1,2');
+Route::get('/admin/chitietbaocao/{id}', [Admin_Controller::class,'chiTietBaoCao'])->middleware('CheckLogin:1,2');
+Route::get('/admin/doinguadmin', [Admin_Controller::class,'doiNguAdmin'])->middleware('CheckLogin:1');
+
+
 //////////////Chuyển token từ ngrok về localhost
 Route::get('/auth/callback', [User_Controller::class,'authCallback']);
 

@@ -1,0 +1,53 @@
+.ChiTietBaoCao{
+    >div:first-of-type{
+        display: flex;
+        background-color: white;
+        align-items: center;
+        padding: 30px;
+    }
+    >.main{
+        padding: 10px;
+        display: flex;
+        border: 1px solid;
+        >.content{
+            width: 70%;
+            border: 1px solid;
+            padding: 10px;
+            max-height: 80vh;
+            overflow: auto;
+        }
+        >.baoCao{
+            width: 30%;
+            background-color: rgb(241, 228, 172);
+            border: 1px solid;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            >div{
+                padding: 10px;
+            }
+            >.tuyChon{
+                display: flex;
+                flex-direction: column;
+                >div{
+                    display: flex;
+                    justify-content: space-around;
+                    >button{
+                        width: 20%;
+                        aspect-ratio: 2/1;
+                        border-radius: 10px;
+                        background-color: greenyellow;
+                    }
+                    >button:nth-child(2){
+                        background-color: red;
+                    }
+                }
+                >h2{margin-top: 20px;}
+            }
+            >.noiDungBaoCao{
+                flex: 1;
+                overflow: auto;
+            }
+        }
+    }
+}

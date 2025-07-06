@@ -1,0 +1,42 @@
+.quanLyTruyenBaoCao{
+    >div:first-of-type{
+        display: flex;
+        background-color: white;
+        align-items: center;
+        padding: 30px;
+    }
+    >.table{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        >table{
+            width: 95%;
+            >thead{
+                >tr{
+                    background-color: #D9D9D9;
+                }
+            }
+            .ten{
+                width: 30%;
+                padding: 10px 0;
+                padding-left: 10px;
+            }
+            .loai{
+                width: 12%;
+            }
+            .soLuong{
+                width: 10%;
+            }
+            .doanhThu{
+                width: 15%;
+            }
+            .tacGia{
+                width: 15%;
+            }
+            .hanhDong{
+                width: 8%;
+            }
+            
+        }
+    }
+}

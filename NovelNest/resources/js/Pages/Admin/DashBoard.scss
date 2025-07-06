@@ -9,22 +9,33 @@
         justify-content: space-around;
         width: 100%;
         >div{
-            width: 30%;
+            width: 37%;
             background-color: white;
             border: 1px solid;
             padding: 10px;
             border-radius: 10px;
-            p{
-                font-size: 25px
-            }
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             >div{
                 margin-top: 20px;
                 display: flex;
                 justify-content: space-between;
-                
+                p{
+                    font-size: 25px
+                }
             };
+            >a{
+                text-align: center;
+                width: 100%;
+                display: block;
+                text-decoration: none;
+                color: rgb(75, 75, 75);
+                font-size: 20px;
+            }
         }
         >.soLuongTacGia{
+            width: 16%;
             padding: 0;
             border: none;
             background-color: rgba(0, 0, 0, 0);

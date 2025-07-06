@@ -43,7 +43,7 @@ export default function TruyenChuong({user, truyen, chuongs}){
                         </thead>
                         <tbody>
                             {chuongs.map((chuong) => (
-                            <tr key={chuong.id} onClick={()=>{window.open(`/chuong/${chuong.id}`,'__blank')}} className="rowChuong">
+                            <tr key={chuong.id} onClick={()=>{window.open(`/chuong/${chuong.id}`,'_blank')}} className="rowChuong">
                                 <td>{chuong.soChuong}</td>
                                 <td>{chuong.ten}</td>
                                 <td>{chuong.gia}</td>
