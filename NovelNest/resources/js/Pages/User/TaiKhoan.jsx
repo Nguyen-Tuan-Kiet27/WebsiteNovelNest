@@ -7,7 +7,7 @@ import { TiPen } from "react-icons/ti";
 import axios from 'axios';
 import { FaRegHeart, FaHeart  } from 'react-icons/fa';
 import VerifyPass from '../../Components/VerifyPass';
-
+import BuyPremium from '../../Components/BuyPremium';
 
 export default function TaiKhoan({user}){
     const [showTab,setShowTab] = useState(1);
@@ -121,6 +121,7 @@ export default function TaiKhoan({user}){
     const [eTen,setETen] = useState('');
     const [showDoiTen,setShowDoiTen] = useState(false);
     const [showPass,setShowPass] = useState(false);
+    const [showPremium,setShowPremium]=useState(false);
     const handleDoiTen = ()=>{
       if(ten.trim().length < 8){
         setETen('Tên phải dài từ 8 ký tự!');
@@ -150,6 +151,7 @@ export default function TaiKhoan({user}){
   return (
     <Userlayout login={user} title='Tài khoản' page='4'>
       <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleDoiTenS}/>
+      <BuyPremium isShow={showPremium} setShow={setShowPremium}/>
       {showDoiTen&& (
           <div className='popupDoiTen' onClick={()=>setShowDoiTen(false)}>
             <div className='mainDoiTen' onClick={(e)=>{e.stopPropagation()}}>
@@ -169,7 +171,11 @@ export default function TaiKhoan({user}){
 
           <div className="profile-section">
             <div className="profile-avatar">
-              <div className="avatar-img"><img src={user.anhDaiDien}/></div>
+              <div className="avatar-img">
+                <img src={user.anhDaiDien}/>
+                <button onClick={()=>setShowPremium(user.vaiTro>2)} className={user.premium?'gold-button':'silver-button'} ><label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label></button>
+                {console.log(user)}
+              </div>
               <button className="edit-avatar">Đổi Ảnh</button>
             </div>
             <div className='uName'>

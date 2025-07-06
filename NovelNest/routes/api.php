@@ -36,6 +36,7 @@ Route::get('/getlichsu',[User_Controller::class,'apiGetLichSus'])->middleware(['
 Route::put('/user/doiten',[User_Controller::class,'apiDoiTen'])->middleware(['web','CheckLogin']);
 Route::post('/user/baocaochuong/{id}',[User_Controller::class,'apiBaoCaoChuong'])->middleware(['web','CheckLogin']);
 Route::post('/binhluan/{id}',[User_Controller::class,'apiBinhLuan'])->middleware(['web','CheckLogin','CheckContent']);
+Route::put('/muapremium',[User_Controller::class,'apiMuaPremium'])->middleware(['web','CheckLogin:3,4']);
 
 //Author
 Route::post('/author/themtruyen', [Author_Controller::class,'apiThemTruyen'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);

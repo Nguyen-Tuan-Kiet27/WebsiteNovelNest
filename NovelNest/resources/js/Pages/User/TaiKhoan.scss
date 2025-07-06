@@ -29,6 +29,7 @@
         margin: 0 auto;
 
         .avatar-img {
+          position: relative;
           width: 100px;
           height: 100px;
           border: 2px solid #000;
@@ -37,11 +38,59 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
+          // overflow: hidden;
           >img{
                 width: 100%;
                 aspect-ratio: 1/1;
+                border-radius: 50%;
             }
+          .gold-button{
+            position: absolute;
+            display: flex;
+            align-items: center;
+            right: -20%;
+            bottom: 0;
+            padding: 0 5px;
+            cursor: pointer;
+
+            box-sizing: border-box;
+            background: linear-gradient(180deg, #FFD700 0%, #FFF0A2 54.33%, #FFD700 100%);
+            border: 1px solid #000000;
+
+            .gold-text {
+              cursor: pointer;
+              font-size: 13px;
+
+              background: linear-gradient(180deg, #DAB800 26.44%, #F9E163 46%, #D7B500 57.21%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              text-fill-color: transparent;
+            }
+          }
+          .silver-button{
+            position: absolute;
+            display: flex;
+            align-items: center;
+            right: -20%;
+            bottom: 0;
+            padding: 0 5px;
+            cursor: pointer;
+
+            box-sizing: border-box;
+            background: linear-gradient(180deg, #8F8F8F 0%, #FFFFFF 54.33%, #8F8F8F 100%);
+            border: 1px solid #000000;
+            .silver-text{
+              cursor: pointer;
+              font-size: 13px;
+
+              background: linear-gradient(180deg, #8F8F8F 26.44%, #FFFFFF 46.15%, #8F8F8F 57.21%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              text-fill-color: transparent;
+            }
+          }
         }
 
         .edit-avatar {

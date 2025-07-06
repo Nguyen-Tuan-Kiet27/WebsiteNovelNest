@@ -12,8 +12,8 @@ set_time_limit(300); // Zalo phản hồi nhanh nhưng ghép file mất thời g
 
 class TextToSpeech_Controller extends Controller
 {
-    // protected $zaloApiKey = 'iTwrMkTt3DF65kMMbhe3DPhG1K9k8z13';
-    protected $zaloApiKey = '5Pvp1ICYU3rCBBDWVMmcA48Q1nhejRQj'; 
+    protected $zaloApiKey = 'iTwrMkTt3DF65kMMbhe3DPhG1K9k8z13';
+    // protected $zaloApiKey = '5Pvp1ICYU3rCBBDWVMmcA48Q1nhejRQj';
 
     public function callZaloTTS($text, $speakerId = 3)
     {
