@@ -1,0 +1,12 @@
+.ChiTietBaoCao{
+    >div:first-of-type{
+        display: flex;
+        background-color: white;
+        align-items: center;
+        padding: 30px;
+    }
+    >.main{
+        padding: 10px;
+        display: flex;
+    }
+}

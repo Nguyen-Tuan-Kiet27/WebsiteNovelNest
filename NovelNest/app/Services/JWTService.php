@@ -19,15 +19,21 @@ class JwtService
         );
     }
 
-    public function generateToken(string $userId): string
+    public function generateToken(string $userId, array $customClaims = []): string
     {
         $now = new \DateTimeImmutable();
 
-        return $this->config->builder()
+        $builder = $this->config->builder()
             ->issuedBy('novelnest') // tuỳ chọn
             ->issuedAt($now)
             ->expiresAt($now->modify('+7 days'))
-            ->withClaim('uid', $userId)
+            ->withClaim('uid', $userId);
+            
+        foreach ($customClaims as $key => $value) {
+            $builder = $builder->withClaim($key, $value);
+        }
+
+        return $builder
             ->getToken($this->config->signer(), $this->config->signingKey())
             ->toString();
     }

@@ -27,6 +27,7 @@ export default function AdminLayout({children,page,user,title}){
                 </button>
                 <button
                     style={page == 3 ? { color: '#378C0C', fontWeight: '700' } : {}}
+                    onClick={()=>router.visit('/admin/quanlytacgia')}
                 >
                     Tác giả
                 </button>
@@ -43,11 +44,13 @@ export default function AdminLayout({children,page,user,title}){
                 </button>
                 <button
                     style={page == 6 ? { color: '#378C0C', fontWeight: '700' } : {}}
+                    onClick={()=>router.visit('/admin/quanlytruyenbaocao')}
                 >
                     Báo cáo vi phạm
                 </button>
                 <button
                     style={page == 7 ? { color: '#378C0C', fontWeight: '700'} : {display: user.vaiTro==1 ? 'block':'none'}}
+                    onClick={()=>router.visit('/admin/doinguadmin')}
                 >
                     Đội ngũ admin
                 </button>

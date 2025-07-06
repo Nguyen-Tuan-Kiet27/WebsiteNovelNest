@@ -25,6 +25,17 @@ class Truyen extends Model
     public function Chuongs(){
         return $this->hasMany(Chuong::class,"id_Truyen");
     }
+    public function daMuas()
+    {
+        return $this->hasManyThrough(
+            DaMua::class,
+            Chuong::class,
+            'id_Truyen',
+            'id_Chuong',
+            'id',
+            'id'
+        );
+    }
 
     public function updatePhanLoai(){
         $gias = $this->chuongs()->where('trangThai', 1)->pluck('gia');

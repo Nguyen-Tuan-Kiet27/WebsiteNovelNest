@@ -1,10 +1,10 @@
 import AdminLayout from "../../Layouts/AdminLayout";
-import './QuanLyTruyen.scss'
+import './QuanLyTruyenTacGia.scss'
 import { useEffect, useState } from "react";
 import { router,usePage } from "@inertiajs/react";
 import VerifyPass from "../../Components/VerifyPass"
 import axios from "axios";
-export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
+export default function QuanLyTruyen({user,nguoiDung,theLoais, tenTheLoai,truyens}){
     console.log(truyens)
     const {url} = usePage();
     const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
@@ -43,11 +43,11 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
         }
     }
     return(
-        <AdminLayout page='4' user={user} title='Quản lý truyện'>
+        <AdminLayout page='3' user={user} title='Quản lý truyện'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <div className="quanLyTruyen">
                 <div>
-                    <h1>Truyện</h1>
+                    <h1>Truyện của {nguoiDung.ten}</h1>
                     <div>
                         <div
                             onClick={()=>setShowSort(!showSort)}
@@ -57,19 +57,19 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                 onClick={(e)=>{ e.stopPropagation();}}
                             >
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?theLoai=${theLoai}&searchText=${query.searchText || ''}`)}}
+                                    onClick={()=>{router.visit(`/admin/quanlytruyentacgia/${nguoiDung.id}?theLoai=${theLoai}&searchText=${query.searchText || ''}`)}}
                                     style={sort=='macdinh'?{backgroundColor:'greenyellow'}:{}}
                                 >
                                     Mặc định
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?theLoai=${theLoai}&searchText=${query.searchText || ''}&sort=thutang`)}}
+                                    onClick={()=>{router.visit(`/admin/quanlytruyentacgia/${nguoiDung.id}?theLoai=${theLoai}&searchText=${query.searchText || ''}&sort=thutang`)}}
                                     style={sort=='thutang'?{backgroundColor:'greenyellow'}:{}}
                                 >
                                     Doanh thu tăng
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?theLoai=${theLoai}&searchText=${query.searchText || ''}&sort=thugiam`)}}
+                                    onClick={()=>{router.visit(`/admin/quanlytruyentacgia/${nguoiDung.id}?theLoai=${theLoai}&searchText=${query.searchText || ''}&sort=thugiam`)}}
                                     style={sort=='thugiam'?{backgroundColor:'greenyellow'}:{}}
                                 >
                                     Doanh thu giảm
@@ -90,7 +90,7 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                     Quản lý thể loại
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlytruyen?searchText=${query.searchText || ''}`)}}
+                                    onClick={()=>{router.visit(`/admin/quanlytruyentacgia/${nguoiDung.id}?searchText=${query.searchText || ''}`)}}
                                     style={theLoai=='all'?{backgroundColor:'greenyellow'}:{}}
                                 >
                                     Tất cả thể loại
@@ -99,7 +99,7 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                     theLoais.map((i)=>(
                                         <button
                                             key={i.id}
-                                            onClick={()=>{if(theLoai != i.id)router.visit(`/admin/quanlytruyen?theLoai=${i.id}&searchText=${query.searchText || ''}`)}}
+                                            onClick={()=>{if(theLoai != i.id)router.visit(`/admin/quanlytruyentacgia/${nguoiDung.id}?theLoai=${i.id}&searchText=${query.searchText || ''}`)}}
                                             style={theLoai==i.id?{backgroundColor:'greenyellow'}:{}}
                                         >
                                             {i.ten}
@@ -138,9 +138,6 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                 <th className="doanhThu">
                                     Doanh thu
                                     </th>
-                                <th className="tacGia">
-                                    Tác giả
-                                </th>
                                 <th className="hanhDong">
                                     Hành động
                                 </th>
@@ -166,9 +163,6 @@ export default function QuanLyTruyen({user,theLoais, tenTheLoai,truyens}){
                                     </td>
                                     <td className="doanhThu">
                                         {i.doanhThu || 0}
-                                    </td>
-                                    <td className="tacGia">
-                                        {i.nguoidung.ten}
                                     </td>
                                     <td className="hanhDong">
                                         <button

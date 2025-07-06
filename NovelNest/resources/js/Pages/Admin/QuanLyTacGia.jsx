@@ -1,11 +1,12 @@
 import AdminLayout from "../../Layouts/AdminLayout";
-import './QuanLyNguoiDung.scss'
+import './QuanLyTacGia.scss'
 import { useEffect, useState } from "react";
 import { router,usePage } from "@inertiajs/react";
 import VerifyPass from "../../Components/VerifyPass"
 import axios from "axios";
-export default function QuanLyTruyen({user,nguoiDungs}){
-    console.log(nguoiDungs)
+import { BsCopy } from "react-icons/bs";
+export default function QuanLyTruyen({user,tacGias}){
+    console.log(tacGias)
     const {url} = usePage();
     const queryString = url.split('?')[1]; // Lấy phần query string sau dấu ?
     const query = Object.fromEntries(new URLSearchParams(queryString));
@@ -23,7 +24,7 @@ export default function QuanLyTruyen({user,nguoiDungs}){
 
     const handleSearch = ()=>{
         if(searchText.trim()!=query.searchText)
-            router.visit(`/admin/quanlynguoidung?sort=${sort}&searchText=${searchText.trim()}`)
+            router.visit(`/admin/quanlytacgia?sort=${sort}&searchText=${searchText.trim()}`)
     }
     const handleAction=(id,e)=>{
         e.stopPropagation();
@@ -41,36 +42,36 @@ export default function QuanLyTruyen({user,nguoiDungs}){
         }
     }
     return(
-        <AdminLayout page='2' user={user} title='Quản lý truyện'>
+        <AdminLayout page='3' user={user} title='Quản lý tác giả'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <div className="quanLyTruyen">
                 <div>
-                    <h1>Quản lý người dùng</h1>
+                    <h1>Quản lý tác giả</h1>
                     <div>
                         <div
                             onClick={()=>setPupopTheLoai(!popupTheLoai)}
-                        >{sort=='dutang'?'Số dư tăng':sort=='dugiam'?'Số dư giảm':'Mặc định'}
+                        >{sort=='thutang'?'Doanh thu tăng':sort=='thugiam'?'Doanh thu giảm':'Mặc định'}
                             <div 
                                 style={popupTheLoai?{display:'flex'}:{display:'none'}}
                                 onClick={(e)=>{ e.stopPropagation();}}
                             >
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}`)}}
+                                    onClick={()=>{router.visit(`/admin/quanlytacgia?searchText=${query.searchText || ''}`)}}
                                     style={sort=='macdinh'?{backgroundColor:'greenyellow'}:{}}
                                 >
                                     Mặc định
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}&sort=dutang`)}}
-                                    style={sort=='dutang'?{backgroundColor:'greenyellow'}:{}}
+                                    onClick={()=>{router.visit(`/admin/quanlytacgia?searchText=${query.searchText || ''}&sort=thutang`)}}
+                                    style={sort=='thutang'?{backgroundColor:'greenyellow'}:{}}
                                 >
-                                    Số dư tăng
+                                    Doanh thu tăng
                                 </button>
                                 <button
-                                    onClick={()=>{router.visit(`/admin/quanlynguoidung?searchText=${query.searchText || ''}&sort=dugiam`)}}
-                                    style={sort=='dugiam'?{backgroundColor:'greenyellow'}:{}}
+                                    onClick={()=>{router.visit(`/admin/quanlytacgia?searchText=${query.searchText || ''}&sort=thugiam`)}}
+                                    style={sort=='thugiam'?{backgroundColor:'greenyellow'}:{}}
                                 >
-                                    Số dư giảm
+                                    Doanh thu giảm
                                 </button>
 
                             </div>
@@ -90,6 +91,9 @@ export default function QuanLyTruyen({user,nguoiDungs}){
                     <table>
                         <thead>
                             <tr>
+                                <th className="id">
+                                    ID
+                                </th>
                                 <th className="ten">
                                     Tên
                                 </th>
@@ -97,7 +101,7 @@ export default function QuanLyTruyen({user,nguoiDungs}){
                                     Emai
                                 </th>
                                 <th className="soDu">
-                                    Số dư
+                                    Doanh thu
                                 </th>
                                 <th className="hanhDong">
                                     Hành động
@@ -105,11 +109,27 @@ export default function QuanLyTruyen({user,nguoiDungs}){
                             </tr>
                         </thead>
                         <tbody>
-                            {nguoiDungs.map((i)=>(
+                            {tacGias.map((i)=>(
                                 <tr key={i.id}
                                     style={i.trangThai==0?{backgroundColor:'red'}:i.trangThai==2?{backgroundColor:'yellow'}:{}}
-                                    onClick={()=>router.visit('/admin/quanlylichsu/'+i.id)}
+                                    onClick={()=>router.visit('/admin/quanlytruyentacgia/'+i.id)}
                                 >
+                                    <td className="id">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const target = e.currentTarget;
+                                                target.style.color = 'red';
+                                                navigator.clipboard.writeText(i.id);
+                                                setTimeout(() => {
+                                                target.style.color = 'black';
+                                                }, 1000);
+                                            }}
+                                            title="Copy ID"
+                                        >
+                                            <BsCopy />
+                                        </button>
+                                    </td>
                                     <td className="ten">
                                         {i.ten}
                                     </td>
@@ -117,9 +137,12 @@ export default function QuanLyTruyen({user,nguoiDungs}){
                                         {i.email}
                                     </td>
                                     <td className="tacGia">
-                                        {i.soDu}
+                                        {i.doanhThu}
                                     </td>
                                     <td className="hanhDong">
+                                        {/* <button
+                                            onClick={(e)=>handleAction(i.id,e)}
+                                        >{i.trangThai==1?'Khóa':'Khôi phục'}</button> */}
                                         <button
                                             disabled={i.vaiTro<3}
                                             onClick={(e)=>handleAction(i.id,e)}

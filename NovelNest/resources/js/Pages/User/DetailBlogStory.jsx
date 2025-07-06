@@ -11,15 +11,16 @@ export default function DetailBlogStory({login,detailBlog,randomBlogs}){
                 <button className="back-arrow" onClick={() => window.history.back()}>←</button>
                 <div className="blog-detail">
                     <div className="blog-main">
-                        <img className="blog-image" src={detailBlog.hinhAnh} alt={detailBlog.hinhAnh} />
+                        <img className="blog-image" src={'/img/blog/'+detailBlog.hinhAnh} alt={detailBlog.hinhAnh} />
                         <h3 className='blog-title'>
                             {detailBlog.tieuDe}
                         </h3>
                         <div className="blog-content">
                             <div className="blog-text">
-                                {detailBlog.noiDung.split('\n').map((line, index) => (
+                                {/* {detailBlog.noiDung.split('\n').map((line, index) => (
                                     <p key={index}>{line.trim()}</p>
-                                ))}
+                                ))} */}
+                                <div dangerouslySetInnerHTML={{ __html: detailBlog.noiDung }} />
                             </div>
                         </div>
                     </div>
@@ -28,7 +29,7 @@ export default function DetailBlogStory({login,detailBlog,randomBlogs}){
                             <div className="related-list">
                                 {randomBlogs.map(item => (
                                 <div key={item.id}  className="related-item" onClick={() => router.visit(`/blogtruyen/${item.id}`)}>
-                                    <img src={item.hinhAnh} alt={item.tieuDe} />
+                                    <img src={'/img/blog/'+item.hinhAnh} alt={item.tieuDe} />
                                 <h4>{item.tieuDe}</h4>
                             </div>
                             ))}

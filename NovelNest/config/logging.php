@@ -51,7 +51,11 @@ return [
     */
 
     'channels' => [
-
+        'customlog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/admin.log'),
+            'level' => 'info',
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),

@@ -1,0 +1,66 @@
+.ThemBlog{
+    padding: 0 20px;
+    background-color: white;
+    >.head{
+        padding-top: 10px;
+    }
+    >.body{
+        background-color: #d5d5d5;
+        width: 100%;
+        padding: 20px 20px;
+        border-radius: 20px;
+        min-height: 90vh;
+        >.hinhAnh{
+            display: flex;
+            justify-content: center;
+            >.inputAN{
+                width: 40%;
+                display: flex;
+                margin-top: 10px;
+                flex-direction: column;
+                >img{
+                    width: 100%;
+                    aspect-ratio: 16/9;
+                    background-color: white;
+                    &:hover{
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+        >.tenBlog{
+            margin: 20px 0;
+            display: flex;
+            width: 100%;
+            >.tenChuong{
+                width: 70%;
+                >div{
+                    width: 100%;
+                    >label{
+                        margin-right: 20px;
+                    }
+                    >input{
+                        width: 60%;
+                    }
+                }
+            }
+        }
+        >.buttonSM{
+            width: 100%;
+            display: flex;
+            justify-content: end;
+            margin-top: 20px;
+            >button:first-of-type{
+                margin-right: 20px;
+            }
+            >button{
+                width: 10%;
+                aspect-ratio: 4/1;
+            }
+        }
+    }
+}
+.error{
+    color: red;
+    font-size: 16px;
+}

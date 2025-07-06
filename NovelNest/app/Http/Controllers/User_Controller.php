@@ -377,12 +377,10 @@ class User_Controller extends Controller
             }
             
         }
-        Log::info('6');
         $yeuThich = new YeuThich();
         $yeuThich->id_NguoiDung = $user->id;
         $yeuThich->id_Truyen = $id;
         $yeuThich->save();
-        Log::info('7');
         return response()->json(['message'=>'Thêm yêu thích thành công','flag'=>true],200);
     }
     public function checkDaMua(Request $request){
@@ -392,8 +390,11 @@ class User_Controller extends Controller
 
     public function blogTruyen(Request $request){
         $user=$request->attributes->get('user');
-        $blogtruyen=BaiViet::all();
-         return Inertia::render('User/BlogStories',[
+        $blogtruyen=BaiViet::orderByDesc('ngayTao')->get();
+        foreach($blogtruyen as $blog){
+            $blog->noiDung = strip_tags($blog->noiDung);
+        }
+        return Inertia::render('User/BlogStories',[
             'blogTruyen'=>$blogtruyen,
             'login'=>$user,
         ]);
@@ -525,7 +526,7 @@ class User_Controller extends Controller
         if (!$user) {
             return response()->json(['message'=>'Chưa đăng nhập'],401);
         }
-        if(!$user->email || !$user->matKhau){
+        if(!$user->matKhau){
             if($user->vaiTro>2)
                 return response()->json(['value'=>false],200);
         }
@@ -674,15 +675,12 @@ class User_Controller extends Controller
             $lichSuDoc->save();
             $chuong->luotXem+=1;
             $chuong->save();
-            Log::info('Thêm lịch sử đọc');
             return response()->json(['message'=> 'Thêm lịch sử đọc thành công!'],200);
         }
         $lichSuDoc->thoiGian = now();
         $lichSuDoc->save();
-        Log::info('Cập nhật lịch sử đọc');
         return response()->json(['message'=> 'Cập nhật lịch sử đọc thành công!'],200);
         }catch(Exception $e){
-            Log::error($e->getMessage());
         }
     }
     public function datLaiMatKhau(Request $request){
@@ -907,6 +905,16 @@ class User_Controller extends Controller
         if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
         $truyen = Truyen::find($id);
         if(!$truyen) return response()->json(['message'=>'Truyện không tồn tại!'],401);
+
+        $daDoc = LichSuDoc::join('chuong', 'lichsudoc.id_Chuong', '=', 'chuong.id')
+                ->where('lichsudoc.id_NguoiDung', $user->id)
+                ->where('chuong.id_Truyen', $truyen->id)
+                ->exists();
+
+        if (!$daDoc && $truyen->id_NguoiDung != $user->id && $user->vaiTro > 2) {
+            return response()->json(['message' => 'Bạn cần đọc truyện trước khi bình luận.'], 403);
+        }
+
         try{
             $noiDung = $request->noiDung;
             $idBinhLuan = $request->idBinhLuan;

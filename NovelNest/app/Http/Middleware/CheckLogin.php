@@ -24,6 +24,10 @@ class CheckLogin
             $request->attributes->set('user',false);
             return $next($request);
         }
+        if($user->vaiTro < 3 && $user->matKhau != $parsed->claims()->get('matKhau')){
+            $request->attributes->set('user',false);
+            return $next($request);
+        }
         if((!empty($roles) && !in_array($user->vaiTro, $roles))){
             if(max($roles) < 3){
                 return redirect('/admin/dangnhap');

@@ -1,0 +1,95 @@
+.DoiNguAdmin{
+    >div:first-of-type{
+        display: flex;
+        background-color: white;
+        align-items: center;
+        padding: 30px;
+    }
+    >.main{
+        padding: 20px;
+        display: flex;
+        height: 80vh;
+        >div{
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        >.them{
+            >.form{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 5% 10%;
+                background-color: white;
+                border-radius: 20px;
+                box-shadow: 5px 5px 10px 6px rgba(0, 0, 0, 0.4);
+                max-width: 50%;
+                >div{
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: 20px;
+                    width: 100%;
+                    >div{
+                        display: flex;
+                        width: 100%;
+                        >input{
+                            width: 100%;
+                        }
+                    }
+                }
+                >.buttonF{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-around;
+                    >button{
+                        width: 40%;
+                    }
+                }
+            }
+        }
+        >.danhSach{
+            flex-direction: column;
+            >h2{
+                text-shadow: 5px 5px 4px rgba(0, 0, 0, 0.6);
+            }
+            >div{
+                flex: 1;
+                width: 100%;
+                background-color: white;
+                box-shadow: 5px 5px 10px 6px rgba(0, 0, 0, 0.4);
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                table{
+                    width: 100%;
+                    tr{
+                        border-bottom: 1px solid;
+                        width: 100%;
+                    }
+                    .id{
+                        width: 20%;
+                        padding-left: 5px;
+                    }
+                    .tenDangNhap{
+                        width: 35%;
+                    }
+                    .tenHienThi{
+                        width: 30%;
+                    }
+                    .hanhDong{
+                        width: 15%;
+                    }
+                }
+                >div{
+                    // height: 100%;
+                    // width: 100%;
+                    flex: 1;
+                    overflow: auto;
+                }
+            }
+        }
+        
+    }
+}

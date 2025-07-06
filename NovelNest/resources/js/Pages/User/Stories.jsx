@@ -10,7 +10,6 @@ import { TbLockDollar } from "react-icons/tb";
 import { GoDotFill } from "react-icons/go";
 import BuyChapter from '../../Components/BuyChappter';
 import UserLogin from '@/Components/UserLogin';
-import EmailAndPassword from '@/Components/EmailAndPassword';
 
 const rawComments = [
   { id: 1, id_NguoiDung: 101, id_BinhLuan: null, noiDung: "Bình luận gốc", thoiGian: "2025-07-04" },
@@ -83,10 +82,11 @@ function Comment({ comment, onReply }) {
             placeholder="Nhập phản hồi..."
             style={{ width: '100%' }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Ngăn xuống dòng
                 handleSubmit();
-              }}
-            }
+              }
+            }}
           />
           <button className='btnc' onClick={handleSubmit} style={{ fontSize: '12px', marginTop: 4 }}>Gửi</button>
         </div>
@@ -111,7 +111,6 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
     const [traiHeight2, setTraiHeight2] = useState(0);
     const chuongChuaMuaIds = new Set(chuongChuaMua.map(c => c.id));
     const [showLogin,setShowLogin] = useState(false);
-    const [modalEP,setModalEP] = useState(false);
     const [love,setLove]=useState(favorite);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [showDate,setShowDate] = useState(false)
@@ -148,16 +147,6 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
             if(!login){
               setShowLogin(true)
               return;
-            }
-            try {
-                const response = await axios.get('/api/checkep');
-                if(!response.data.value){
-                    setModalEP(true);
-                    return;
-                }
-            } catch (error) {
-                setShowLogin(true);
-                return;
             }
             //hiển thị modal mua chương và truyền set chương đã chọn 
             setShowModal(true);
@@ -235,7 +224,6 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
 return(
 <Userlayout title="Stories" login={login} >
     <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
-    <EmailAndPassword isShow={modalEP} setIsShow={setModalEP}/>
     {(showDate) && (
         <div
             className="custom-tooltip"
@@ -351,11 +339,11 @@ return(
       <div className='tBinhLuanDiv'>
         <textarea spellCheck={false} value={noiDung} onChange={(e)=>{setNoiDung(e.target.value)}}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
               handleComment();
-            }}
-          }
+            }
+          }}
         />
         <button disabled={loadingComment} onClick={handleComment}>Bình luận</button>
       </div>

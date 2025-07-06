@@ -31,7 +31,7 @@ class CheckContent
             'da đen', 'khựa', 'chó tàu', 'đồ mọi', 'dân chợ',
 
             // ✅ Bạo lực, kích động thù hận
-            'giết', 'chém', 'đánh', 'đập', 'bom', 'lật đổ', 'đảo chính', 'phản động',
+            'giết', 'chém', 'bom', 'lật đổ', 'đảo chính', 'phản động',
             'cộng sản chó', 'đảng ngu', 'bọn nó phải chết', 'đáng bị đâm',
 
             // ✅ Chính trị nhạy cảm
@@ -41,34 +41,61 @@ class CheckContent
             'http', 'www', '.com', 'zalo.me', 'fb.com', 'facebook.com', 'bán hàng',
             'inbox', 'like page', 'kiếm tiền online', 'mời gọi đầu tư', 'đa cấp', 'tuyển cộng tác viên'
         ];
-        $noiDung = $request->noiDung;
-        if($noiDung)
-            foreach ($tuCam as $tu) {
-                // Tách chuỗi thành mảng ký tự an toàn với Unicode
-                $chars = mb_str_split($tu);
-                // Escape từng ký tự
-                $escapedChars = array_map(fn($char) => preg_quote($char, '/'), $chars);
-                // Nối lại thành regex cho phép xen kẽ khoảng trắng (hoặc ký tự khác nếu bạn muốn)
-                $pattern = '/' . implode('\s*', $escapedChars) . '/iu';
+        // $noiDung = $request->noiDung;
+        // if($noiDung)
+        //     foreach ($tuCam as $tu) {
+        //         // Tách chuỗi thành mảng ký tự an toàn với Unicode
+        //         $chars = mb_str_split($tu);
+        //         // Escape từng ký tự
+        //         $escapedChars = array_map(fn($char) => preg_quote($char, '/'), $chars);
+        //         // Nối lại thành regex cho phép xen kẽ khoảng trắng (hoặc ký tự khác nếu bạn muốn)
+        //         $pattern = '/' . implode('\s*', $escapedChars) . '/iu';
 
-                if (preg_match($pattern, $noiDung)) {
-                    return response()->json(['message' => 'Nội dung chứa từ ngữ không phù hợp.'], 400);
+        //         if (preg_match($pattern, $noiDung)) {
+        //             return response()->json(['message' => 'Nội dung chứa từ ngữ không phù hợp.'], 400);
+        //         }
+        //     }
+        // $gioiThieu = $request->gioiThieu;
+        // if($gioiThieu)
+        //     foreach ($tuCam as $tu) {
+        //         // Tách chuỗi thành mảng ký tự an toàn với Unicode
+        //         $chars = mb_str_split($tu);
+        //         // Escape từng ký tự
+        //         $escapedChars = array_map(fn($char) => preg_quote($char, '/'), $chars);
+        //         // Nối lại thành regex cho phép xen kẽ khoảng trắng (hoặc ký tự khác nếu bạn muốn)
+        //         $pattern = '/' . implode('\s*', $escapedChars) . '/iu';
+
+        //         if (preg_match($pattern, $gioiThieu)) {
+        //             return response()->json(['message' => 'Nội dung chứa từ ngữ không phù hợp.'], 400);
+        //         }
+        //     }
+        // return $next($request);
+        $fields = ['noiDung', 'gioiThieu','ten','tieuDe'];
+        $viPham = [];
+
+        foreach ($fields as $field) {
+            $text = $request->$field;
+            if (!$text) continue;
+
+            foreach ($tuCam as $tu) {
+                $chars = mb_str_split($tu);
+                $escapedChars = array_map(fn($char) => preg_quote($char, '/'), $chars);
+                // $pattern = '/' . implode('\s*', $escapedChars) . '/iu';
+                // $pattern = '/\b' . implode('\s*', $escapedChars) . '\b/iu';
+                $pattern = '/' . implode('\s*+', array_map(fn($c) => preg_quote($c, '/') . '+', $escapedChars)) . '\b/iu';
+
+                if (preg_match($pattern, $text)) {
+                    $viPham[] = $tu;
                 }
             }
-        $gioiThieu = $request->gioiThieu;
-        if($gioiThieu)
-            foreach ($tuCam as $tu) {
-                // Tách chuỗi thành mảng ký tự an toàn với Unicode
-                $chars = mb_str_split($tu);
-                // Escape từng ký tự
-                $escapedChars = array_map(fn($char) => preg_quote($char, '/'), $chars);
-                // Nối lại thành regex cho phép xen kẽ khoảng trắng (hoặc ký tự khác nếu bạn muốn)
-                $pattern = '/' . implode('\s*', $escapedChars) . '/iu';
+        }
 
-                if (preg_match($pattern, $gioiThieu)) {
-                    return response()->json(['message' => 'Nội dung chứa từ ngữ không phù hợp.'], 400);
-                }
-            }
+        if (!empty($viPham)) {
+            return response()->json([
+                'message' => 'Nội dung chứa từ ngữ không phù hợp: ' . implode(', ', array_unique($viPham))
+            ], 400);
+        }
+
         return $next($request);
     }
 }
