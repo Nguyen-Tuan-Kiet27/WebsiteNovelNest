@@ -44,6 +44,7 @@ class User_Controller extends Controller
                 $subDaMua[$truyenId]['total'] = ($subDaMua[$truyenId]['total'] ?? 0) + $row->gia;
         }
             $user->id=NguoiDung::giaiMa($user->id);
+            $user->premium = $user->premium > now() || $user->vaiTro < 3;
             return Inertia::render('User/TaiKhoan',[
                 'user'=> $user,
                 'daMua'=>$subDaMua,
@@ -935,6 +936,35 @@ class User_Controller extends Controller
             ],200);
         }catch(Exception $e){
             return response()->json(['message'=>$e->getMessage()],500);
+        }
+    }
+    public function apiMuaPremium(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return response()->json([
+                'message'=>'Không tìm thấy người dùng!'
+            ],401);
+        }
+        try{
+            if($user->soDu < 20000){
+                return response()->json([
+                    'message'=>'Không đủ xu trong tài khoản!'
+                ],400);
+            }
+            $user->soDu = (int)$user->soDu - 20000;
+            $user->premium = $user->premium > now()
+                ? Carbon::parse($user->premium)->addDays(30)
+                : now()->addDays(30);
+            $user->save();
+            Log::channel('customlog')->info('User mua premium: ', [
+                'user' => $user->toArray()
+            ]);
+            return response()->json(['message'=>'Mua premium thành công hiệu lực đến: '. Carbon::parse($user->premium)->format('d/m/Y H:i')],200);
+        }catch(Exception $e){
+            return response()->json([
+                'message'=>'Có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage()
+            ],500);
         }
     }
 }
