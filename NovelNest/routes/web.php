@@ -75,4 +75,3 @@ Route::get('/admin/yeucauruttien',[Admin_Controller::class,'yeuCauRutXu'])->midd
 //////////////Chuyển token từ ngrok về localhost
 Route::get('/auth/callback', [User_Controller::class,'authCallback']);
 
-//////realtime
