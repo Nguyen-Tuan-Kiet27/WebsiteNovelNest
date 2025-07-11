@@ -26,6 +26,7 @@ export default function({isShow,setIsShow,onOk}){
             setPass('');
             onOk();
         } catch (error) {
+            console.log(error);
             if(error.response.data.matKhau)
                 setEPass(error.response.data.matKhau)
             if(error.response.data.taiKhoan)

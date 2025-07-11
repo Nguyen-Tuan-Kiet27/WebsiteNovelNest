@@ -1,17 +1,40 @@
 import Userlayout from '@/Layouts/UserLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Home.scss';
 import CardStories from '../../Components/CardStories';
 import ListStories from '../../Components/ListStories';
 import { router } from '@inertiajs/react';
+import { motion, AnimatePresence } from "framer-motion";
+import axios from 'axios';
 
-export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanThanhs}) {
+export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanThanhs,slides}) {
   console.log(truyenDaHoanThanhs)
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
+  const bannerRef = useRef(null);
+  const [widthBanner, setWidthBanner] = useState(0);
+
+  
+
   useEffect(() => {
     window.addEventListener('resize', () => setScreenWidth(window.innerWidth));
-    return () => window.removeEventListener('resize', () => setScreenWidth(window.innerWidth));
+    if (bannerRef.current) {
+      setWidthBanner(bannerRef.current.offsetWidth);
+    }
+    const handleResize = () => {
+      if (bannerRef.current) {
+        setWidthBanner(bannerRef.current.offsetWidth);
+      }
+    };
+    if (slides.length === 0) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, 5000);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', () => setScreenWidth(window.innerWidth));
+      window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   const containerWidth = screenWidth * 0.9;
@@ -30,11 +53,58 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
     genres2 = theLoais.slice(half);
   }
 
+  const [current, setCurrent] = useState(0);
+  const timerRef = useRef();
+
+  useEffect(() => {
+    if (slides.length === 0) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timerRef.current);
+  }, [current]);
+
+  const goToSlide = (index) => {
+    setCurrent(index);
+    clearInterval(timerRef.current);
+  };
+
   return (
     <Userlayout title="Home" login={login} page={1}>
       <div className='tong'>
-        <div className='banner'>
-          <img src="/img/banner2.jpg" alt="" />
+        <div className='banner'>{
+          slides.length != 0 &&
+          <div ref={bannerRef}>
+              <div>
+                <AnimatePresence initial={false}>
+                  <motion.a
+                    key={slides[current]?.id}
+                    href={slides[current]?.lienKet}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ x: widthBanner, opacity: 0 }}     // Bắt đầu từ bên phải
+                    animate={{ x: 0, opacity: 1 }}        // Di chuyển về giữa và hiện dần
+                    exit={{ x: -widthBanner, opacity: 0 }}        // Trượt sang trái khi rời đi
+                    transition={{ duration: 1 }}
+                  >
+                    <img
+                      src={`/img/quangcao/${slides[current]?.hinhAnh}`}
+                      alt=""
+                    />
+                  </motion.a>
+                </AnimatePresence>
+                <div>
+                  {slides.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      style={{backgroundColor:index==current?'yellow':'white'}}
+                    ></button>
+                  ))}
+                </div>
+              </div>
+          </div>
+        }
         </div>
         <div>
           <button className='TheLoai'>

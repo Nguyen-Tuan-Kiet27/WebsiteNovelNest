@@ -57,8 +57,27 @@ class Summary_Controller extends Controller
     {
         $chunks = [];
         while (strlen($text) > $maxLength) {
-            $cutAt = mb_strrpos(mb_substr($text, 0, $maxLength), ". ");
-            $cutAt = $cutAt ?: $maxLength;
+            // $cutAt = mb_strrpos(mb_substr($text, 0, $maxLength), ". ");
+            // $cutAt = $cutAt ?: $maxLength;
+
+            $subText = mb_substr($text, 0, $maxLength);
+
+            // Tìm vị trí các dấu ngắt: chấm, phẩy, khoảng trắng
+            $cutAtDot   = mb_strrpos($subText, '.');
+            $cutAtComma = mb_strrpos($subText, ',');
+            $cutAtSpace = mb_strrpos($subText, ' ');
+
+            // Ưu tiên dấu chấm, sau đó phẩy, rồi đến khoảng trắng
+            if ($cutAtDot !== false) {
+                $cutAt = $cutAtDot;
+            } elseif ($cutAtComma !== false) {
+                $cutAt = $cutAtComma;
+            } elseif ($cutAtSpace !== false) {
+                $cutAt = $cutAtSpace;
+            } else {
+                // Không có dấu nào thì cắt thẳng tại maxLength
+                $cutAt = $maxLength;
+            }
 
             $chunks[] = trim(mb_substr($text, 0, $cutAt + 1));
             $text = mb_substr($text, $cutAt + 1);

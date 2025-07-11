@@ -23,7 +23,9 @@ use App\Models\LichSuMua;
 use Illuminate\Support\Facades\Log;
 use App\Models\LichSuDoc;
 use App\Models\BaoCao;
+use App\Models\QuangCao;
 use App\Models\BinhLuan;
+use App\Models\LichSuRut;
 use Illuminate\Support\Facades\DB;
 class User_Controller extends Controller
 {
@@ -43,13 +45,13 @@ class User_Controller extends Controller
                 $subDaMua[$truyenId]['sub'][] = $chuong;
                 $subDaMua[$truyenId]['total'] = ($subDaMua[$truyenId]['total'] ?? 0) + $row->gia;
         }
+            $timePrem = $user->premium<now()?null:Carbon::parse($user->premium)->format('d/m/Y');
+            Log::info($user->premium);
             $user->id=NguoiDung::giaiMa($user->id);
             $user->premium = $user->premium > now() || $user->vaiTro < 3;
             return Inertia::render('User/TaiKhoan',[
                 'user'=> $user,
-                'daMua'=>$subDaMua,
-                
-             
+                'timePrem' => $timePrem,
         ]);
     }
 //////////////////////////////////////////////////////////////
@@ -183,12 +185,14 @@ class User_Controller extends Controller
             ->orderByDesc('ngayKetThuc')
             ->take(14)
             ->get();
+        $slides = QuangCao::where('trangThai',1)->orderByDesc('ngayTao')->get();
         return Inertia::render('User/Home',[
             'login'=> $user,
             'theLoais'=> $theLoais,
             'truyenHots' => $truyenHots,
             'truyenMois' => $truyenMois,
             'truyenDaHoanThanhs' => $truyenDaHoanThanhs,
+            'slides'=>$slides,
         ]);
     }
     public function category(Request $request){
@@ -345,6 +349,7 @@ class User_Controller extends Controller
                 ->where('gia', '>', 0)
                 ->get();
         }
+        $user->email = NguoiDung::giaiMa($user->email);
         return Inertia::render('User/DetailStory',[
             'chuong'=>$chuong,
             'truyen'=>$chuong->Truyen,
@@ -768,6 +773,12 @@ class User_Controller extends Controller
             'lichSu' => $r
         ]);
 
+        $rut = $queryBuilder(LichSuRut::class)->map(fn($r) => [
+            'loai' => 4,
+            'thoiGian' => $r->thoiGian,
+            'lichSu' => $r
+        ]);
+
         // $mua = LichSuMua::with('daMuas.chuong.truyen')
         // ->where('id_NguoiDung', $user->id)
         // ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
@@ -811,7 +822,7 @@ class User_Controller extends Controller
         ]);
 
         // Gộp, sắp xếp lại
-        $all = $doc->concat($nap)->concat($mua)
+        $all = $doc->concat($nap)->concat($mua)->concat($rut)
             ->sortByDesc('thoiGian')
             ->values();
 
@@ -959,12 +970,51 @@ class User_Controller extends Controller
             Log::channel('customlog')->info('User mua premium: ', [
                 'user' => $user->toArray()
             ]);
-            return response()->json(['message'=>'Mua premium thành công hiệu lực đến: '. Carbon::parse($user->premium)->format('d/m/Y H:i')],200);
+            return response()->json(['message'=>'Mua premium thành công hiệu lực đến: '. Carbon::parse($user->premium)->format('d/m/Y')],200);
         }catch(Exception $e){
             return response()->json([
                 'message'=>'Có lỗi hệ thống xảy ra!',
                 'error'=>$e->getMessage()
             ],500);
         }
+    }
+    public function apiDoiAvatar(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return response()->json([
+                'message'=>'Không tìm thấy người dùng!'
+            ],401);
+        }
+        try{
+            if($request->hasFile('anhDaiDien')){
+                if ($user->anhDaiDien && file_exists(public_path('img/nguoiDung/' . $user->anhDaiDien))) {
+                    unlink(public_path('img/nguoiDung/' . $user->anhDaiDien));
+                }
+                $hinhAnh = $request->file('anhDaiDien');
+                $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+                $hinhAnh->move(public_path('img/nguoiDung/'), $nameHinhAnh);
+                $user->anhDaiDien = $nameHinhAnh;
+                $user->save();
+                return response()->json(['message'=>'Đổi ảnh đại diện thành công!'],200);
+            }else{
+                return response()->json([
+                    'message'=>'Không nhận được ảnh!'
+                ],401);
+            }
+        }catch(Exception $e){
+            return response()->json([
+                'message'=>'Có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage()
+            ],500);
+        }
+    }
+
+    public function apiGetThongTin(){
+        $fb = ThongTin::where('khoa','facebook')->first();
+        $yt = ThongTin::where('khoa','youtube')->first();
+        $eml = ThongTin::where('khoa','email')->first();
+        return response()->json([
+            'thongTin'=>[$fb->giaTri,$yt->giaTri,$eml->giaTri],
+        ],200);
     }
 }

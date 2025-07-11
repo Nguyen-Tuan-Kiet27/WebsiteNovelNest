@@ -9,7 +9,7 @@ import { FaRegHeart, FaHeart  } from 'react-icons/fa';
 import VerifyPass from '../../Components/VerifyPass';
 import BuyPremium from '../../Components/BuyPremium';
 
-export default function TaiKhoan({user}){
+export default function TaiKhoan({user,timePrem}){
     const [showTab,setShowTab] = useState(1);
     const hinh='https://www.westminstercollection.com/media/52253261/dn-change-checker-2022-canadian-mint-honouring-queen-elizabeth-ii-2-coin-product-images-2-1.jpg?height=450&bgcolor=fff'
     //đã mua
@@ -18,7 +18,8 @@ export default function TaiKhoan({user}){
     const [hasMoreDaMua,setHasMoreDaMua] = useState(true);
     const [loadDaMua,setLoadDaMua] = useState(false);
     const [expandedId, setExpandedId] = useState(null);
-
+    const [show, setShow] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const handleGetDaMuas = async ()=>{
       try {
@@ -97,7 +98,7 @@ export default function TaiKhoan({user}){
               lastTime: sLichSu,
             }
           });
-
+          console.log(response.data.lichSus);
           setLichSus(prev => ([
             ...prev,
             ...response.data.lichSus
@@ -141,6 +142,69 @@ export default function TaiKhoan({user}){
         alert(error.response.data.message)
       }
     }
+    //Đổi ảnh đại diện
+    const [showChangeAvatar,setShowChangeAvatar] = useState(false);
+    const avatar = new useRef();
+    const [errorAV,setErrorAV] = useState('');
+    const [fileAV,setFileAV] = useState(null);
+    const [previewAV,setPreviewAV] = useState(null);
+    const [showPassAV,setShowPassAV] = useState(false);
+
+    const handleAVChange=(e)=>{
+      const sfile = e.target.files[0];
+        if(sfile){
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onloadend = event=>{
+                img.onload = ()=>{
+                    const {width, height} = img;
+                    if(width/height != 1){
+                        setErrorAV("Vui lòng chọn hình ảnh (1:1)!")
+                        setPreviewAV(null)
+                        setFileAV(null)
+                    }else{
+                        setFileAV(sfile)
+                        setErrorAV(null)
+                        setPreviewAV(event.target.result)
+                    }
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(sfile)
+        }else{
+            setPreviewAV(null);
+            setFileAV(null);
+        }
+        e.target.value = null;
+    }
+    const handleCheckAV=()=>{
+      if(!fileAV){
+        setErrorAV('Chưa chọn ảnh!')
+        return;
+      }
+      setShowPassAV(true);
+    }
+    const handleSubmitAV = async ()=>{
+      try {
+        const formData = new FormData();
+        formData.append('anhDaiDien',fileAV);
+        formData.append('_method','PUT');
+        const response = await axios.post('/api/doiavartar',formData,{
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+        })
+        alert(response.data.message);
+        window.location.reload();
+      } catch (error) {
+        alert(error.response.data.message);
+        console.log(error.response.data.error);
+      }
+    }
+    //Hiện thị thời gian prem
+    const handleMouseMove = (e) => {
+        setPosition({ x: e.pageX, y: e.pageY});
+    };
     //////
     useEffect( ()=>{
       handleGetDaMuas();
@@ -151,6 +215,7 @@ export default function TaiKhoan({user}){
   return (
     <Userlayout login={user} title='Tài khoản' page='4'>
       <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleDoiTenS}/>
+      <VerifyPass isShow={showPassAV} setIsShow={setShowPassAV} onOk={handleSubmitAV}/>
       <BuyPremium isShow={showPremium} setShow={setShowPremium}/>
       {showDoiTen&& (
           <div className='popupDoiTen' onClick={()=>setShowDoiTen(false)}>
@@ -163,6 +228,31 @@ export default function TaiKhoan({user}){
           </div>
         )
       }
+      {showChangeAvatar && (
+        <div className='ChangeAvatar' onClick={()=>setShowChangeAvatar(false)}>
+            <div className='main' onClick={e=>e.stopPropagation()}>
+              <div className="inputAV">
+                  <label>Ảnh đại diện size(1:1)</label>
+                  <input ref={avatar} type="file" accept="image/*" style={{display:'none'}} onChange={handleAVChange}/>
+                  <img src={previewAV || '/img/nguoiDung/d1_1.png'} onClick={()=>avatar.current.click()}/>
+                  <label className="error">{errorAV}</label>
+              </div>
+              <button onClick={handleCheckAV}>Lưu</button>
+            </div>
+        </div>
+      )}
+      {(show && user.vaiTro>2) && (
+          <div
+              className="custom-tooltip"
+              style={{
+                  position: 'absolute',
+                  top: position.y+20,
+                  left: position.x+10,
+              }}
+          >
+              {timePrem!=null?`Hiệu lực đến: ${timePrem}`:'Mua Premium'}
+          </div>
+      )}
       <div className="tai-khoan-page">
         <div className="tai-khoan-container">
           <div className="logout-btn">
@@ -172,11 +262,18 @@ export default function TaiKhoan({user}){
           <div className="profile-section">
             <div className="profile-avatar">
               <div className="avatar-img">
-                <img src={user.anhDaiDien}/>
-                <button onClick={()=>setShowPremium(user.vaiTro>2)} className={user.premium?'gold-button':'silver-button'} ><label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label></button>
-                {console.log(user)}
+                <img src={user.anhDaiDien.startsWith('http')?user.anhDaiDien:`/img/nguoiDung/${user.anhDaiDien}`}/>
+                <button 
+                  onClick={()=>setShowPremium(user.vaiTro>2)}
+                  className={user.premium?'gold-button':'silver-button'}
+                  onMouseEnter={() => setShow(true)}
+                  onMouseLeave={() => setShow(false)}
+                  onMouseMove={handleMouseMove}
+                >
+                  <label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label>
+                </button>
               </div>
-              <button className="edit-avatar">Đổi Ảnh</button>
+              <button className="edit-avatar" onClick={()=>setShowChangeAvatar(true)}>Đổi Ảnh</button>
             </div>
             <div className='uName'>
               <p>Tên:&ensp;{user.ten}</p>
@@ -244,8 +341,23 @@ export default function TaiKhoan({user}){
                       </div> 
                     </div>
                   ))}
-                  {/*Lịch sử: 3Mua*/}
+                  {/*Lịch sử:*/}
                   {showTab==3 && lichSus.map(item => (
+                    /*Rút*/
+                    item.loai == 4 && (
+                      <div key={item.thoiGian}>
+                        <div className="item" onClick={()=>router.visit(`/muaxu`)} style={{cursor:'pointer'}}>
+                          <div className="item-image"><img src='/img/XuNovelNest.png' alt="" /></div>
+                          <div className="item-info">
+                              <p><strong>Rút xu:</strong></p>
+                              <p>Số lượng xu: {item.lichSu.soLuongXu}</p>
+                              <p>Giá trị: {item.lichSu.giaTri}₫</p>
+                              <p>Trạng thái: {item.lichSu.trangThai == 0?'Đang chờ xử lý':item.lichSu.ketQua==1?'Đã hoàn thành':`Bị từ chối với lý do "${item.lichSu.lyDo}"`}</p>
+                              <p>Thời gian: {item.thoiGian}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )||
                     /*Mua*/
                     item.loai == 3 && (
                       <div key={item.thoiGian}>

@@ -1,0 +1,169 @@
+.QuanLyThongTinWeb{
+    width: 100%;
+    >.main{
+        >.head{
+            >h1{
+                background-color: white;
+                padding: 30px;
+            }
+        }
+        >.body{
+            padding: 0 30px;
+            >.link{
+                >div{
+                    width: 100%;
+                    padding-left: 30px;
+                    margin-top: 20px;
+                    >div{
+                        width: 100%;
+                        >input{
+                            width: 30%;
+                        }
+                    }
+                }
+            }
+            >.baner{
+                width: 100%;
+                margin-top: 30px;
+                >.bts{
+                    display: flex;
+                    justify-content: end;
+                    padding: 10px 30px;
+                    >button{
+                        background-color: greenyellow;
+                    }
+                }
+                >div{
+                    width: 100%;
+                    padding: 0 30px;
+                    table{
+                        width: 100%;
+                        tr{
+                            border-bottom: 1px solid;
+                        }
+                        >thead{
+                            background-color: #b8b8b8;
+                        }
+                        .hinhAnh{
+                            width: 25%;
+                            padding: 15px 30px;
+                            >img{
+                                width: 100%;
+                                aspect-ratio: 16/9;
+                            }
+                        }
+                        .lienKet{
+                            width: 50%;
+                            >a{
+                                color: rgb(157, 0, 204);
+                            }
+                        }
+                        .tangThai{
+                            width: 10%;
+                        }
+                        .hanhDong{
+                            width: 15%;
+                            height: 100%;
+                            >div{
+                                width: 100%;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-around;
+                                align-items: center;
+                                >.suaB{
+                                    border-radius: 5px;
+                                    width: 50%;
+                                }
+                                >.khoaB{
+                                    margin: 10px 0;
+                                    border-radius: 5px;
+                                    width: 50%;
+                                    background-color: orange;
+                                }
+                                >.xoaB{
+                                    border-radius: 5px;
+                                    width: 50%;
+                                    background-color: red;
+                                }
+
+                            }
+                        }
+                    }
+                    >.tbody{
+                        width: 100%;
+                        max-height: 100vh;
+                        overflow: auto;
+                        tbody{
+                            width: 100%;
+                            background-color: white;
+                        }
+                    }
+                }
+            }
+            >.dieuKhoan{
+                margin-top: 30px;
+                width: 100%;
+                >div{
+                    width: 100%;
+                    padding: 0 30px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    >div{
+                        width: 100%;
+                        max-height: 80vh;
+                        padding: 10px 30px;
+                        background-color: white;
+                        overflow: auto;
+                    }
+                    >h4{
+                        width: 100%;
+                    }
+                }
+                >div:nth-of-type(2){
+                    margin-top: 30px;
+                }
+            }
+        }
+    }
+
+    .SuaDieuKhoan{
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
+        >.main{
+            background-color: #bfbfbf;
+            padding: 30px;
+            width: 70%;
+            max-height: 90vh;
+            overflow: auto;
+            border: 1px solid;
+            border-radius: 10px;
+            margin-left: 15%;
+            box-shadow: 10px 10px 20px 10px rgba(0, 0, 0, 0.5);
+            >.blh{
+                margin-top: 30px;
+                width: 100%;
+                display: flex;
+                justify-content: end;
+                >button{
+                    margin-left: 30px;
+                }
+            }
+        }
+    }
+
+    button{
+        border-radius: 5px;
+        >a{
+            text-decoration: none;
+            color: black;
+        }
+    }
+}

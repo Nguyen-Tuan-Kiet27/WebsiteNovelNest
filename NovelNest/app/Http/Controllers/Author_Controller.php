@@ -14,10 +14,12 @@ use App\Models\Chuong;
 use App\Models\LichSuMua;
 use App\Models\BaiViet;
 use App\Models\DaMua;
+use App\Models\LichSuRut;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Events\LichSuRutMoi;
 
 
 
@@ -594,5 +596,50 @@ class Author_Controller extends Controller
             'message'=> 'Sửa blog thành công!'
         ],201);
     }
-
+    public function rutXu(Request $request){
+        $user = $request->attributes->get("user");
+        if(!$user){ 
+            return redirect("/");
+        }
+        return Inertia::render('Author/RutXu',[
+            'user'=>$user,
+        ]);
+    }
+    public function apiRutXu(Request $request){
+        try{
+            $user = $request->attributes->get('user');
+            if(!$user){
+                return response()->json([
+                    'message'=> 'Không có quyền truy cập!'
+                ],401);
+            }
+            if($request->soLuongXu > $user->soDu){
+                return response()->json([
+                    'message'=> 'Không đủ số dư trong tài khoản!'
+                ],401);
+            }
+            $lichSuRut = new LichSuRut();
+            $lichSuRut->id_NguoiDung = $user->id;
+            $lichSuRut->soLuongXu = $request->soLuongXu;
+            $lichSuRut->giaTri = floor((int)($request->soLuongXu)*0.95);
+            $lichSuRut->thoiGian = now();
+            $lichSuRut->tenNganHang = $request->tenNganHang;
+            $lichSuRut->soTaiKhoan = $request->soTaiKhoan;
+            $lichSuRut->tenNguoiNhan = $request->tenNguoiNhan;
+            $user->soDu = $user->soDu - (int)$request->soLuongXu;
+            DB::transaction(function () use ($user, $lichSuRut) {
+                $user->save();
+                $lichSuRut->save();
+            });
+            broadcast(new LichSuRutMoi($lichSuRut));
+            return response()->json([
+                'message' => 'Yêu cầu rút tiền đã được gửi thành công.',
+            ], 200);
+        }catch(Exception $e){
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi hệ thống!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
