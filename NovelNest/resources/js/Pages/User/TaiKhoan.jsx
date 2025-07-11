@@ -9,7 +9,7 @@ import { FaRegHeart, FaHeart  } from 'react-icons/fa';
 import VerifyPass from '../../Components/VerifyPass';
 import BuyPremium from '../../Components/BuyPremium';
 
-export default function TaiKhoan({user}){
+export default function TaiKhoan({user,timePrem}){
     const [showTab,setShowTab] = useState(1);
     const hinh='https://www.westminstercollection.com/media/52253261/dn-change-checker-2022-canadian-mint-honouring-queen-elizabeth-ii-2-coin-product-images-2-1.jpg?height=450&bgcolor=fff'
     //đã mua
@@ -18,7 +18,8 @@ export default function TaiKhoan({user}){
     const [hasMoreDaMua,setHasMoreDaMua] = useState(true);
     const [loadDaMua,setLoadDaMua] = useState(false);
     const [expandedId, setExpandedId] = useState(null);
-
+    const [show, setShow] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const handleGetDaMuas = async ()=>{
       try {
@@ -97,7 +98,7 @@ export default function TaiKhoan({user}){
               lastTime: sLichSu,
             }
           });
-
+          console.log(response.data.lichSus);
           setLichSus(prev => ([
             ...prev,
             ...response.data.lichSus
@@ -200,6 +201,10 @@ export default function TaiKhoan({user}){
         console.log(error.response.data.error);
       }
     }
+    //Hiện thị thời gian prem
+    const handleMouseMove = (e) => {
+        setPosition({ x: e.pageX, y: e.pageY});
+    };
     //////
     useEffect( ()=>{
       handleGetDaMuas();
@@ -236,6 +241,18 @@ export default function TaiKhoan({user}){
             </div>
         </div>
       )}
+      {(show && user.vaiTro>2) && (
+          <div
+              className="custom-tooltip"
+              style={{
+                  position: 'absolute',
+                  top: position.y+20,
+                  left: position.x+10,
+              }}
+          >
+              {timePrem!=null?`Hiệu lực đến: ${timePrem}`:'Mua Premium'}
+          </div>
+      )}
       <div className="tai-khoan-page">
         <div className="tai-khoan-container">
           <div className="logout-btn">
@@ -246,8 +263,15 @@ export default function TaiKhoan({user}){
             <div className="profile-avatar">
               <div className="avatar-img">
                 <img src={user.anhDaiDien.startsWith('http')?user.anhDaiDien:`/img/nguoiDung/${user.anhDaiDien}`}/>
-                <button onClick={()=>setShowPremium(user.vaiTro>2)} className={user.premium?'gold-button':'silver-button'} ><label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label></button>
-                {console.log(user)}
+                <button 
+                  onClick={()=>setShowPremium(user.vaiTro>2)}
+                  className={user.premium?'gold-button':'silver-button'}
+                  onMouseEnter={() => setShow(true)}
+                  onMouseLeave={() => setShow(false)}
+                  onMouseMove={handleMouseMove}
+                >
+                  <label className={user.premium?'gold-text':'silver-text'}>{user.premium?'Prem':'STD'}</label>
+                </button>
               </div>
               <button className="edit-avatar" onClick={()=>setShowChangeAvatar(true)}>Đổi Ảnh</button>
             </div>
@@ -317,8 +341,23 @@ export default function TaiKhoan({user}){
                       </div> 
                     </div>
                   ))}
-                  {/*Lịch sử: 3Mua*/}
+                  {/*Lịch sử:*/}
                   {showTab==3 && lichSus.map(item => (
+                    /*Rút*/
+                    item.loai == 4 && (
+                      <div key={item.thoiGian}>
+                        <div className="item" onClick={()=>router.visit(`/muaxu`)} style={{cursor:'pointer'}}>
+                          <div className="item-image"><img src='/img/XuNovelNest.png' alt="" /></div>
+                          <div className="item-info">
+                              <p><strong>Rút xu:</strong></p>
+                              <p>Số lượng xu: {item.lichSu.soLuongXu}</p>
+                              <p>Giá trị: {item.lichSu.giaTri}₫</p>
+                              <p>Trạng thái: {item.lichSu.trangThai == 0?'Đang chờ xử lý':item.lichSu.ketQua==1?'Đã hoàn thành':`Bị từ chối với lý do "${item.lichSu.lyDo}"`}</p>
+                              <p>Thời gian: {item.thoiGian}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )||
                     /*Mua*/
                     item.loai == 3 && (
                       <div key={item.thoiGian}>

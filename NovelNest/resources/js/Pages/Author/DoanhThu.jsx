@@ -4,6 +4,7 @@ import {
 } from 'recharts'
 import './DoanhThu.scss'
 import { useState } from "react";
+import { router } from "@inertiajs/react";
 export default function DoanhThu({user,top3Truyens,truyenDangHoatDong,doanhThuTuan,chartThang,chartNam,chartAll,top10Thang,top10Nam,top10All}){
     console.log(top10Thang)
     const [selected,setSelected] = useState(0);
@@ -12,7 +13,7 @@ export default function DoanhThu({user,top3Truyens,truyenDangHoatDong,doanhThuTu
             <div className="DoanhThu">
                 <div className="mainDoanhThu">
                     <div className="headDT">
-                        <h4>Doanh thu</h4>
+                        <h1>Doanh thu</h1>
                     </div>
                     <div className="bodyDT">
                         <div className="thongKe">
@@ -38,7 +39,7 @@ export default function DoanhThu({user,top3Truyens,truyenDangHoatDong,doanhThuTu
                                     </div>
                                 </div>
                                 <div className="rut">
-                                    <button>Rút xu</button>
+                                    <button onClick={()=>router.visit('/author/rutxu')}>Rút xu</button>
                                 </div>
                             </div>
                         </div>

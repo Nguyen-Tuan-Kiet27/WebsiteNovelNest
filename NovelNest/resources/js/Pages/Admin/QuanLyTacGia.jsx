@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { router,usePage } from "@inertiajs/react";
 import VerifyPass from "../../Components/VerifyPass"
 import axios from "axios";
+import LyDo from "../../Components/LyDo";
 import { BsCopy } from "react-icons/bs";
 export default function QuanLyTruyen({user,tacGias}){
     console.log(tacGias)
@@ -16,6 +17,10 @@ export default function QuanLyTruyen({user,tacGias}){
 
     const [showPass,setShowPass] = useState(false);
     const [idAction,setIdAction] = useState(null);
+    const [lyDo,setLyDo] = useState('');
+    const [trangThai,setTrangThai] = useState(0)
+
+    const [showLyDo,setShowLyDo] = useState(false)
 
     useEffect(()=>{
        setsort(query.sort || 'macdinh')
@@ -26,14 +31,20 @@ export default function QuanLyTruyen({user,tacGias}){
         if(searchText.trim()!=query.searchText)
             router.visit(`/admin/quanlytacgia?sort=${sort}&searchText=${searchText.trim()}`)
     }
-    const handleAction=(id,e)=>{
+    const handleAction=(id,trangThai,e)=>{
         e.stopPropagation();
         setIdAction(id);
-        setShowPass(true);
+        setTrangThai(Math.abs(trangThai-1))
+        if(trangThai==0){
+            setShowPass(true);
+            setLyDo('');
+        }else{
+            setShowLyDo(true);
+        }
     }
     const handleOkPass = async ()=>{
         try {
-            const response = await axios.put(`/api/admin/changenguoidung/${idAction}`);
+            const response = await axios.put(`/api/admin/changenguoidung/${idAction}`,{trangThai:trangThai,lyDo:lyDo});
             alert(response.data.message);
         } catch (error) {
             alert(error.response.data.message)
@@ -44,6 +55,7 @@ export default function QuanLyTruyen({user,tacGias}){
     return(
         <AdminLayout page='3' user={user} title='Quản lý tác giả'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
+            <LyDo isShow={showLyDo} setIsShow={setShowLyDo} onOk={(e)=>{setShowPass(true);setLyDo(e)}}/>
             <div className="quanLyTruyen">
                 <div>
                     <h1>Quản lý tác giả</h1>
@@ -145,7 +157,7 @@ export default function QuanLyTruyen({user,tacGias}){
                                         >{i.trangThai==1?'Khóa':'Khôi phục'}</button> */}
                                         <button
                                             disabled={i.vaiTro<3}
-                                            onClick={(e)=>handleAction(i.id,e)}
+                                            onClick={(e)=>handleAction(i.id,i.trangThai,e)}
                                         >{i.vaiTro<3?'Admin':i.trangThai==1?'Khóa':'Khôi phục'}</button>
                                     </td>
                                 </tr>

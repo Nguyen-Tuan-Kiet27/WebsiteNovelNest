@@ -5,8 +5,12 @@ use App\Http\Controllers\User_Controller;
 use App\Http\Controllers\Author_Controller;
 use App\Http\Controllers\Admin_Controller;
 use App\Http\Controllers\Payment_Controller;
+use Illuminate\Support\Facades\Broadcast;
 use Inertia\Inertia;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 //user
 Route::get('/', [User_Controller::class, 'index'])->middleware('CheckLogin');
@@ -44,6 +48,7 @@ Route::get('/author/suachuong/{id}', [Author_Controller::class,'suaChuong'])->mi
 Route::get('/author/blog',[Author_Controller::class,'blog'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/themblog',[Author_Controller::class,'themBlog'])->middleware('CheckLogin:1,2,3');
 Route::get('/author/suablog/{id}',[Author_Controller::class,'suaBlog'])->middleware('CheckLogin:1,2,3');
+Route::get('/author/rutxu',[Author_Controller::class,'rutXu'])->middleware('CheckLogin:1,2,3');
 
 
 
@@ -61,8 +66,13 @@ Route::get('/admin/quanlytruyenbaocao', [Admin_Controller::class,'quanLyTruyenBa
 Route::get('/admin/quanlychuongbaocao/{id}', [Admin_Controller::class,'quanLyChuongBaoCao'])->middleware('CheckLogin:1,2');
 Route::get('/admin/chitietbaocao/{id}', [Admin_Controller::class,'chiTietBaoCao'])->middleware('CheckLogin:1,2');
 Route::get('/admin/doinguadmin', [Admin_Controller::class,'doiNguAdmin'])->middleware('CheckLogin:1');
+Route::get('/admin/quanlythongtinweb',[Admin_Controller::class,'quanLyThongTinWeb'])->middleware(['CheckLogin:1']);
+Route::get('/admin/themslide',[Admin_Controller::class,'themSlide'])->middleware(['CheckLogin:1']);
+Route::get('/admin/suaslide/{id}',[Admin_Controller::class,'suaSlide'])->middleware(['CheckLogin:1']);
+Route::get('/admin/yeucauruttien',[Admin_Controller::class,'yeuCauRutXu'])->middleware('CheckLogin:1,2');
 
 
 //////////////Chuyển token từ ngrok về localhost
 Route::get('/auth/callback', [User_Controller::class,'authCallback']);
 
+//////realtime

@@ -1,0 +1,36 @@
+.LyDo{
+    position: fixed;
+    width: 100%;
+    height: 80vh;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    >.main{
+        background-color: white;
+        padding: 30px;
+        display: flex;
+        width: 25%;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid;
+        box-shadow: 3px 3px 5px 3px rgba(0, 0, 0, 0.3);
+        >div{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            >textarea{
+                width: 100%;
+                max-height: 10vh;
+                min-height: 40px;
+            }
+        }
+        >button{
+            margin-top: 20px;
+            width: 25%;
+            aspect-ratio: 5/2;
+        }
+    }
+}

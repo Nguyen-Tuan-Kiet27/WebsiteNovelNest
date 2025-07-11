@@ -44,7 +44,7 @@ export default function Login(){
                         />
                     </div>
                     <div>
-                        <lable style={{width:'80%', color:'red'}}>{error}</lable>
+                        <label style={{width:'80%', color:'red'}}>{error}</label>
                     </div>
                     <div>
                         <p style={{color:"blue"}}>Nếu bạn quyên mật khẩu, cần liên hệ với Super Admin hoặc kỹ thuật viên!</p>

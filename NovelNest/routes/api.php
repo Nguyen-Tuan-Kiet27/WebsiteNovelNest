@@ -38,6 +38,7 @@ Route::post('/user/baocaochuong/{id}',[User_Controller::class,'apiBaoCaoChuong']
 Route::post('/binhluan/{id}',[User_Controller::class,'apiBinhLuan'])->middleware(['web','CheckLogin','CheckContent']);
 Route::put('/muapremium',[User_Controller::class,'apiMuaPremium'])->middleware(['web','CheckLogin:3,4']);
 Route::put('/doiavartar',[User_Controller::class,'apiDoiAvatar'])->middleware(['web','CheckLogin']);
+Route::get('/getthongtin',[User_Controller::class,'apiGetThongTin']);
 
 
 
@@ -49,7 +50,7 @@ Route::put('/author/suatruyen/{id}', [Author_Controller::class,'apiSuaTruyen'])-
 Route::put('/author/suachuong/{id}', [Author_Controller::class,'apiSuaChuong'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
 Route::post('/author/themblog', [Author_Controller::class,'apiThemBlog'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
 Route::post('/author/suablog/{id}', [Author_Controller::class,'apiSuaBlog'])->middleware(['web','CheckLogin:1,2,3','CheckContent']);
-
+Route::post('/author/rutxu',[Author_Controller::class,'apiRutXu'])->middleware(['web','CheckLogin:1,2,3']);
 
 //Admin
 Route::post('/admin/login', [Admin_Controller::class,'authLogin'])->middleware(['web']);
@@ -62,6 +63,19 @@ Route::put('/admin/changenguoidung/{id}',[Admin_Controller::class,'apiChangeNguo
 Route::put('/admin/boquabaocao/{id}',[Admin_Controller::class,'boQuaBaoCao'])->middleware(['web','CheckLogin:1,2']);
 Route::post('/superadmin/themadmin',[Admin_Controller::class,'apiThemAdmin'])->middleware(['web','CheckLogin:1']);
 Route::put('/superadmin/suaadmin/{id}',[Admin_Controller::class,'apiSuaAdmin'])->middleware(['web','CheckLogin:1']);
+Route::put('/superadmin/suathongtin',[Admin_Controller::class,'apiSuaThongTin'])->middleware(['web','CheckLogin:1']);
+Route::post('/superadmin/themslide',[Admin_Controller::class,'apiThemSlide'])->middleware(['web','CheckLogin:1']);
+Route::put('/superadmin/suaslide/{id}',[Admin_Controller::class,'apiSuaSlide'])->middleware(['web','CheckLogin:1']);
+Route::put('/superadmin/suatrangthaislide/{id}',[Admin_Controller::class,'apiSuaTrangThaiSlide'])->middleware(['web','CheckLogin:1']);
+Route::delete('/superadmin/xoaslide/{id}',[Admin_Controller::class,'apiXoaSlide'])->middleware(['web','CheckLogin:1']);
+Route::put('/admin/nhanyeucau',[Admin_Controller::class,'apiNhanYeuCau'])->middleware(['web','CheckLogin:1,2']);
+Route::post('/admin/huynhanyeucau',[Admin_Controller::class,'apiHuyNhanYeuCau'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/tuchoiyeucau',[Admin_Controller::class,'apiTuChoiYeuCau'])->middleware(['web','CheckLogin:1,2']);
+Route::put('/admin/hoanthanhyeucau',[Admin_Controller::class,'apiHoanThanhYeuCau'])->middleware(['web','CheckLogin:1,2']);
+
+
+
+
 
 
 

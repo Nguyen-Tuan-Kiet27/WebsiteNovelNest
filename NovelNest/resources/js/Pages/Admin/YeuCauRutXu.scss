@@ -1,0 +1,97 @@
+.QuanLyThongTinWeb{
+    width: 100%;
+    >.XuLyYeuCau{
+        position: fixed;
+        width: 100%;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: 999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        >.main{
+            margin-left: 15%;
+            width: 30%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            box-shadow: 10px 10px 15px 7px rgba(0, 0, 0, 0.4);
+            >div{
+                width: 100%;
+                display: flex;
+                justify-content: space-around;
+                margin-top: 30px;
+                >div:first-of-type{
+                    //Thông tin
+                    width: 40%;
+                    padding-left: 30px;
+                }
+                >div:nth-of-type(2){
+                    width: 60%;
+                }
+                >button{
+                    width: 25%;
+                    border-radius: 5px;
+                }
+            }
+        }
+    }
+    >.main{
+        >.head{
+            >h1{
+                background-color: white;
+                padding: 30px;
+            }
+        }
+        >.body{
+            padding: 0 30px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            >div{
+                width: 100%;
+            }
+            table{
+                width: 100%;
+                >thead{
+                    >tr{
+                        background-color: #a1a1a1;
+                    }
+                }
+                tr{
+                    border-bottom: 1px solid;
+                }
+                .id{
+                    padding: 10px 0;
+                    width: 5%;
+                    padding-left: 10px;
+                    >button{
+                        background-color: rgba(0, 0, 0, 0);
+                        border: none;
+                        padding: 0;
+                        transition: color 0.3s ease;
+                    }
+                }
+                .soTaiKhoan{
+                    width: 40%;
+                    padding-left: 10px;
+
+                }
+                .tenNganHang{
+                    width: 20%;
+                }
+                .giaTri{
+                    width: 20%;
+                }
+                .hanhDong{
+                    width: 10%;
+                }
+                
+            }
+        }
+    }
+}

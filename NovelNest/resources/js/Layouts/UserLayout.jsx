@@ -20,14 +20,30 @@ export default function Userlayout({children,title,login,page}){
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [show, setShow] = useState(false);
     const [searchText,setSearchText] = useState('');
+
+    const [thongTin,setThongTin] = useState([]);
+
+    const handleGetThongTin = async ()=>{
+        try {
+        const response = await axios.get('/api/getthongtin');
+        setThongTin(response.data.thongTin);
+        } catch (error) {
+        console.log('Có lỗi xảy ra khi lấy thông tin:'.error.response.data)
+        }
+    }
+
     useEffect(() => {
         if(flash.loginf)
             window.location.reload();
+        console.log(flash.block)
+        if(flash.block)
+            alert(flash.block);
         if (window.location.hash === '#_=_') {
             window.history.replaceState(null, null, window.location.pathname + window.location.search);
         }
         setSearchText(query.searchText || "")
         setMrtMain(headRef.current.offsetHeight+20)
+        handleGetThongTin();
     }, []);
     const handleClickLogin = ()=>{
         if(login || flash.loginf)
@@ -169,9 +185,9 @@ export default function Userlayout({children,title,login,page}){
                         <div>
                             <h5>Liên hệ:</h5>
                             <ul>
-                                <li><a href="#"> FaceBook</a></li>
-                                <li><a href="#"> Youtube</a></li>
-                                <li><a href="#"> Email</a></li>
+                                <li><a href={thongTin[0]}> FaceBook</a></li>
+                                <li><a href={thongTin[1]}> Youtube</a></li>
+                                <li><a href={"https://mail.google.com/mail/?view=cm&fs=1&to="+thongTin[2]} target="_blank"> Email</a></li>
                             </ul>
                         </div>
                         

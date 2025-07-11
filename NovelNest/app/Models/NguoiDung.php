@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Traits\Timestamp;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class NguoiDung extends Model
 {
@@ -11,7 +12,7 @@ class NguoiDung extends Model
     protected $primaryKey = "id";
     public $incrementing = false;
     public $keyType = "string";
-    protected $fillable = ["id","ten","tenDangNhap","email","matKhau","vaiTro","soDu","premium","anhDaiDien","ngayTao"] ;
+    protected $fillable = ["id","ten","tenDangNhap","email","matKhau","vaiTro","soDu","premium","anhDaiDien","ngayTao","trangThai","lyDo"] ;
     public $timestamps = false;
     public function BaiViets(){
         return $this->hasMany(BaiViet::class, "id_NguoiDung");

@@ -1,0 +1,57 @@
+.RutXu{
+    >.main{
+        height: 100vh;
+        width: 100%;
+        padding: 10px 30px;
+        display: flex;
+        flex-direction: column;
+        >.body{
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            >div{
+                width: 40%;
+                padding: 30px;
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border-radius: 20px;
+                box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.5);
+                >div{
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    margin-bottom: 20px;
+                    >input{
+                        width: 100%;
+                    }
+                }
+                >.soLuong{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    >div{
+                        width: 45%;
+                        display: flex;
+                        flex-direction: column;
+                        >input{
+                            flex: 1;
+                        }
+                        
+                    }
+                }
+                >button{
+                    margin-top: 30px;
+                    border-radius: 5px;
+                }
+            }
+
+        }
+    }
+    .error{
+        color: red;
+        font-size: 14px;
+    }
+}

@@ -20,6 +20,12 @@ export default function AdminLayout({children,page,user,title}){
                     Dash Board
                 </button>
                 <button
+                    style={page == 8 ? { color: '#378C0C', fontWeight: '700'} : {display: user.vaiTro==1 ? 'block':'none'}}
+                    onClick={()=>router.visit('/admin/quanlythongtinweb')}
+                >
+                    Quản lý thông tin web
+                </button>
+                <button
                     style={page == 2 ? { color: '#378C0C', fontWeight: '700' } : {}}
                     onClick={()=>router.visit('/admin/quanlynguoidung')}
                 >
@@ -39,6 +45,7 @@ export default function AdminLayout({children,page,user,title}){
                 </button>
                 <button
                     style={page == 5 ? { color: '#378C0C', fontWeight: '700' } : {}}
+                    onClick={()=>router.visit('/admin/yeucauruttien')}
                 >
                     Yêu cầu rút tiền
                 </button>

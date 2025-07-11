@@ -15,9 +15,14 @@ use App\Models\DaMua;
 use App\Models\LichSuNap;
 use App\Models\BaoCao;
 use App\Models\ThongTin;
+use App\Models\QuangCao;
+use App\Models\LichSuRut;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Events\LichSuRutMoi;
+use App\Events\AnLichSuRut;
+
 
 class Admin_Controller extends Controller
 {
@@ -441,10 +446,8 @@ class Admin_Controller extends Controller
                 'message'=> 'Không có quyền cập nhật tài khoản này!'
             ],401);
         }
-        if($nguoiDung->trangThai != 0)
-            $nguoiDung->trangThai = 0;
-        else
-            $nguoiDung->trangThai = 1;
+        $nguoiDung->trangThai = $request->input('trangThai');
+        $nguoiDung->lyDo = $request->input('lyDo','');
         $nguoiDung->save();
         Log::channel('customlog')->info('Cập nhật người dùng: ', [
             'user' => $user->toArray(),
@@ -486,16 +489,27 @@ class Admin_Controller extends Controller
                 DB::raw('lichsumua.thoiGian as thoiGian')
             ])
             ->groupBy('damua.id_LichSuMua', 'lichsumua.thoiGian');
+        $lichSuRut = DB::table('lichsurut')
+            ->where('id_NguoiDung', $nguoiDung->id)
+            ->where('ketQua',1)
+            ->select([
+                DB::raw("'Rút' as loai"),
+                DB::raw('soLuongXu as soLuong'),
+                'thoiGian'
+            ]);
         $lichSuTongHop = DB::table(DB::raw("(
                             {$lichSuNap->toSql()}
                             UNION ALL
                             {$lichSuMua->toSql()}
                             UNION ALL
                             {$lichSuNhan->toSql()}
+                            UNION ALL
+                            {$lichSuRut->toSql()}
                         ) as lichsu"))
                         ->mergeBindings($lichSuNap)
                         ->mergeBindings($lichSuMua)
                         ->mergeBindings($lichSuNhan)
+                        ->mergeBindings($lichSuRut)
                         ->when($sort=='new',function($q){
                             $q->orderByDesc('thoiGian');
                         })
@@ -814,6 +828,356 @@ class Admin_Controller extends Controller
         }catch(Exception $e){
             return response()->json([
                 'message'=> 'Có lỗi hệ thống sảy ra!',
+                'error'=>$e->getMessage(),
+            ],500);
+        }
+    }
+    public function quanLyThongTinWeb(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect('admin/dangnhap');
+        }
+        $dktg = ThongTin::where('khoa','DKTG')->first();
+        $dknd = ThongTin::where('khoa','dieuKhoanDichVu')->first();
+        $email = ThongTin::where('khoa','email')->first();
+        $fb = ThongTin::where('khoa','facebook')->first();
+        $yt = ThongTin::where('khoa','youtube')->first();
+
+        $slides = QuangCao::orderByDesc('trangThai')
+                  ->orderByDesc('ngayTao')
+                  ->get();
+
+        return Inertia::render('Admin/QuanLyThongTinWeb',[
+            'user'=>$user,
+            'dktg'=>$dktg,
+            'dknd'=>$dknd,
+            'eml'=>$email,
+            'fb'=>$fb,
+            'yt'=>$yt,
+            'slides'=>$slides,
+        ]);
+    }
+    public function apiSuaThongTin(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        try{
+            $newThongTin = $request->input('thongTin');
+            $thongTin = ThongTin::where('khoa',$newThongTin['khoa'])->first();
+            $thongTin->giaTri = $newThongTin['giaTri'];
+            $thongTin->ngayTao = now();
+            $thongTin->save();
+            Log::channel('customlog')->info('Thêm sửa thông tin: ', [
+                'user' => $user->toArray(),
+                'theloai' => $thongTin->toArray(),
+            ]);
+            return response()->json(['message'=>'Thay đổi thông tin thành công!'],200);
+        }catch(Exception $e){
+            return response()->json(['message'=>'Có lỗi hệ thống sảy ra!','error'=>$e->getMessage()],500);
+        }
+    }
+    public function themSlide(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect('admin/dangnhap');
+        }
+        return Inertia::render('Admin/ThemSlide',[
+            'user'=>$user,
+        ]);
+    }
+    public function apiThemSlide(Request $request){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        if($request->hasFile('hinhAnh')){
+            $hinhAnh = $request->file('hinhAnh');
+            $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+        }else{
+            return response()->json([
+                'message'=> 'Chưa chọn hình ảnh!'
+            ],401);
+        }
+        try{
+            $slide = new QuangCao();
+            $slide->hinhAnh = $nameHinhAnh;
+            $slide->lienKet = $request->lienKet;
+            $slide->ngayTao = now();
+            $slide->trangThai = 1;
+            $slide->id_NguoiDung = $user->id;
+            $slide->save();
+            Log::channel('customlog')->info('Thêm slide: ', [
+                'user' => $user->toArray(),
+                'theloai' => $slide->toArray()
+            ]);
+            $hinhAnh->move(public_path('img/quangCao/'), $nameHinhAnh);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Tạo slide mới thành công!'
+        ],201);
+    }
+    public function suaSlide(Request $request,$id){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect('admin/dangnhap');
+        }
+        $slide = QuangCao::find($id);
+        if(!$slide){
+            return redirect('/admin/quanlythongtinweb');
+        }
+        return Inertia::render('Admin/SuaSlide',[
+            'user'=>$user,
+            'slide'=>$slide,
+        ]);
+    }
+    public function apiSuaSlide(Request $request,$id){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        try{
+            $slide = QuangCao::find($id);
+            if(!$slide){
+                return response()->json([
+                    'message'=> 'Không tìm thấy slide!'
+                ],401);
+            }
+            if($request->hasFile('hinhAnh')){
+                if ($slide->hinhAnh && file_exists(public_path('img/quangCao/' . $slide->hinhAnh))) {
+                    unlink(public_path('img/quangCao/' . $slide->hinhAnh));
+                }
+                $hinhAnh = $request->file('hinhAnh');
+                $nameHinhAnh = uniqid().'.'.$hinhAnh->getClientOriginalExtension();
+                $hinhAnh->move(public_path('img/quangCao/'), $nameHinhAnh);
+                $slide->hinhAnh = $nameHinhAnh;
+            }
+            $slide->lienKet = $request->lienKet;
+            $slide->ngayTao = now();
+            $slide->id_NguoiDung = $user->id;
+            $slide->save();
+            Log::channel('customlog')->info('Sửa slide: ', [
+                'user' => $user->toArray(),
+                'slide' => $slide->toArray()
+            ]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Sửa slide thành công!'
+        ],201);
+    }
+
+    public function apiSuaTrangThaiSlide(Request $request,$id){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        try{
+            $slide = QuangCao::find($id);
+            if(!$slide){
+                return response()->json([
+                    'message'=> 'Không tìm thấy slide!'
+                ],401);
+            }
+            $slide->trangThai = $request->trangThai;
+            $slide->ngayTao = now();
+            $slide->id_NguoiDung = $user->id;
+            $slide->save();
+            Log::channel('customlog')->info('Sửa slide: ', [
+                'user' => $user->toArray(),
+                'slide' => $slide->toArray()
+            ]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Cập nhật trạng thái slide thành công!'
+        ],201);
+    }
+
+    public function apiXoaSlide(Request $request,$id){
+        $user = $request->attributes->get("user");
+        if(!$user){
+            return response()->json([
+                'message'=> 'Không có quyền truy cập!'
+            ],401);
+        }
+        try{
+            $slide = QuangCao::find($id);
+            if(!$slide){
+                return response()->json([
+                    'message'=> 'Không tìm thấy slide!'
+                ],401);
+            }
+            if ($slide->hinhAnh && file_exists(public_path('img/quangCao/' . $slide->hinhAnh))) {
+                unlink(public_path('img/quangCao/' . $slide->hinhAnh));
+            }
+            Log::channel('customlog')->info('Xóa slide: ', [
+                'user' => $user->toArray(),
+                'slide' => $slide->toArray()
+            ]);
+            $slide->delete(); 
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],404);
+        }
+        return response()->json([
+            'message'=> 'Xóa slide thành công!'
+        ],201);
+    }
+    public function yeuCauRutXu(Request $request){
+        $user = $request->attributes->get('user');
+        if(!$user){
+            return redirect('admin/dangnhap');
+        }
+        $lichSuRuts = LichSuRut::where('trangThai',0)->where('xuLy',0)->orderBy('thoiGian')->get();
+        return Inertia::render('Admin/YeuCauRutXu',[
+            'user'=>$user,
+            'LSRs'=>$lichSuRuts,
+        ]);
+
+    }
+    public function apiNhanYeuCau(Request $request){
+        try{
+            $user = $request->attributes->get("user");
+            if(!$user){
+                return response()->json([
+                    'message'=> 'Không có quyền truy cập!'
+                ],401);
+            }
+            $yeuCau = LichSuRut::find($request->input('id'));
+            if(!$yeuCau){
+                return response()->json([
+                    'message'=> 'Không tìm thấy yêu cầu!'
+                ],401);
+            }
+            if($yeuCau->trangThai == 1 || $yeuCau->xuLy==1){
+                return response()->json([
+                    'message'=> 'Đã có người nhận yêu cầu này!'
+                ],401);
+            }
+            $yeuCau->xuLy = 1;
+            $yeuCau->id_Admin = $user->id;
+            $yeuCau->save();
+            broadcast(new AnLichSuRut($yeuCau));
+            return response()->json([
+                'message'=> 'Nhận yêu cầu rút tiền thành công!'
+            ],200);
+        }catch(Exception $e){
+            return response()->json([
+                'message'=> 'Đã có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage(),
+            ],500);
+        }
+    }
+
+    public function apiHuyNhanYeuCau(Request $request){
+        try{
+            $user = $request->attributes->get("user");
+            if(!$user){
+                return response()->json([
+                    'message'=> 'Không có quyền truy cập!'
+                ],401);
+            }
+            $yeuCau = LichSuRut::find($request->input('id'));
+            if(!$yeuCau){
+                return response()->json([
+                    'message'=> 'Không tìm thấy yêu cầu!'
+                ],401);
+            }
+            $yeuCau->xuLy = 0;
+            $yeuCau->id_Admin = null;
+            $yeuCau->save();
+            broadcast(new LichSuRutMoi($yeuCau));
+            return response()->json([
+                'message'=> 'Hủy nhận yêu cầu rút tiền thành công!'
+            ],200);
+        }catch(Exception $e){
+            return response()->json([
+                'message'=> 'Đã có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage(),
+            ],500);
+        }
+    }
+
+    public function apiTuChoiYeuCau(Request $request){
+        try{
+            $user = $request->attributes->get("user");
+            if(!$user){
+                return response()->json([
+                    'message'=> 'Không có quyền truy cập!'
+                ],401);
+            }
+            $yeuCau = LichSuRut::find($request->input('id'));
+            if(!$yeuCau){
+                return response()->json([
+                    'message'=> 'Không tìm thấy yêu cầu!'
+                ],401);
+            }
+            $yeuCau->trangThai = 1;
+            $yeuCau->ketQua = 0;
+            $yeuCau->lyDo = $request->input('lyDo');
+            $yeuCau->thoiGian = now();
+            $nguoiDung = NguoiDung::find($yeuCau->id_NguoiDung);
+            $nguoiDung->soDu+=$yeuCau->soLuongXu;
+            DB::transaction(function () use ($yeuCau, $nguoiDung) {
+                $yeuCau->save();
+                $nguoiDung->save();
+            });
+            $yeuCau->save();
+            Log::channel('customlog')->info('Từ chôi yêu cầu rút tiền: ', [
+                'user' => $user->toArray(),
+                'theloai' => $yeuCau->toArray()
+            ]);
+            return response()->json([
+                'message'=> 'Từ chối yêu cầu rút tiền thành công!'
+            ],200);
+        }catch(Exception $e){
+            return response()->json([
+                'message'=> 'Đã có lỗi hệ thống xảy ra!',
+                'error'=>$e->getMessage(),
+            ],500);
+        }
+    }
+
+    public function apiHoanThanhYeuCau(Request $request){
+        try{
+            $user = $request->attributes->get("user");
+            if(!$user){
+                return response()->json([
+                    'message'=> 'Không có quyền truy cập!'
+                ],401);
+            }
+            $yeuCau = LichSuRut::find($request->input('id'));
+            if(!$yeuCau){
+                return response()->json([
+                    'message'=> 'Không tìm thấy yêu cầu!'
+                ],401);
+            }
+            $yeuCau->trangThai = 1;
+            $yeuCau->ketQua = 1;
+            $yeuCau->thoiGian = now();
+            $yeuCau->save();
+            Log::channel('customlog')->info('Hoàn thành yêu cầu rút tiền: ', [
+                'user' => $user->toArray(),
+                'theloai' => $yeuCau->toArray()
+            ]);
+            return response()->json([
+                'message'=> 'Hoàn thành yêu cầu rút tiền thành công!'
+            ],200);
+        }catch(Exception $e){
+            return response()->json([
+                'message'=> 'Đã có lỗi hệ thống xảy ra!',
                 'error'=>$e->getMessage(),
             ],500);
         }

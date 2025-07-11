@@ -23,6 +23,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   const [showLogin,setShowLogin] = useState(false);
   const [showTT,setShowTT] = useState(false);
   const [showModalChapter,setShowModalChapter] = useState(false)
+  const [showNhacNho,setShowNhacNho] = useState(false);
 
 
 
@@ -39,12 +40,14 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
   const showLoginRef = useRef(showLogin);
   const showTTRef = useRef(showTT);
   const showModalChapterRef = useRef(showModalChapter);
+  const showNhacNhoRef = useRef(showNhacNho);
   useEffect(() => { devToolRef.current = devTool }, [devTool]);
   useEffect(() => { hidenRef.current = hiden }, [hiden]);
   useEffect(() => { showBaoCaoRef.current = showBaoCao }, [showBaoCao]);
   useEffect(() => { showLoginRef.current = showLogin }, [showLogin]);
   useEffect(() => { showTTRef.current = showTT }, [showTT]);
   useEffect(() => { showModalChapterRef.current = showModalChapter }, [showModalChapter]);
+  useEffect(() => { showNhacNhoRef.current = showNhacNho }, [showNhacNho]);
 
   const resetIdleTimer = () => {
     if (
@@ -53,7 +56,8 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
     !showBaoCaoRef.current &&
     !showLoginRef.current &&
     !showTTRef.current &&
-    !showModalChapterRef.current
+    !showModalChapterRef.current &&
+    !showNhacNhoRef
     ){
       clearTimeout(idleTimerRef.current);
       setPaused(false)
@@ -69,8 +73,29 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
           const next = prev + 1;
           console.log(next)
           if (next === 45) {
-            clearInterval(interval); // dừng interval tại đây
+            // clearInterval(interval); // dừng interval tại đây
             axios.post(`/api/lichsudoc/${chuong.id}`);
+          }
+           // Lấy thời gian từ localStorage
+          const lastTime = Number(localStorage.getItem('thoiGian')) || Date.now();
+          const elapsed = Date.now() - lastTime;
+
+          // Nếu đã quá 1 phút từ lần ghi trước
+          if (elapsed > 60 * 1000) {
+            localStorage.setItem('nhacNho', '0');
+            localStorage.setItem('thoiGian', Date.now().toString());
+          }
+
+          // Tăng số giây đọc
+          let nhacNho = Number(localStorage.getItem('nhacNho')) || 0;
+          nhacNho += 1;
+          localStorage.setItem('nhacNho', nhacNho.toString());
+          localStorage.setItem('thoiGian', Date.now().toString());
+
+          // Nếu đủ 30 phút nhắc nhở
+          if (nhacNho >= 60*30) {
+            setShowNhacNho(true);
+            localStorage.setItem('nhacNho', '0');
           }
           return next;
         });
@@ -258,12 +283,12 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
 
   /////////
   useEffect(() => {
-    if (!devTool && !hiden && !showBaoCao && !showLogin && !showTT && !showModalChapter) {
+    if (!devTool && !hiden && !showBaoCao && !showLogin && !showTT && !showModalChapter && !showNhacNho) {
       setPaused(false);
     } else {
       setPaused(true);
     }
-  }, [showBaoCao, showLogin, showTT, showModalChapter, devTool, hiden]);
+  }, [showBaoCao, showLogin, showTT, showModalChapter, devTool, hiden, showNhacNho]);
   
   
 
@@ -283,7 +308,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
         </div>
       )}
       {(showTT)&&(
-        <div className='tomTat'
+        <div className='tomTats'
               onClick={()=>setShowTT(false)}
         >
             <div className='mainTT'
@@ -314,6 +339,15 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
           >
               {`Ngày đăng: `+date}
           </div>
+      )}
+      {(showNhacNho) && (
+        <div className='NhacNho'>
+          <div className='main'>
+            <h3>Nhắc nhở!</h3>
+            <p>Bạn đã đọc truyện liên tục 30 phút hãy nghỉ ngơi một lát để bảo vệ sức khỏe</p>
+            <button onClick={()=>setShowNhacNho(false)}>Đã rõ</button>
+          </div>
+        </div>
       )}
       <div className="doc-truyen">
         <div className="doc-header">
@@ -372,7 +406,7 @@ export default function DocTruyen({user,chuong,truyen,chuongCuoi,idChuongTruoc,i
             </div>
             <div className='hidenDoc'>
                 {(!devTool && !hiden) &&
-                  <div className='hiden' style={{opacity:'0.19'}}>
+                  <div className='hiden' style={{opacity:'0.22'}}>
                    
                       {Array.from({ length: 30 }).map((_, index) => (
                         <div key={index} className='waterMask'>

@@ -20,13 +20,13 @@ export default function({isShow,setShow}){
             <div className="main" onClick={e=>e.stopPropagation()}>
                 <div className="head">
                     <h1>ĐĂNG KÝ PREMIUM</h1>
+                    <h1>ĐĂNG KÝ PREMIUM</h1>
                 </div>
                 <div className="body">
                     <p>20.000 XU</p>
                     <p>Hiệu lực 30 NGÀY.</p>
                     <p>Khi trở thành thành viên PREMIUM,</p>
-                    <p>bạn sẽ được hưởng những đại ngội sau:</p>
-                    <p>Đọc truyện không quảng cáo.</p>
+                    <p>bạn sẽ được hưởng những đãi ngộ sau:</p>
                     <p>Mở khóa chức năng nghe truyện.</p>
                     <p>Mở chức năng tóm tắt chương bằng AI với TÁC GIẢ.</p>
                     <p>Nếu bạn đã mua trước đó sẽ được cộng thêm thời gian.</p>
