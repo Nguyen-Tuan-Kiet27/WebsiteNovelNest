@@ -119,7 +119,7 @@ export default function({user,pay}){
                             <img src='/img/Mua500.png' alt="" />
                             <p>Số lượng xu: 500.000</p>
                             <p>Giá: 480.000₫</p>
-                            <button onClick={()=>handleClickMua(480000,500.000)}>Mua</button>
+                            <button onClick={()=>handleClickMua(480000,500000)}>Mua</button>
                         </div>
                     </div>
                 </div>

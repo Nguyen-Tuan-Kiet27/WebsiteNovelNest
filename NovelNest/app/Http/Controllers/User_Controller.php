@@ -700,31 +700,72 @@ class User_Controller extends Controller
         ]);
     }
     public function apiGetDaMuas(Request $request,$page){
+        // $user = $request->attributes->get('user');
+        // if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
+        // $limit = 10;
+        // $hasMore = true;
+        // $offset = ($page - 1) * $limit;
+        // $daMuas = $user->daMuas()
+        //         ->with('chuong.truyen')
+        //         ->get()
+        //         ->filter(fn($row) => $row->chuong && $row->chuong->truyen) // loại bỏ null
+        //         ->sortBy(fn($row) => $row->chuong->soChuong) // sắp xếp theo số chương
+        //         ->slice($offset, $limit) // phân trang thủ công
+        //         ->values();
+        // if($daMuas->count() < $limit)
+        //     $hasMore = false;
+        // $subDaMuas = [];
+        // foreach($daMuas as $row){
+        //     $chuong = $row->chuong;
+        //     if (!$chuong || !$chuong->truyen) continue;
+        //         $truyenId = $chuong->truyen->id;
+        //         $subDaMuas[$truyenId]['truyen'] = $chuong->truyen;
+        //         $subDaMuas[$truyenId]['sub'][] = $chuong;
+        //         $subDaMuas[$truyenId]['total'] = ($subDaMuas[$truyenId]['total'] ?? 0) + $row->gia;
+        // }
         $user = $request->attributes->get('user');
-        if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
-        $limit = 10;
-        $hasMore = true;
-        $offset = ($page - 1) * $limit;
-        $daMuas = $user->daMuas()
-                ->with('chuong.truyen')
-                ->get()
-                ->filter(fn($row) => $row->chuong && $row->chuong->truyen) // loại bỏ null
-                ->sortBy(fn($row) => $row->chuong->soChuong) // sắp xếp theo số chương
-                ->slice($offset, $limit) // phân trang thủ công
-                ->values();
-        if($daMuas->count() < $limit)
-            $hasMore = false;
-        $subDaMuas = [];
-        foreach($daMuas as $row){
-            $chuong = $row->chuong;
-            if (!$chuong || !$chuong->truyen) continue;
-                $truyenId = $chuong->truyen->id;
-                $subDaMuas[$truyenId]['truyen'] = $chuong->truyen;
-                $subDaMuas[$truyenId]['sub'][] = $chuong;
-                $subDaMuas[$truyenId]['total'] = ($subDaMuas[$truyenId]['total'] ?? 0) + $row->gia;
+        if (!$user) {
+            return response()->json(['message' => 'Chưa đăng nhập!'], 401);
         }
+
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Lấy tất cả bản ghi đã mua (kèm chuong và truyen)
+        $daMuas = $user->daMuas()
+            ->with('chuong.truyen')
+            ->with('chuong.truyen.nguoidung:id,ten')
+            ->get()
+            ->filter(fn($row) => $row->chuong && $row->chuong->truyen)
+            ->sortBy(fn($row) => [$row->chuong->truyen->id, $row->chuong->soChuong]) // nhóm và sắp theo chương
+
+            ->values();
+
+        // Gom theo truyện
+        $grouped = [];
+        foreach ($daMuas as $row) {
+            $chuong = $row->chuong;
+            $truyen = $chuong->truyen;
+            $truyenId = $truyen->id;
+
+            if (!isset($grouped[$truyenId])) {
+                $grouped[$truyenId] = [
+                    'truyen' => $truyen,
+                    'sub' => [],
+                    'total' => 0,
+                ];
+            }
+
+            $grouped[$truyenId]['sub'][] = $chuong;
+            $grouped[$truyenId]['total'] += $row->gia;
+        }
+
+        // Chuyển thành mảng tuần tự để phân trang
+        $resultList = array_values($grouped);
+        $paginated = array_slice($resultList, $offset, $limit);
+        $hasMore = count($resultList) > ($offset + $limit);
         return response()->json([
-            'daMuas' => $subDaMuas,
+            'daMuas' => $paginated,
             'hasMore' => $hasMore
         ],200);
     }
@@ -748,12 +789,14 @@ class User_Controller extends Controller
         if(!$user) return response()->json(['message'=>'Chưa đăng nhập!'],401);
         $lastTime = $request->query('lastTime');
         $limit = 10;
-        $queryBuilder = function ($model, array $with = []) use ($user, $lastTime, $limit) {
+        $internalLimit = $limit + 1; // lấy dư ở từng bảng
+
+        $queryBuilder = function ($model, array $with = []) use ($user, $lastTime, $internalLimit) {
             return $model::with($with)
                 ->where('id_NguoiDung', $user->id)
                 ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
                 ->orderByDesc('thoiGian')
-                ->take($limit)
+                ->take($internalLimit)
                 ->get();
         };
 
@@ -779,31 +822,11 @@ class User_Controller extends Controller
             'lichSu' => $r
         ]);
 
-        // $mua = LichSuMua::with('daMuas.chuong.truyen')
-        // ->where('id_NguoiDung', $user->id)
-        // ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
-        // ->orderByDesc('thoiGian')
-        // ->take($limit)
-        // ->get()
-        // ->map(fn($r) => [
-        //     'loai' => 3,
-        //     'thoiGian' => $r->thoiGian,
-        //     'lichSu' => $r,
-        //     'sub' => $r->daMuas
-        //         ->map(fn($dm) => $dm->chuong)
-        //         ->filter()
-        //         ->sortBy('soChuong') // Sắp xếp theo số chương tăng dần
-        //         ->values(),
-        //     'truyen' => $r->daMuas
-        //                 ->map(fn($dm) => $dm->chuong?->truyen)
-        //                 ->filter()
-        //                 ->first(),
-        // ]);
         $mua = LichSuMua::with('daMuas.chuong.truyen')
         ->where('id_NguoiDung', $user->id)
         ->when($lastTime, fn($q) => $q->where('thoiGian', '<', $lastTime))
         ->orderByDesc('thoiGian')
-        ->take($limit)
+        ->take($internalLimit)
         ->get()
         ->map(fn($r) => [
             'loai' => 3,
@@ -822,19 +845,32 @@ class User_Controller extends Controller
         ]);
 
         // Gộp, sắp xếp lại
+        // $all = $doc->concat($nap)->concat($mua)->concat($rut)
+        //     ->sortByDesc('thoiGian')
+        //     ->values();
+
+        // // Cắt lại đúng limit nếu nhiều hơn
+        // $result = $all->take($limit);
+        // $minTime = $result->last()['thoiGian'] ?? null;
         $all = $doc->concat($nap)->concat($mua)->concat($rut)
             ->sortByDesc('thoiGian')
             ->values();
 
-        // Cắt lại đúng limit nếu nhiều hơn
+        $hasMore = $all->count() > $limit;
         $result = $all->take($limit);
         $minTime = $result->last()['thoiGian'] ?? null;
 
         return response()->json([
             'lichSus' => $result,
-            'hasMore' => $all->count() > $limit,
+            'hasMore' => $hasMore,
             'minTime' => $minTime
         ]);
+
+        // return response()->json([
+        //     'lichSus' => $result,
+        //     'hasMore' => $all->count() > $limit,
+        //     'minTime' => $minTime
+        // ]);
 
     }
     public function apiDoiTen(Request $request){

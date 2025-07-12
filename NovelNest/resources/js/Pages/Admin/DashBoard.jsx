@@ -8,6 +8,7 @@ export default function DashBoard({user,tacGiaPNguoiDung,doanhThuTheoNgay,doanhT
     const [select,setSelect] = useState(0)
     const [selectNguoiDung,setSelectNguoiDung] = useState(0)
     const [selectDoanhThu,setSelectDoanhThu] = useState(0)
+    console.log(napRutTheoNam);
 
     return(
         <AdminLayout user={user} page={1} title='Thống kê'>

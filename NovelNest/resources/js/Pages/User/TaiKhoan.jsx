@@ -13,7 +13,7 @@ export default function TaiKhoan({user,timePrem}){
     const [showTab,setShowTab] = useState(1);
     const hinh='https://www.westminstercollection.com/media/52253261/dn-change-checker-2022-canadian-mint-honouring-queen-elizabeth-ii-2-coin-product-images-2-1.jpg?height=450&bgcolor=fff'
     //đã mua
-    const [daMuas,setDaMuas] = useState({});
+    const [daMuas,setDaMuas] = useState([]);
     const [sDaMua,setSDaMua] = useState(1);
     const [hasMoreDaMua,setHasMoreDaMua] = useState(true);
     const [loadDaMua,setLoadDaMua] = useState(false);
@@ -26,11 +26,11 @@ export default function TaiKhoan({user,timePrem}){
           setLoadDaMua(true);
           const response = await axios.get(`/api/getdamua/${sDaMua}`);
 
-          setDaMuas(prev => ({
+          setDaMuas(prev => ([
             ...prev,
             ...response.data.daMuas
-          }));
-          
+          ]));
+          console.log(response.data.daMuas);
           setHasMoreDaMua(response.data.hasMore);
           setSDaMua(prev => prev + 1);
         } catch (error) {
@@ -44,7 +44,7 @@ export default function TaiKhoan({user,timePrem}){
         setExpandedId(prev => (prev === id ? null : id));
     };
     //yêu thích
-    const [yeuThichs,setYeuThichs] = useState({});
+    const [yeuThichs,setYeuThichs] = useState([]);
     const [sYeuThich,setSYeuThich] = useState(1);
     const [hasMoreYeuThich,setHasMoreYeuThich] = useState(true);
     const [loadYeuThich,setLoadYeuThich] = useState(false);
@@ -55,10 +55,10 @@ export default function TaiKhoan({user,timePrem}){
           setLoadYeuThich(true);
           const response = await axios.get(`/api/getyeuthich/${sYeuThich}`);
 
-          setYeuThichs(prev => ({
+          setYeuThichs(prev => ([
             ...prev,
             ...response.data.yeuThichs
-          }));
+          ]));
           
           setHasMoreYeuThich(response.data.hasMore);
           setSYeuThich(prev => prev + 1);
@@ -98,7 +98,6 @@ export default function TaiKhoan({user,timePrem}){
               lastTime: sLichSu,
             }
           });
-          console.log(response.data.lichSus);
           setLichSus(prev => ([
             ...prev,
             ...response.data.lichSus
@@ -304,8 +303,8 @@ export default function TaiKhoan({user,timePrem}){
                         <div className="item-image"><img src={`/img/truyen/hinhAnh/${item.truyen.hinhAnh}`} alt="" /></div>
                         <div className="item-info">
                             <p><strong>{item.truyen.ten}</strong></p>
-                            <p>Tác giả: {item.truyen.tacGia}</p>
-                            <p>Số lượng: {item.truyen.soLuong}</p>
+                            <p>Tác giả: {item.truyen.nguoidung.ten}</p>
+                            <p>Số lượng: {item.sub.length}</p>
                             <p>Tổng tiền: {item.total} xu</p>
                         </div>
                         <div className="item-arrow" onClick={(e) => handleToggle(item.truyen.id,e)}>

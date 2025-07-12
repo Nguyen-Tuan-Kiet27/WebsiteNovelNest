@@ -254,20 +254,37 @@ class Admin_Controller extends Controller
             ];
         });
 
-        $minYear = LichSuNap::min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
-        $maxYear = LichSuNap::max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        // $minYear = LichSuNap::min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        // $maxYear = LichSuNap::max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
 
-        $years = collect(range($minYear, $maxYear));
-        $rawData = LichSuNap::selectRaw('YEAR(thoiGian) as nam, SUM(menhGia) as tongNap')
+        // $years = collect(range($minYear, $maxYear));
+        // $rawData = LichSuNap::selectRaw('YEAR(thoiGian) as nam, SUM(menhGia) as tongNap')
+        //     ->groupByRaw('YEAR(thoiGian)')
+        //     ->pluck('tongNap', 'nam');
+
+        // $napTheoNam = $years->map(function($year) use ($rawData) {
+        //     return [
+        //         'thoiGian' => (string)$year,
+        //         'tongNap' => $rawData[$year] ?? 0
+        //     ];
+        // });
+
+        $minYearNap = LichSuNap::min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        $maxYearNap = LichSuNap::max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+
+        $yearsNap = collect(range($minYearNap, $maxYearNap));
+
+        $rawNap = LichSuNap::selectRaw('YEAR(thoiGian) as nam, SUM(menhGia) as tongNap')
             ->groupByRaw('YEAR(thoiGian)')
             ->pluck('tongNap', 'nam');
 
-        $napTheoNam = $years->map(function($year) use ($rawData) {
+        $napTheoNam = $yearsNap->map(function ($year) use ($rawNap) {
             return [
                 'thoiGian' => (string)$year,
-                'tongNap' => $rawData[$year] ?? 0
+                'tongNap' => $rawNap[$year] ?? 0
             ];
         });
+
         //Rút
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
@@ -309,21 +326,21 @@ class Admin_Controller extends Controller
                 'tongRut' => $rawData[$month] ?? 0
             ];
         });
-        $minYear = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
-        $maxYear = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        $minYearRut = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        $maxYearRut = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
 
-        $years = collect(range($minYear, $maxYear));
+        $yearsRut = collect(range($minYearRut, $maxYearRut));
 
-        $rawData = LichSuRut::selectRaw('YEAR(thoiGian) as nam, SUM(giaTri) as tongRut')
+        $rawRut = LichSuRut::selectRaw('YEAR(thoiGian) as nam, SUM(giaTri) as tongRut')
             ->where('trangThai', 1)
             ->where('ketQua', 1)
             ->groupByRaw('YEAR(thoiGian)')
             ->pluck('tongRut', 'nam');
 
-        $rutTheoNam = $years->map(function ($year) use ($rawData) {
+        $rutTheoNam = $yearsRut->map(function ($year) use ($rawRut) {
             return [
                 'thoiGian' => (string)$year,
-                'tongRut' => $rawData[$year] ?? 0
+                'tongRut' => $rawRut[$year] ?? 0
             ];
         });
 
@@ -350,12 +367,32 @@ class Admin_Controller extends Controller
                 'tongRut' => $rut
             ];
         });
-        $mergedYears = $years->unique();
+        // $mergedYears = $years->unique();
+
+        // $napRutTheoNam = $mergedYears->map(function ($year) use ($napTheoNam, $rutTheoNam) {
+        //     $key = (string)$year;
+        //     $napItem = $napTheoNam->firstWhere('thoiGian', $key);
+        //     $rutItem = $rutTheoNam->firstWhere('thoiGian', $key);
+
+        //     $nap = $napItem['tongNap'] ?? 0;
+        //     $rut = $rutItem['tongRut'] ?? 0;
+
+        //     return [
+        //         'thoiGian' => $key,
+        //         'tongNap' => $nap,
+        //         'tongRut' => $rut
+        //     ];
+        // });
+
+        $mergedYears = $yearsNap->merge($yearsRut)->unique()->sort()->values();
 
         $napRutTheoNam = $mergedYears->map(function ($year) use ($napTheoNam, $rutTheoNam) {
             $key = (string)$year;
-            $nap = $napTheoNam->firstWhere('thoiGian', $key)['tongNap'] ?? 0;
-            $rut = $rutTheoNam->firstWhere('thoiGian', $key)['tongRut'] ?? 0;
+            $napItem = $napTheoNam->firstWhere('thoiGian', $key);
+            $rutItem = $rutTheoNam->firstWhere('thoiGian', $key);
+
+            $nap = $napItem['tongNap'] ?? 0;
+            $rut = $rutItem['tongRut'] ?? 0;
 
             return [
                 'thoiGian' => $key,
