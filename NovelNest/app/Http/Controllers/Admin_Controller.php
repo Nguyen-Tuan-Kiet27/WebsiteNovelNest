@@ -71,52 +71,150 @@ class Admin_Controller extends Controller
         if(!$user){
             return redirect('admin/dangnhap');
         }
+        //Người dùng mới:
+        $startOfMonth = now()->startOfMonth();
+        $endOfMonth = now()->endOfMonth();
+        $dates = collect();
+        $current = $startOfMonth->copy();
+        while ($current <= $endOfMonth) {
+            $dates->push($current->format('d/m/Y'));
+            $current->addDay();
+        }
+        $rawData = NguoiDung::selectRaw('DATE(ngayTao) as date, COUNT(id) as soLuong')
+            ->whereIn('vaiTro',['3','4'])
+            ->whereMonth('ngayTao', now()->month)
+            ->whereYear('ngayTao', now()->year)
+            ->groupByRaw('DATE(ngayTao)')
+            ->pluck('soLuong', 'date');
+        $nguoiDungTheoNgay = $dates->map(function($date) use ($rawData) {
+            $key = Carbon::createFromFormat('d/m/Y', $date)->toDateString();
+            return [
+                'thoiGian' => $date,
+                'soLuong' => $rawData[$key] ?? 0
+            ];
+        });
 
-        $top3Truyen = Truyen::join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
-                    ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
-                    ->select(
-                        'truyen.id',
-                        'truyen.ten',
-                        DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu')
-                    )
-                    ->groupBy('truyen.id', 'truyen.ten')
-                    ->orderByDesc('doanhThu')
-                    ->limit(3)
-                    ->get();
+        $months = collect(range(1, 12));
+        $year = now()->year;
+        $rawData = NguoiDung::selectRaw('MONTH(ngayTao) as thang, COUNT(id) as soLuong')
+            ->whereIn('vaiTro',['3','4'])
+            ->whereYear('ngayTao', $year)
+            ->groupByRaw('MONTH(ngayTao)')
+            ->pluck('soLuong', 'thang');
+        $nguoiDungTheoThang = $months->map(function($month) use ($rawData, $year) {
+            return [
+                'thoiGian' => str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $year,
+                'soLuong' => $rawData[$month] ?? 0
+            ];
+        });
 
-        $top3TacGia = NguoiDung::join('truyen', 'nguoidung.id', '=', 'truyen.id_NguoiDung')
-            ->join('chuong', 'truyen.id', '=', 'chuong.id_Truyen')
-            ->join('damua', 'chuong.id', '=', 'damua.id_Chuong')
-            ->select(
-                'nguoidung.id',
-                'nguoidung.ten',
-                DB::raw('FLOOR(SUM(damua.gia) * 0.7) as doanhThu')
-            )
-            ->groupBy('nguoidung.id', 'nguoidung.ten')
-            ->orderByDesc('doanhThu')
-            ->limit(3)
-            ->get();
+        $minYear = NguoiDung::min(DB::raw('YEAR(ngayTao)')) ?? now()->year;
+        $maxYear = NguoiDung::max(DB::raw('YEAR(ngayTao)')) ?? now()->year;
+
+        $years = collect(range($minYear, $maxYear));
+        $rawData = NguoiDung::selectRaw('YEAR(ngayTao) as nam, COUNT(id) as soLuong')
+            ->whereIn('vaiTro',['3','4'])
+            ->groupByRaw('YEAR(ngayTao)')
+            ->pluck('soLuong', 'nam');
+
+        $nguoiDungTheoNam = $years->map(function($year) use ($rawData) {
+            return [
+                'thoiGian' => (string)$year,
+                'soLuong' => $rawData[$year] ?? 0
+            ];
+        });
+
+        //%tacgia/nguoidung
         $soLuongTacGia = Truyen::distinct('id_NguoiDung')
             ->count('id_NguoiDung');
-        $doanhThuHeThong = lichSuMua::sum('gia');
-        $doanhThuTacGia = floor(DaMua::SUM('gia')*0.7);
-        $loiNhuanHeThong = $doanhThuHeThong - $doanhThuTacGia;
+        $soLuongNguoiDung = NguoiDung::where('vaiTro',4)->where('trangThai',1)->count();
+        //DoanhThu
+        // $doanhThuHeThong = lichSuMua::sum('gia');
+        // $doanhThuTacGia = floor(DaMua::SUM('gia')*0.7);
+        // $loiNhuanHeThong = $doanhThuHeThong - $doanhThuTacGia;
+        $start = now()->startOfMonth();
+        $end = now()->endOfMonth();
+        $dates = collect();
+        $curr = $start->copy();
+        while ($curr <= $end) {
+            $dates->push($curr->format('d/m/Y'));
+            $curr->addDay();
+        }
+        $heThongRaw = LichSuMua::selectRaw('DATE(thoiGian) as ngay, SUM(gia) as tong')
+            ->whereBetween('thoiGian', [$start, $end])
+            ->groupByRaw('DATE(thoiGian)')
+            ->pluck('tong', 'ngay');
+        $tacGiaRaw = DB::table('daMua')
+            ->join('lichSuMua', 'daMua.id_LichSuMua', '=', 'lichSuMua.id')
+            ->selectRaw('DATE(lichSuMua.thoiGian) as ngay, FLOOR(SUM(daMua.gia) * 0.7) as tong')
+            ->whereBetween('lichSuMua.thoiGian', [$start, $end])
+            ->groupByRaw('DATE(lichSuMua.thoiGian)')
+            ->pluck('tong', 'ngay');
+        $doanhThuTheoNgay = $dates->map(function ($date) use ($heThongRaw, $tacGiaRaw) {
+            $key = Carbon::createFromFormat('d/m/Y', $date)->toDateString();
+            $heThong = $heThongRaw[$key] ?? 0;
+            $tacGia = $tacGiaRaw[$key] ?? 0;
+            return [
+                'thoiGian' => $date,
+                'heThong' => $heThong,
+                'tacGia' => $tacGia,
+                'loiNhuan' => $heThong - $tacGia,
+            ];
+        });
 
-        // $napTheoNgay = LichSuNap::selectRaw('DATE(thoiGian) as thoiGian, SUM(menhGia) as tongNap')
-        //     ->whereMonth('thoiGian', now()->month)
-        //     ->whereYear('thoiGian', now()->year)
-        //     ->groupByRaw('DATE(thoiGian)')
-        //     ->orderBy('thoiGian')
-        //     ->get();
-        // $napTheoThang = LichSuNap::selectRaw('MONTH(thoiGian) as thoiGian, SUM(menhGia) as tongNap')
-        //     ->whereYear('thoiGian', now()->year)
-        //     ->groupByRaw('MONTH(thoiGian)')
-        //     ->orderBy('thoiGian')
-        //     ->get();
-        // $napTheoNam = LichSuNap::selectRaw('YEAR(thoiGian) as thoiGian, SUM(menhGia) as tongNap')
-        //     ->groupByRaw('YEAR(thoiGian)')
-        //     ->orderBy('thoiGian')
-        //     ->get();
+        $year = now()->year;
+        $months = collect(range(1, 12));
+
+        $heThongRaw = LichSuMua::selectRaw('MONTH(thoiGian) as thang, SUM(gia) as tong')
+            ->whereYear('thoiGian', $year)
+            ->groupByRaw('MONTH(thoiGian)')
+            ->pluck('tong', 'thang');
+
+        $tacGiaRaw = DB::table('daMua')
+            ->join('lichSuMua', 'daMua.id_LichSuMua', '=', 'lichSuMua.id')
+            ->selectRaw('MONTH(lichSuMua.thoiGian) as thang, FLOOR(SUM(daMua.gia) * 0.7) as tong')
+            ->whereYear('lichSuMua.thoiGian', $year)
+            ->groupByRaw('MONTH(lichSuMua.thoiGian)')
+            ->pluck('tong', 'thang');
+
+        $doanhThuTheoThang = $months->map(function ($month) use ($year, $heThongRaw, $tacGiaRaw) {
+            $heThong = $heThongRaw[$month] ?? 0;
+            $tacGia = $tacGiaRaw[$month] ?? 0;
+            return [
+                'thoiGian' => str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $year,
+                'heThong' => $heThong,
+                'tacGia' => $tacGia,
+                'loiNhuan' => $heThong - $tacGia,
+            ];
+        });
+        $minYear = LichSuMua::min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        $maxYear = LichSuMua::max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+
+        $years = collect(range($minYear, $maxYear));
+
+        $heThongRaw = LichSuMua::selectRaw('YEAR(thoiGian) as nam, SUM(gia) as tong')
+            ->groupByRaw('YEAR(thoiGian)')
+            ->pluck('tong', 'nam');
+
+        $tacGiaRaw = DB::table('daMua')
+            ->join('lichSuMua', 'daMua.id_LichSuMua', '=', 'lichSuMua.id')
+            ->selectRaw('YEAR(lichSuMua.thoiGian) as nam, FLOOR(SUM(daMua.gia) * 0.7) as tong')
+            ->groupByRaw('YEAR(lichSuMua.thoiGian)')
+            ->pluck('tong', 'nam');
+
+        $doanhThuTheoNam = $years->map(function ($year) use ($heThongRaw, $tacGiaRaw) {
+            $heThong = $heThongRaw[$year] ?? 0;
+            $tacGia = $tacGiaRaw[$year] ?? 0;
+            return [
+                'thoiGian' => (string) $year,
+                'heThong' => $heThong,
+                'tacGia' => $tacGia,
+                'loiNhuan' => $heThong - $tacGia,
+            ];
+        });
+        
+
+        //Nạp
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
@@ -170,17 +268,117 @@ class Admin_Controller extends Controller
                 'tongNap' => $rawData[$year] ?? 0
             ];
         });
+        //Rút
+        $startOfMonth = now()->startOfMonth();
+        $endOfMonth = now()->endOfMonth();
+
+        $dates = collect();
+        $current = $startOfMonth->copy();
+        while ($current <= $endOfMonth) {
+            $dates->push($current->format('d/m/Y'));
+            $current->addDay();
+        }
+        $rawData = LichSuRut::selectRaw('DATE(thoiGian) as date, SUM(giaTri) as tongRut')
+            ->where('trangThai', 1)
+            ->where('ketQua', 1)
+            ->whereMonth('thoiGian', now()->month)
+            ->whereYear('thoiGian', now()->year)
+            ->groupByRaw('DATE(thoiGian)')
+            ->pluck('tongRut', 'date');
+
+        $rutTheoNgay = $dates->map(function ($date) use ($rawData) {
+            $key = Carbon::createFromFormat('d/m/Y', $date)->toDateString();
+            return [
+                'thoiGian' => $date,
+                'tongRut' => $rawData[$key] ?? 0
+            ];
+        });
+        $months = collect(range(1, 12));
+        $year = now()->year;
+
+        $rawData = LichSuRut::selectRaw('MONTH(thoiGian) as thang, SUM(giaTri) as tongRut')
+            ->where('trangThai', 1)
+            ->where('ketQua', 1)
+            ->whereYear('thoiGian', $year)
+            ->groupByRaw('MONTH(thoiGian)')
+            ->pluck('tongRut', 'thang');
+
+        $rutTheoThang = $months->map(function ($month) use ($rawData, $year) {
+            return [
+                'thoiGian' => str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $year,
+                'tongRut' => $rawData[$month] ?? 0
+            ];
+        });
+        $minYear = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->min(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+        $maxYear = LichSuRut::where('trangThai', 1)->where('ketQua', 1)->max(DB::raw('YEAR(thoiGian)')) ?? now()->year;
+
+        $years = collect(range($minYear, $maxYear));
+
+        $rawData = LichSuRut::selectRaw('YEAR(thoiGian) as nam, SUM(giaTri) as tongRut')
+            ->where('trangThai', 1)
+            ->where('ketQua', 1)
+            ->groupByRaw('YEAR(thoiGian)')
+            ->pluck('tongRut', 'nam');
+
+        $rutTheoNam = $years->map(function ($year) use ($rawData) {
+            return [
+                'thoiGian' => (string)$year,
+                'tongRut' => $rawData[$year] ?? 0
+            ];
+        });
+
+        //Tổng hợp nạp rút
+        $napRutTheoNgay = $dates->map(function ($date) use ($napTheoNgay, $rutTheoNgay) {
+            $key = $date;
+            $nap = $napTheoNgay->firstWhere('thoiGian', $key)['tongNap'] ?? 0;
+            $rut = $rutTheoNgay->firstWhere('thoiGian', $key)['tongRut'] ?? 0;
+
+            return [
+                'thoiGian' => $key,
+                'tongNap' => $nap,
+                'tongRut' => $rut
+            ];
+        });
+        $napRutTheoThang = $months->map(function ($month) use ($napTheoThang, $rutTheoThang, $year) {
+            $key = str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $year;
+            $nap = $napTheoThang->firstWhere('thoiGian', $key)['tongNap'] ?? 0;
+            $rut = $rutTheoThang->firstWhere('thoiGian', $key)['tongRut'] ?? 0;
+
+            return [
+                'thoiGian' => $key,
+                'tongNap' => $nap,
+                'tongRut' => $rut
+            ];
+        });
+        $mergedYears = $years->unique();
+
+        $napRutTheoNam = $mergedYears->map(function ($year) use ($napTheoNam, $rutTheoNam) {
+            $key = (string)$year;
+            $nap = $napTheoNam->firstWhere('thoiGian', $key)['tongNap'] ?? 0;
+            $rut = $rutTheoNam->firstWhere('thoiGian', $key)['tongRut'] ?? 0;
+
+            return [
+                'thoiGian' => $key,
+                'tongNap' => $nap,
+                'tongRut' => $rut
+            ];
+        });
+
         return Inertia::render('Admin/DashBoard',[
             'user'=> $user,
-            'top3Truyen'=>$top3Truyen,
-            'top3TacGia'=>$top3TacGia,
-            'soLuongTacGia'=>$soLuongTacGia,
-            'doanhThuHeThong'=>$doanhThuHeThong,
-            'doanhThuTacGia'=>$doanhThuTacGia,
-            'loiNhuanHeThong'=>$loiNhuanHeThong,
-            'napTheoNgay' => $napTheoNgay,
-            'napTheoThang'=>$napTheoThang,
-            'napTheoNam'=>$napTheoNam
+            'nguoiDungTheoNgay'=>$nguoiDungTheoNgay,
+            'nguoiDungTheoThang'=>$nguoiDungTheoThang,
+            'nguoiDungTheoNam'=>$nguoiDungTheoNam,
+            'tacGiaPNguoiDung'=>[
+                ['name' => 'Tác giả', 'soLuong' => $soLuongTacGia],
+                ['name' => 'Độc giả', 'soLuong' => $soLuongNguoiDung],
+            ],
+            'doanhThuTheoNgay'=>$doanhThuTheoNgay, 
+            'doanhThuTheoThang'=>$doanhThuTheoThang,
+            'doanhThuTheoNam'=>$doanhThuTheoNam,
+            'napRutTheoNgay' => $napRutTheoNgay,
+            'napRutTheoThang'=>$napRutTheoThang,
+            'napRutTheoNam'=>$napRutTheoNam
         ]);
     }
 
