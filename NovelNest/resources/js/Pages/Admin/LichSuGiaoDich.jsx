@@ -15,7 +15,7 @@ export default function QuanLyTruyen({user,nguoiDung,lichSus}){
     },[]);
 
     return(
-        <AdminLayout page='2' user={user} title='Quản lý truyện'>
+        <AdminLayout page='2' user={user} title='Lịch sử giao dịch'>
             <div className="quanLyTruyen">
                 <div>
                     <h1>Lịch sử giao dịch của {nguoiDung.ten}</h1>

@@ -14,7 +14,18 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
   const bannerRef = useRef(null);
   const [widthBanner, setWidthBanner] = useState(0);
 
-  
+  const [current, setCurrent] = useState(0);
+  const timerRef = useRef();
+
+  useEffect(() => {
+    if (slides.length === 0) return;
+
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % slides.length);
+    }, 5000);
+
+    return () => clearInterval(timerRef.current);
+  }, [slides.length]);
 
   useEffect(() => {
     window.addEventListener('resize', () => setScreenWidth(window.innerWidth));
@@ -26,10 +37,10 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
         setWidthBanner(bannerRef.current.offsetWidth);
       }
     };
-    if (slides.length === 0) return;
-    timerRef.current = setInterval(() => {
-      setCurrent(prev => (prev + 1) % slides.length);
-    }, 5000);
+    // if (slides.length === 0) return;
+    // timerRef.current = setInterval(() => {
+    //   setCurrent(prev => (prev + 1) % slides.length);
+    // }, 5000);
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', () => setScreenWidth(window.innerWidth));
@@ -53,20 +64,25 @@ export default function Home({login,theLoais,truyenHots,truyenMois,truyenDaHoanT
     genres2 = theLoais.slice(half);
   }
 
-  const [current, setCurrent] = useState(0);
-  const timerRef = useRef();
+  
 
-  useEffect(() => {
-    if (slides.length === 0) return;
+  // useEffect(() => {
+  //   if (slides.length === 0) return;
+  //   timerRef.current = setInterval(() => {
+  //     setCurrent(prev => (prev + 1) % slides.length);
+  //   }, 5000);
+  //   return () => clearInterval(timerRef.current);
+  // }, [current]);
+  const resetTimer = () => {
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setCurrent(prev => (prev + 1) % slides.length);
     }, 5000);
-    return () => clearInterval(timerRef.current);
-  }, [current]);
+  };
 
   const goToSlide = (index) => {
     setCurrent(index);
-    clearInterval(timerRef.current);
+    resetTimer();
   };
 
   return (

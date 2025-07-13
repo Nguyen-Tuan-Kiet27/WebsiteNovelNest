@@ -222,7 +222,7 @@ export default function Stories({favorite,login,truyen,chuongs, soLuong,truyenDa
   }
   const commentTree = useMemo(() => buildCommentTree(comments), [comments]);
 return(
-<Userlayout title="Stories" login={login} >
+<Userlayout title={'Truyện: '+truyen.ten} login={login} >
     <UserLogin userLoginIsVisible={showLogin} setUserLoginIsVisible={setShowLogin}/>
     {(showDate) && (
         <div

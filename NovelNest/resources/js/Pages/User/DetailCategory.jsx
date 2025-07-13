@@ -70,7 +70,7 @@ export default function DetailCategory({user,truyens,theLoai,pageCount}) {
     { label: 'Xem nhiều', value: 'view' },
   ];
   return (
-    <Userlayout title="Đọc truyện" login={user} page={2}>
+    <Userlayout title="Chi tiết thể loại" login={user} page={2}>
       <div className="detail-category-page">
         <div className="detail-header">
           <button className="back-arrow" onClick={() => window.history.back()}>

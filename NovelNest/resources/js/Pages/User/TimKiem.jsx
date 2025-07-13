@@ -67,7 +67,7 @@ export default function DetailCategory({user,truyens,pageCount}) {
     { label: 'Xem nhiều', value: 'view' },
   ];
   return (
-    <Userlayout title="Tìm Kiếm" login={user}>
+    <Userlayout title="Tìm kiếm truyện" login={user}>
       <div className="detail-category-page">
         <div className="detail-header">
           <button className="back-arrow" onClick={() => router.visit('/theloai')}>

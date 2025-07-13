@@ -12,7 +12,7 @@ export default function blogStories({blogTruyen,login}){
         setVisibleCount(prev => prev + 5);
     };
     return(
-        <Userlayout title="BlogTruyen" login={login} page={3}>
+        <Userlayout title="Blog truyện" login={login} page={3}>
                 <div className="container-blog">
                     {blogs.slice(0, visibleCount).map(blog => (
                         <div key={blog.id} className="blog-item" onClick={() => router.visit(`/blogtruyen/${blog.id}`)}>
