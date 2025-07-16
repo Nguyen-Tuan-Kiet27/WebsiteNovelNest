@@ -12,13 +12,7 @@ export default function TruyenChuong({user, truyen, chuongs}){
                     </div>
                     <div className="option">
                         <div>
-                            <label>
-                                Mới nhất
-                            </label>
-
-                            <label>
-                                Hoạt động
-                            </label>
+                            
                             <p></p>
                         </div>
                         <div>

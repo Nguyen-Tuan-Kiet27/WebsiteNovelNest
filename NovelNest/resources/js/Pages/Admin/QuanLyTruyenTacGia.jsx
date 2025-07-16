@@ -43,7 +43,7 @@ export default function QuanLyTruyen({user,nguoiDung,theLoais, tenTheLoai,truyen
         }
     }
     return(
-        <AdminLayout page='3' user={user} title='Quản lý truyện'>
+        <AdminLayout page='3' user={user} title='Quản lý truyện của tác giả'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <div className="quanLyTruyen">
                 <div>

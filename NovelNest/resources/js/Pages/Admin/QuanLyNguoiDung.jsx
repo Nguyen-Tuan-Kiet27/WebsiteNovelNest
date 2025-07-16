@@ -52,7 +52,7 @@ export default function QuanLyTruyen({user,nguoiDungs}){
         }
     }
     return(
-        <AdminLayout page='2' user={user} title='Quản lý truyện'>
+        <AdminLayout page='2' user={user} title='Quản lý người dùng'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleOkPass}/>
             <LyDo isShow={showLyDo} setIsShow={setShowLyDo} onOk={(e)=>{setShowPass(true);setLyDo(e)}}/>
             <div className="quanLyTruyen">

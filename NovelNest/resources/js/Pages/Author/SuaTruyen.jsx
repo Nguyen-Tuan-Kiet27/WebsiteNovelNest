@@ -148,7 +148,7 @@ export default function SuaTruyen({user,theLoais,truyen}){
         <AuthorLayout page='2' user={user} title={`Sửa truyện_${truyen.ten}`}>
             <div className="SuaTruyen">
                 <div className="head">
-                        <h1>Thêm truyện</h1>
+                        <h1>Sửa truyện</h1>
                 </div>
                 <div className="body">
                     <div>

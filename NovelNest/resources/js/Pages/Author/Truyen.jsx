@@ -12,13 +12,7 @@ export default function Truyen({user, truyens}){
                     </div>
                     <div className="option">
                         <div>
-                            <label>
-                                Mới nhất
-                            </label>
-
-                            <label>
-                                Hoạt động
-                            </label>
+                            
                             <p></p>
                         </div>
                         <div>

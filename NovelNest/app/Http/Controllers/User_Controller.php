@@ -264,7 +264,10 @@ class User_Controller extends Controller
                             ->where('id_Truyen',$id)->first();
         else
             $yeuThich=false;
-        $truyen = Truyen::with('TheLoai:id,ten')-> find($id);
+        $truyen = Truyen::with('TheLoai:id,ten')->where('id',$id)->where('trangThai',1)->first();
+        if(!$truyen){
+            return redirect('/');
+        }
         $soLuong = $truyen->Chuongs()->count();
         $chuongs = $truyen->Chuongs()->where('trangThai', 1)->select('id','ten','soChuong','gia','ngayTao')->get();
         $truyenDaHoanThanhs = Truyen::where('trangThai', 1)
@@ -349,7 +352,8 @@ class User_Controller extends Controller
                 ->where('gia', '>', 0)
                 ->get();
         }
-        $user->email = NguoiDung::giaiMa($user->email);
+        if($user)
+            $user->email = NguoiDung::giaiMa($user->email);
         return Inertia::render('User/DetailStory',[
             'chuong'=>$chuong,
             'truyen'=>$chuong->Truyen,
@@ -408,13 +412,14 @@ class User_Controller extends Controller
      public function detailBlogTruyen(Request $request, $id){
         $user=$request->attributes->get('user');
         $detailBlog=BaiViet::find($id);
-        
+        if(!$detailBlog){
+            return redirect('/blogtruyen');
+        }
          // Lấy 20 bài viết mới nhất, loại trừ bài hiện tại
         $recentBlogs = BaiViet::where('id', '!=', $id)
             ->orderBy('ngayTao', 'desc') 
             ->take(20)
             ->get();
-
         // Random chọn 5 bài trong số 20 bài mới nhất
         $randomBlogs = $recentBlogs->random(min(5, $recentBlogs->count()));
 

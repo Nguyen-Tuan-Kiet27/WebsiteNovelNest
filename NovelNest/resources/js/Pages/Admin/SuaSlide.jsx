@@ -77,12 +77,12 @@ export default function ({user,slide}){
    
 
     return(
-        <AdminLayout page='8' user={user} title='Thêm slide'>
+        <AdminLayout page='8' user={user} title='Sửa slide'>
             <VerifyPass isShow={showPass} setIsShow={setShowPass} onOk={handleSubmit}/>
             <div className="ThemSlide">
                 <div className="head">
                     <div>
-                        <h1>Thêm slide</h1>
+                        <h1>Sửa slide</h1>
                     </div>
                 </div>
                 <div className="body">

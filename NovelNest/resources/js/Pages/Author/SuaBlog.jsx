@@ -67,11 +67,11 @@ export default function Truyen({user,blog}){
     },[])
     useEffect(()=>{setENoiDung('')},[noiDung])
     return(
-        <AuthorLayout page='3' user={user} title={`Viết blog`}>
+        <AuthorLayout page='3' user={user} title={`Sửa blog`}>
             <div className="ThemBlog">
                 <div className="head">
                     <div>
-                        <h1>Viết blog</h1>
+                        <h1>Sửa blog</h1>
                     </div>
                 </div>
                 <div className="body">
