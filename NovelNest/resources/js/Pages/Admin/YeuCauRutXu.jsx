@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import LyDo from '../../Components/LyDo';
 import VerifyPass from '../../Components/VerifyPass';
+import {echo} from '../../Hooks/echo';
 export default function({user,LSRs}){
     const [yeuCauRuts,setYeuCauRuts]=useState(LSRs);
     const [xuLy,setXuLy] = useState(null);
@@ -13,7 +14,7 @@ export default function({user,LSRs}){
     const daNhanRef = useRef(false);
 
     useEffect(() => {
-        const channel = window.Echo.channel('admin-lich-su-rut');
+        const channel = echo.channel('admin-lich-su-rut');
 
         channel.listen('.LichSuRutMoi', (e) => {
             setYeuCauRuts(prev => [...prev,e.lichSuRut]);
@@ -37,7 +38,7 @@ export default function({user,LSRs}){
 
 
         return () => {
-            window.Echo.leave('admin-lich-su-rut');
+            echo.leave('admin-lich-su-rut');
             window.removeEventListener('beforeunload', handleBeforeUnload);
             if (daNhanRef.current && xuLyRef.current) {
                 axios.post('/api/admin/huynhanyeucau', { id: xuLyRef.current.id });

@@ -352,7 +352,8 @@ class User_Controller extends Controller
                 ->where('gia', '>', 0)
                 ->get();
         }
-        $user->email = NguoiDung::giaiMa($user->email);
+        if($user)
+            $user->email = NguoiDung::giaiMa($user->email);
         return Inertia::render('User/DetailStory',[
             'chuong'=>$chuong,
             'truyen'=>$chuong->Truyen,

@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 export default function SuaChuong({user, truyen, chuong}){
     const [ten,setTen] = useState('');
-    const [phi,setPhi] = useState(false);
-    const [xu,setXu] = useState(0);
+    const [phi,setPhi] = useState(chuong.gia!=0?true:false);
+    const [xu,setXu] = useState(chuong.gia);
     const [noiDung,setNoiDung] = useState('');
     const [errorTen,setErrorTen] = useState('');
     const tenLabelRef = useRef(null);
@@ -19,7 +19,7 @@ export default function SuaChuong({user, truyen, chuong}){
     const textareaRef = useRef(null);
     const [end,setEnd] = useState(false);
     const refCheckBox = useRef(null);
-    const [rawXu, setRawXu] = useState(100);
+    const [rawXu, setRawXu] = useState(chuong.gia);
     useEffect(() => {
         if (tenLabelRef.current) {
             const el = tenLabelRef.current;
@@ -165,14 +165,19 @@ export default function SuaChuong({user, truyen, chuong}){
                         </div>
                         <div className="gia">
                             <div>
-                                <input ref={refCheckBox} type="checkBox" onChange={handleChangePhi}/>
+                                <input type="checkBox" ref={refCheckBox} onChange={handleChangePhi}/>
                                 <label>Có phí</label>
                             </div>
                             <div style={{display:phi?'flex':'none'}}>
-                                <input type="number" value={xu} onChange={handleChangeXu}/>
+                                <input type="number" 
+                                    value={rawXu} 
+                                    onChange={handleChangeXu} 
+                                    onBlur={handleBlurXu} 
+                                    min={100}
+                                    step={100}
+                                />
                                 <label>xu</label>
                             </div>
-                            
                         </div>
                     </div>
                     <div className="noiDung">
@@ -195,10 +200,10 @@ export default function SuaChuong({user, truyen, chuong}){
                         ></textarea>
                         <label className="error" style={{marginTop:'10px'}}>{errorTomTat}</label>
                     </div>
-                    <div className="end">
-                        <input type="checkBox" checked={chuong.gia==null?true:false}/>
+                    {/* <div className="end">
+                        <input type="checkBox"/>
                         <label style={{marginLeft:'10px',color:'green'}}>Chương cuối, hoàn thành truyện!</label>
-                    </div>
+                    </div> */}
                     <div className="buttonSM">
                         <button onClick={() => window.history.back()}>Hủy</button>
                         <button onClick={handleSubmit} >Sửa</button>

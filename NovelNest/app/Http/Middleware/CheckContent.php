@@ -70,7 +70,7 @@ class CheckContent
         //         }
         //     }
         // return $next($request);
-        $fields = ['noiDung', 'gioiThieu','ten','tieuDe'];
+        $fields = ['noiDung', 'gioiThieu','ten','tieuDe','tomTat'];
         $viPham = [];
 
         foreach ($fields as $field) {

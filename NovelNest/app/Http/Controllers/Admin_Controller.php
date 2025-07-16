@@ -992,7 +992,7 @@ class Admin_Controller extends Controller
             $tenDangNhap = $request->tenDangNhap;
             $tenHienThi = $request->tenHienThi;
             $matKhau = $request->matKhau;
-            if(!NguoiDung::where('tenDangNhap',NguoiDung::maHoa($tenDangNhap))->exists()){
+            if(NguoiDung::where('tenDangNhap',NguoiDung::maHoa($tenDangNhap))->exists()){
                 return response()->json([
                     'eTDN'=> 'Tên đăng nhập đã tồn tại!'
                 ],409);
